@@ -257,7 +257,6 @@ def readFullinputedSeq(rightData,leftData,lowerlimit,upperlimit):
                 print("choosed Sequence is: ",outputSeq)
                 if outputSeq == "rightSequence":
                     state = 1
-                    pass
                 elif outputSeq == "leftSequence":
                     state = -1
                 elif outputSeq == "selectSequence":
