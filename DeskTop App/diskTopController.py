@@ -10,12 +10,12 @@ import asyncio
 from types import SimpleNamespace
 from scipy import signal
 
-from pythonosc.dispatcher import Dispatcher
-from pythonosc.osc_server import BlockingOSCUDPServer
+# from pythonosc.dispatcher import Dispatcher
+# from pythonosc.osc_server import BlockingOSCUDPServer
 
 import threading
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 from nltk import flatten
 
 import pygame
