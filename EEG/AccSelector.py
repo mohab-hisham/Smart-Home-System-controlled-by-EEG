@@ -12,7 +12,7 @@ The neurofeedback protocols described here are inspired by
 
 Adapted from https://github.com/NeuroTechX/bci-workshop
 """
-
+import pyautogui
 import numpy as np  # Module that simplifies computations on matrices
 import matplotlib.pyplot as plt  # Module used for plotting
 from pylsl import StreamInlet, resolve_byprop  # Module to receive EEG data
@@ -184,8 +184,8 @@ if __name__ == "__main__":
     # Set active EEG stream to inlet and apply time correction
     print("Start acquiring data")
     inlet = StreamInlet(streams[0], max_chunklen=12)
-    accInlet = StreamInlet(streams[0], max_chunklen=12)
-    gyroInlet = StreamInlet(streams[0], max_chunklen=12)
+    accInlet = StreamInlet(accStreams[0], max_chunklen=1)
+    gyroInlet = StreamInlet(gyroStreams[0], max_chunklen=1)
     eeg_time_correction = inlet.time_correction()
 
     # Get the stream info and description
@@ -224,7 +224,11 @@ if __name__ == "__main__":
     
     # calbCount = 0
     # input("input any key to start calibration")
-
+    starttime = time.time()
+    xposarr = []
+    yposarr = []
+    yaw = 0
+    # time.sleep(10)
     # The following loop acquires data, computes band powers, and calculates neurofeedback metrics based on those band powers
     while True:
 
@@ -236,22 +240,66 @@ if __name__ == "__main__":
         
 
         acc_data, accTimestamp = accInlet.pull_chunk(
-            timeout=1, max_samples=int(52))
+            timeout=1, max_samples=int(10))
         
         gyro_data, gyroTimestamp = gyroInlet.pull_chunk(
-            timeout=1, max_samples=int(52))
+            timeout=1, max_samples=int(10))
         # Only keep the channel we're interested in
         
-        ch_data = np.array(eeg_data)[:, 2]
-        print(ch_data)
-        for i in range(52):
-            accelerationX = (np.array(acc_data)[:,0][i]) * np.pi
-            accelerationY = (np.array(acc_data)[:,1][i])  * np.pi
-            accelerationZ = (np.array(acc_data)[:,2][i])  * np.pi
-            pitch = 180 * m.atan (accelerationX/np.sqrt(accelerationY*accelerationY + accelerationZ*accelerationZ))/np.pi
-            roll = 180 * m.atan (accelerationY/np.sqrt(accelerationX*accelerationX + accelerationZ*accelerationZ))/np.pi
-            yaw = 180 * m.atan (accelerationZ/np.sqrt(accelerationX*accelerationX + accelerationZ*accelerationZ))/np.pi
+        ch_data = np.array(acc_data)[:, 2]
+        # print(ch_data)
+        # for i in range(52):
+        accelerationX = np.mean(np.array(acc_data)[:,0]) * np.pi
+        accelerationY = np.mean(np.array(acc_data)[:,1]) * np.pi
+        accelerationZ = np.mean(np.array(acc_data)[:,2]) * np.pi
+        gyroscpeX = np.mean(np.array(gyro_data)[:,0]) * np.pi
+        gyroscpeY = np.mean(np.array(gyro_data)[:,1]) * np.pi
+        gyroscpeZ = np.mean(np.array(gyro_data)[:,2]) * np.pi
+        pitch = 180 * m.atan (accelerationX/np.sqrt(accelerationY*accelerationY + accelerationZ*accelerationZ))/np.pi
+        roll = 180 * m.atan (accelerationY/np.sqrt(accelerationX*accelerationX + accelerationZ*accelerationZ))/np.pi
+        # yaw = 0
+        if gyroscpeZ>10 or gyroscpeZ<-10:
+            yaw = yaw + gyroscpeZ/52
+        print("pitch: ", pitch)
+        print("roll: ", roll)
+        print("yaw: ", yaw)
+        print("")
         
+
+        # # if i < 10:
+        # print("gyrox: ", gyroscpeX) #-750
+        # print("gyroy: ", gyroscpeY)#-450
+        # print("gyroz: ", gyroscpeZ)#80
+        # print("accx: ", accelerationX) #-750
+        # print("accy: ", accelerationY)#-450
+        # print("accz: ", accelerationZ)#80
+        # print("")
+        # sensetevity = 2
+        xpos = (25-yaw)*(1920/50)
+        ypos = 540
+        # xpos = (accelerationY)*sensetevity*960 + 960
+        # ypos = (accelerationX)*sensetevity*540 + 540
+        # print("xpos: ", (accelerationY)*sensetevity*960)
+        # print("ypos: ", (accelerationX)*sensetevity*540)
+        if xpos > 1920:
+            xpos = 1910
+        # if ypos > 1080:
+        #     ypos = 1070
+        pyautogui.moveTo(xpos, ypos)
+        # endtime = time.time()
+        # if (endtime - starttime)<10 :
+        #     xposarr.append(gyroscpeX)
+        #     yposarr.append(yaw)
+        # else :
+        #     break
+    plt.plot(xposarr)
+    plt.plot(yposarr)
+    # plt.scatter(xposarr,np.zeros(np.array(xposarr).shape))
+    # plt.scatter(yposarr,np.ones(np.array(yposarr).shape))
+    # plt.xlim([-540,540])
+    # plt.ylim([-360,360])
+    plt.show()
+        # time.sleep(0.1)
         # rData,lData = filter_alpha_beta(eeg_data,fs=fs,wind_len=int(SHIFT_LENGTH * fs))
         # print(rData,lData)
 
