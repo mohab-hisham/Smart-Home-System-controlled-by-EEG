@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt  # Module used for plotting
 from pylsl import StreamInlet, resolve_byprop  # Module to receive EEG data
 # import utils  # Our own utility functions
 import os
-import paho.mqtt.client as mqtt
+# import paho.mqtt.client as mqtt
 import threading
 import asyncio
 from muselsl import stream, list_muses
@@ -32,7 +32,7 @@ serverAddress = "raspberrypi.local"
 # Handy little enum to make code more readable
 clientName = "PiBot"
 
-mqttClient = mqtt.Client(clientName)
+# mqttClient = mqtt.Client(clientName)
 # Flag to indicate subscribe confirmation hasn't been printed yet.
 didPrintSubscribeMessage = False
 
