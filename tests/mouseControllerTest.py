@@ -1,3 +1,3 @@
-import pyautogui
-print(pyautogui.size())
-pyautogui.moveTo(100, 100, duration = 1)
+import pyautogui as pg
+print(pg.size())
+pg.moveTo(100, 100, duration = 1)
