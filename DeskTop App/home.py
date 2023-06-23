@@ -15,6 +15,7 @@ import asyncio
 # import variables
 from types import SimpleNamespace
 from scipy import signal
+import pyautogui as pg
 
 ns = SimpleNamespace()
 
@@ -123,7 +124,38 @@ setTH = 0
 ###############################
 ns.continueFlag = 0
 ns.reconectFlag = 0
+#############################
+currentPos = 0
+numOfMoves = 0
+homeorroom = 1
+#############################
+def homeNavigate():
+    pg.typewrite(["space"])
+    pg.typewrite(["right","right","right","right", "space"],interval=0.5)# to return to main menu
+def navigate(gotoPos):
+    global numOfMoves
+    global currentPos
+    global homeorroom
+    numberofchooses = 5
+    if homeorroom == 0:
+        numberofchooses = 4
+    else:
+        numberofchooses = 5
 
+    if gotoPos > currentPos:
+        numOfMoves = gotoPos - currentPos 
+    elif currentPos > gotoPos:
+        numOfMoves = (numberofchooses-currentPos) + gotoPos +1
+    else:
+        numOfMoves = 0
+    
+    for i in range(numOfMoves):
+        pg.typewrite(["right"],interval=0.5)
+    # pg.typewrite(["space"])
+    # pg.typewrite(["space"])
+    # pg.typewrite(["right","right","right","right", "space"],interval=0.5)# to return to main menu
+
+    currentPos = gotoPos
 
 def SeqSort(arr):
     n = np.array(arr).shape[0]
@@ -188,7 +220,7 @@ def readFullinputedSeq(rightData,leftData,lowerlimit,upperlimit):
     global closeOpenTime
     global startCommand 
     global endCommand
-    global home
+    global homeorroom
 
     if (min(rightData) < lowerlimit ) and (min(leftData) < lowerlimit ) and openCloseState == 0: #close
         print("eye closed")
@@ -210,17 +242,29 @@ def readFullinputedSeq(rightData,leftData,lowerlimit,upperlimit):
                 closeOpenTime = 0
                 outputSeq = checkSeq(Sequence(inputSeqArr))
                 print("choosed Sequence is: ",outputSeq)
-                # if outputSeq == "rightSequence":
-                #     home.checkInput("Room 1")
-                # elif outputSeq == "leftSequence":
-                #     home.openRoom("Room 2")
-                # elif outputSeq == "selectSequence":
-                #     home.openBath()
+                if outputSeq == "rightSequence":
+                    if homeorroom == 1:
+                        navigate(0)
+                        pg.typewrite(["space"])
+                        homeorroom = 0 
+                        
+                elif outputSeq == "leftSequence":
+                    if homeorroom == 1:
+                        navigate(5)
+                        pg.typewrite(["space"])
+                        homeorroom = 0 
+                        
                 # elif outputSeq == "outSequence":
-                #     home.returnHome()
-                # else:
-                #     state = 0
-                    # blinked = False
+                #     if homeorroom == 1:
+                #         pg.typewrite(["space"])
+                #         homeorroom = 0 
+                elif  outputSeq == "selectSequence":
+                    if homeorroom == 0:
+                        homeNavigate()
+                        homeorroom = 1
+                else:
+                    state = 0
+                    blinked = False
                 inputSeqArr = []
                 outputSeq = ""
                 return
@@ -474,9 +518,7 @@ class Smarthome(qtw.QMainWindow):
         self.corridor.open()
         self.close()
 
-    def checkInput(self,input):
-        if input == "Room 1":
-            self.openBath()
+    
 
 # def GUILoop():
     
