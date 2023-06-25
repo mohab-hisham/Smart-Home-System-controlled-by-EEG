@@ -241,7 +241,7 @@ if __name__ == "__main__":
     fulleegData = []
 
     path = "E:/Graduation_Project/Smart-Home-System-controlled-by-EEG/"
-    lite_file = "Left_Right_Mohab.tflite"
+    lite_file = "Left_Right_Mohab_initial_v2.tflite"
 
     ####################### INITIALIZE TF Lite #########################
     # Load TFLite model and allocate tensors.
@@ -262,7 +262,7 @@ if __name__ == "__main__":
         """ 3.1 ACQUIRE DATA """
         # Obtain EEG data from the LSL stream
         eeg_data, timestamp = inlet.pull_chunk(
-            timeout=1, max_samples=int(200))
+            timeout=1, max_samples=int(250))
         # fulleegData = eeg_data
         # Only keep the channel we're interested in
         fulleegData = np.vstack([fulleegData, np.array(eeg_data)[:,:-1]]) if len(fulleegData) else np.array(eeg_data)[:,:-1]
