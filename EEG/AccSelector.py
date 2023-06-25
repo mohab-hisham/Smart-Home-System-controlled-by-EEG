@@ -12,13 +12,13 @@ The neurofeedback protocols described here are inspired by
 
 Adapted from https://github.com/NeuroTechX/bci-workshop
 """
-import pyautogui
+import pyautogui as pg
 import numpy as np  # Module that simplifies computations on matrices
 import matplotlib.pyplot as plt  # Module used for plotting
 from pylsl import StreamInlet, resolve_byprop  # Module to receive EEG data
 # import utils  # Our own utility functions
 import os
-import paho.mqtt.client as mqtt
+# import paho.mqtt.client as mqtt
 import threading
 import asyncio
 from muselsl import stream, list_muses
@@ -32,7 +32,7 @@ serverAddress = "raspberrypi.local"
 # Handy little enum to make code more readable
 clientName = "PiBot"
 
-mqttClient = mqtt.Client(clientName)
+# mqttClient = mqtt.Client(clientName)
 # Flag to indicate subscribe confirmation hasn't been printed yet.
 didPrintSubscribeMessage = False
 
@@ -285,7 +285,7 @@ if __name__ == "__main__":
             xpos = 1910
         # if ypos > 1080:
         #     ypos = 1070
-        pyautogui.moveTo(xpos, ypos)
+        pg.moveTo(xpos, ypos)
         # endtime = time.time()
         # if (endtime - starttime)<10 :
         #     xposarr.append(gyroscpeX)
