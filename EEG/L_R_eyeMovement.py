@@ -262,7 +262,7 @@ if __name__ == "__main__":
         """ 3.1 ACQUIRE DATA """
         # Obtain EEG data from the LSL stream
         eeg_data, timestamp = inlet.pull_chunk(
-            timeout=1, max_samples=int(250))
+            timeout=1, max_samples=int(240))
         # fulleegData = eeg_data
         # Only keep the channel we're interested in
         fulleegData = np.vstack([fulleegData, np.array(eeg_data)[:,:-1]]) if len(fulleegData) else np.array(eeg_data)[:,:-1]
@@ -286,6 +286,13 @@ if __name__ == "__main__":
             output_data = interpreter.get_tensor(output_details[0]['index'])
 
             print(output_data)
+
+            if int(np.array(output_data[0]).argmax()) == 0:
+                print("look Left")
+            elif int(np.array(output_data[0]).argmax()) == 1:
+                print("look center")
+            elif int(np.array(output_data[0]).argmax()) == 2:
+                print("look right")
 
             fulleegData = []
         
