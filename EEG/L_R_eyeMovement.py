@@ -18,12 +18,14 @@ import matplotlib.pyplot as plt  # Module used for plotting
 from pylsl import StreamInlet, resolve_byprop  # Module to receive EEG data
 # import utils  # Our own utility functions
 import os
-import paho.mqtt.client as mqtt
+# import paho.mqtt.client as mqtt
 import threading
 import asyncio
 from muselsl import stream, list_muses
 import time
 from types import SimpleNamespace
+from scipy.signal import *
+import tensorflow as tf
 
 ns = SimpleNamespace()
 
@@ -31,7 +33,7 @@ serverAddress = "raspberrypi.local"
 # Handy little enum to make code more readable
 clientName = "PiBot"
 
-mqttClient = mqtt.Client(clientName)
+# mqttClient = mqtt.Client(clientName)
 # Flag to indicate subscribe confirmation hasn't been printed yet.
 didPrintSubscribeMessage = False
 
@@ -122,7 +124,26 @@ def filter_alpha_beta(eeg_data, fs=256, wind_len=51, lower_alpha=0.5, upper_alph
 
     return(r_alpha,l_alpha)
 
+sfs = 256/2
+ranges = [(0, 4), (4, 8), (9, 13), (14, 30), (30, 100)]
 
+def time_to_freq_domain(directions):
+    freq_domain_data = []
+    freq_domain_data_window = []
+    
+    for j in range(directions.shape[1]):
+        F,PSD = welch(directions[:, j], sfs, nperseg=directions.shape[0])
+
+        data = [PSD[(F >= lower) & (F <= upper)] for lower, upper in ranges]
+        # print(data[1])
+        for i in range(len(data)):
+            data[i] = np.pad(data[i], (0, len(data[4])-len(data[i])), mode='constant')
+        
+        freq_domain_data_window = np.vstack([freq_domain_data_window, data]) if len(freq_domain_data_window) else data
+
+    # freq_domain_data.append(freq_domain_data_window)
+    # freq_domain_data_window = []
+    return freq_domain_data_window
 
 
 ##### the function that need to work on ##########
@@ -216,8 +237,23 @@ if __name__ == "__main__":
     # script with <Ctrl-C>
     print('Press Ctrl-C in the console to break the while loop.')
     CheckSignalQuality(inlet)
-    
-    input("input any key to start calibration")
+    secondFlag = 0
+    fulleegData = []
+
+    path = "E:/Graduation_Project/Smart-Home-System-controlled-by-EEG/"
+    lite_file = "Left_Right_Mohab.tflite"
+
+    ####################### INITIALIZE TF Lite #########################
+    # Load TFLite model and allocate tensors.
+    interpreter = tf.lite.Interpreter(model_path=path + lite_file)
+
+    # Get input and output tensors.
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+
+    # Allocate tensors
+    interpreter.allocate_tensors()
+    # input("input any key to start calibration")
 
     # The following loop acquires data, computes band powers, and calculates neurofeedback metrics based on those band powers
     while True:
@@ -226,20 +262,34 @@ if __name__ == "__main__":
         """ 3.1 ACQUIRE DATA """
         # Obtain EEG data from the LSL stream
         eeg_data, timestamp = inlet.pull_chunk(
-            timeout=1, max_samples=int(SHIFT_LENGTH * fs))
-
+            timeout=1, max_samples=int(200))
+        # fulleegData = eeg_data
         # Only keep the channel we're interested in
-        
+        fulleegData = np.vstack([fulleegData, np.array(eeg_data)[:,:-1]]) if len(fulleegData) else np.array(eeg_data)[:,:-1]
+        if secondFlag == 1:
+            secondFlag =-1
+            # fulleegData = np.transpose(fulleegData)
+            # print(fulleegData.shape)
+            # fulleegData = np.vstack([fulleegData, eeg_data]) 
         # ch_data = np.array(eeg_data)[:, INDEX_CHANNEL]
+            # print(np.array(eeg_data)[:,:-1].shape)
+            freqDomainData = time_to_freq_domain(fulleegData)
+
+            freqDomainData = np.float32(np.transpose(freqDomainData))
+            # print(np.array(freqDomainData).shape)
+            interpreter.set_tensor(input_details[0]['index'], [freqDomainData])
+
+            # run the inference
+            interpreter.invoke()
+
+            # output_details[0]['index'] = the index which provides the input
+            output_data = interpreter.get_tensor(output_details[0]['index'])
+
+            print(output_data)
+
+            fulleegData = []
         
-            
-        L_R_eyeMovement(eeg_data)
-        # rData,lData = filter_alpha_beta(eeg_data,fs=fs,wind_len=int(SHIFT_LENGTH * fs))
-        # if calbCount < 1001:
-        #     lowerTH,upperTH = calibrate(rData)
-        #     calbCount += 1
-        # else:
-        #     BlinkHandler(rData,lData,lowerTH,upperTH)
+        secondFlag +=1
 
         #print(calibratingFlag,type(calibratingFlag))
         

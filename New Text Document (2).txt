@@ -1,0 +1,19 @@
+fs = 256/2
+ranges = [(0, 4), (4, 8), (9, 13), (14, 30), (30, 100)]
+
+def time_to_freq_domain(directions):
+    freq_domain_data = []
+    freq_domain_data_window = []
+    for i in range(directions.shape[0]):
+      for j in range(directions.shape[1]):
+        F,PSD = welch(directions[i, j], fs, nperseg=directions.shape[2])
+
+        data = [PSD[(F >= lower) & (F <= upper)] for lower, upper in ranges]
+
+        for i in range(len(data)):
+          data[i] = np.pad(data[i], (0, len(data[4])-len(data[i])), mode='constant')
+        freq_domain_data_window = np.vstack([freq_domain_data_window, data]) if len(freq_domain_data_window) else data
+
+      freq_domain_data.append(freq_domain_data_window)
+      freq_domain_data_window = []
+    return freq_domain_data
