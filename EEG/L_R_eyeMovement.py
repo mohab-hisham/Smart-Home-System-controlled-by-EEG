@@ -241,7 +241,7 @@ if __name__ == "__main__":
     fulleegData = []
 
     path = "E:/Graduation_Project/Smart-Home-System-controlled-by-EEG/"
-    lite_file = "Left_Right_Mohab_initial_v2.tflite"
+    lite_file = "Left_Right_Mohab_initial_v3.tflite"
 
     ####################### INITIALIZE TF Lite #########################
     # Load TFLite model and allocate tensors.
