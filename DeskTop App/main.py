@@ -4,15 +4,14 @@ from PyQt5.QtCore import *
 import numpy as np  # Module that simplifies computations on matrices
 import matplotlib.pyplot as plt  # Module used for plotting
 from pylsl import StreamInlet, resolve_byprop  # Module to receive EEG data
-# import utils  # Our own utility functions
+
 import time
-from muselsl import stream, list_muses, view
+
 import threading
 import asyncio
 # import variables
 from types import SimpleNamespace
-from scipy import signal
-import pyautogui as pg
+
 
 ns = SimpleNamespace()
 
