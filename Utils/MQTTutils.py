@@ -1,5 +1,5 @@
 import paho.mqtt.client as mqtt
-
+import threading
 
 
 serverAddress = "raspberrypi.local"
@@ -10,7 +10,7 @@ mqttClient = mqtt.Client(clientName)
 didPrintSubscribeMessage = False
 
 def connectionStatus(client, userdata, flags, rc):
-    global serverIsConnected
+    
     global didPrintSubscribeMessage
     if not didPrintSubscribeMessage:
         didPrintSubscribeMessage = True
@@ -24,7 +24,7 @@ def connectionStatus(client, userdata, flags, rc):
         mqttClient.subscribe("/calibrate/minTH")
         mqttClient.subscribe("/calibrate/maxTH")
         print("subscribed")
-        serverIsConnected = True
+        
         
 
 def On_message(client, userdata, message):
@@ -75,3 +75,13 @@ def connectToServer():
     mqttClient.connect(serverAddress)
     
     mqttClient.loop_forever()
+
+def startMQTTserver():
+    ServerThread = threading.Thread(target=connectToServer)
+    ServerThread.daemon = True
+    ServerThread.start()
+    mqttClient.publish("/server/connection","connecting....")
+    while not didPrintSubscribeMessage:
+        continue
+    mqttClient.publish("/server/connection","connected")
+    

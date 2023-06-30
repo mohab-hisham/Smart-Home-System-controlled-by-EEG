@@ -10,7 +10,8 @@ import time
 from types import SimpleNamespace
 from scipy import signal
 from pandas import *
-from server_utils import mqttClient
+from Utils.MQTTutils import mqttClient
+
 
 ########### classes ############################
 
@@ -54,10 +55,6 @@ class Sequence:
         for choosedSeq in self.Seq:
             choosedSeq.printBlink()
 
-ns = SimpleNamespace()
-
-
-
 
 # the four devices to be controled
 relay1State = 0
@@ -88,7 +85,7 @@ timerStart = 0
 timerEnd = 0
 blinkLength = -1
 startCommand = 0
-command = ""
+BlinkMorseCode = ""
 finalCommand = ""
 startBlinkCount = 0
 firstStartBlinkTime = 0
@@ -97,9 +94,6 @@ moving = 0
 streamRetryCounter = 0
 blinkCounter = 0
 testcounttest = 0
-ns.continueFlag = 0
-ns.testenter=0
-ns.reconectFlag =0
 testData = np.array([])
 setTH = 0
 calibratingFlag = 1
@@ -114,7 +108,12 @@ homeOrCar = 1
 # modular sequence variables
 StartSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,0.5]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="startSequence")
 EndSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,0.5]),Blink(length=[0,0.5],durationAfterBlink=[0,0.5]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="endSequence")
-SeqArray = [Sequence([Blink(length=[0,1],durationAfterBlink=[0,0]),Blink(length=[0,1],durationAfterBlink=[0,0])],whatToControll="home")]
+# SeqArray = [Sequence([Blink(length=[0,1],durationAfterBlink=[0,0]),Blink(length=[0,1],durationAfterBlink=[0,0])],whatToControll="home")]
+rightSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="rightSequence")
+leftSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="leftSequence")
+selectSeqArr = Sequence([Blink(length=[0.6,2],durationAfterBlink=[0,0])],whatToControll="selectSequence")
+outSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="outSequence")
+SeqArray = [rightSeqArr,leftSeqArr,selectSeqArr,outSeqArr]
 inputSeqArr = []
 openTime = time.time()
 closeTime = time.time()
@@ -145,44 +144,6 @@ MORSE_CODE_DICT = { '.-':'A', '-...':'B',
                     '..--..':'?', '-..-.':'/', '-....-':'-',
                     '-.--.':'(', '-.--.-':')'}
 
-########### MUSE2 connection functions #########
-def streamEEG():
-    global streamRetryCounter
-    global mqttClient
-    global muses
-    #asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-    # loop.run_forever()
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    #loop.run_until_complete(streamEEG())
-    #muses = list_muses()
-    while True:
-        
-        if not muses:
-            muses = list_muses()
-        #mqttClient.publish("/auto/working2","yaaay")
-        
-        try:
-            print("entered stream")
-            ns.reconectFlag = 0
-            ns.continueFlag = 0
-            stream(ns , muses[0]['address'])
-            # Note: Streaming is synchronous, so code here will not execute until the stream has been closed
-            print('Stream has ended')
-            #raise RuntimeError('reconecting EEG stream.')
-        except:
-            streamRetryCounter += 1
-            ns.reconectFlag = 0
-            mqttClient.publish("/muse/retrying",streamRetryCounter)
-            print("something went wrong")
-            if streamRetryCounter == 15:
-                print("restarting")
-                mqttClient.publish("/server","Restarting")
-                time.sleep(2)
-                #os.system("sudo reboot")
-            print("retrying")
-            
-        time.sleep(5)
 
 ########### check signal quality ###############
 
@@ -202,7 +163,7 @@ def CheckSignalQuality(inputInlet:StreamInlet):
         RF_ch_STD = np.std(RF_ch_data)
         RE_ch_STD = np.std(RE_ch_data)
         print(LE_ch_STD,LF_ch_STD,RF_ch_STD,RE_ch_STD)
-        if LE_ch_STD < 80 and LF_ch_STD < 80 and RF_ch_STD < 80 and RE_ch_STD < 80:
+        if LE_ch_STD < 25 and LF_ch_STD < 25 and RF_ch_STD < 25 and RE_ch_STD < 25:
             ch_Quality = True
             
 
@@ -214,7 +175,7 @@ def CheckSignalQuality(inputInlet:StreamInlet):
 
 ########### data colection and filtration ######
 
-def filter_dataFreq(eeg_data, fs=256, wind_len=51, lower_freq=0.5, upper_freq=4):
+def filter_dataFreq(eeg_data, fs=256, wind_len=10, lower_freq=0.5, upper_freq=4):
     freq_step = fs / wind_len
     alpha_band = (int(lower_freq / freq_step), int(upper_freq / freq_step))
     
@@ -316,9 +277,10 @@ def concentrationLevel(EEGData):
         databuff = 0
         consbuffer = []  
 
+
 ########### Blink detection functions ##########
 
-def getBlinklength(rightData,leftData,lowerlimit,upperlimit):
+def getBlinklength(EEGData,windowLength = 10, lowerlimit= lowerTH, upperlimit= upperTH):
     global blinkState
     global blinkCounter
     global timerStart
@@ -326,23 +288,24 @@ def getBlinklength(rightData,leftData,lowerlimit,upperlimit):
     global blinkLength
     global homeOrCar
     blinkLength = -1
+    rightData, leftData = filter_dataFreq(EEGData,wind_len=windowLength) 
     if (min(rightData) < lowerlimit) and (min(leftData) < lowerlimit) and blinkState == 0:
         blinkCounter = blinkCounter + 1
         print("close eye")
-        mqttClient.publish("/EEGDetector/BlinkState","eye closed")
+        # mqttClient.publish("/EEGDetector/BlinkState","eye closed")
         # print('Delta: ', smooth_band_powers[Band.Delta], ' Theta: ', smooth_band_powers[Band.Theta])
         timerStart = time.time()
         blinkState = 1
     if (300 > max(rightData) > upperlimit) and (300 > max(leftData) > upperlimit) and blinkState == 1:
         print("opend eye")
-        mqttClient.publish("/EEGDetector/BlinkState","eye opened")
-        mqttClient.publish("/EEGDetector/BlinkCount",blinkCounter)
+        # mqttClient.publish("/EEGDetector/BlinkState","eye opened")
+        # mqttClient.publish("/EEGDetector/BlinkCount",blinkCounter)
         print(blinkCounter)
         # print('Delta: ', smooth_band_powers[Band.Delta], ' Theta: ', smooth_band_powers[Band.Theta])
         timerEnd = time.time()
         blinkLength = timerEnd - timerStart
         print(blinkLength)
-        mqttClient.publish("/EEGDetector/BlinkLength",blinkLength)
+        # mqttClient.publish("/EEGDetector/BlinkLength",blinkLength)
         timerStart = 0
         timerEnd = 0
         blinkState = 0
@@ -402,7 +365,7 @@ def getBlinkData(inputChar):
 
 ########### construct sequence from blinks #####
 
-def readFullinputedSeq(rightData,leftData,lowerlimit,upperlimit):
+def readFullinputedSeq(EEGData,windowLength = 10,startSeq = False,endSeq = False, lowerlimit= lowerTH, upperlimit= upperTH):
     global inputSeqArr
     global openTime 
     global closeTime 
@@ -412,7 +375,9 @@ def readFullinputedSeq(rightData,leftData,lowerlimit,upperlimit):
     global closeOpenTime
     global startCommand 
     global endCommand
-
+    global SeqArray
+    returnValue = 0
+    rightData, leftData = filter_dataFreq(EEGData, wind_len=windowLength) 
     if (min(rightData) < lowerlimit ) and (min(leftData) < lowerlimit ) and openCloseState == 0: #close
         print("eye closed")
         openCloseState = 1
@@ -424,6 +389,7 @@ def readFullinputedSeq(rightData,leftData,lowerlimit,upperlimit):
             openCloseTime = closeTime-openTime
             # inputSeqArr.append(Blink(openCloseTime,BlinkType="eyeOpen"))
             # print("added a Blink!")
+            
             inputSeqArr[-1].durationAfterBlink = [openCloseTime]
             Sequence(inputSeqArr).printSeq()
             # print("eyeOpen: ", openCloseTime)
@@ -434,33 +400,65 @@ def readFullinputedSeq(rightData,leftData,lowerlimit,upperlimit):
         closeOpenTime = openTime-closeTime
         inputSeqArr.append(Blink(length=[closeOpenTime]))
         Sequence(inputSeqArr).printSeq()
-
-
-    if int(np.array(inputSeqArr).shape[0]) >= StartSeqArr.SeqLength and startCommand == 0:
-        
-        if compareSeq(Sequence(inputSeqArr[-StartSeqArr.SeqLength:]),StartSeqArr):
-            startCommand = 1
-            firstClose = 1
-            endCommand = 0
-            inputSeqArr = []
+    # return returnValue
+   
+    if startSeq == True:
+        if int(np.array(inputSeqArr).shape[0]) >= StartSeqArr.SeqLength and startCommand == 0:
             
-            print("started the command")
-    elif int(np.array(inputSeqArr).shape[0]) >= EndSeqArr.SeqLength and endCommand == 0 and startCommand == 1:
-        if compareSeq(Sequence(inputSeqArr[-EndSeqArr.SeqLength:]),EndSeqArr):
-            print("ended the command")
+            if compareSeq(Sequence(inputSeqArr[-StartSeqArr.SeqLength:]),StartSeqArr):
+                startCommand = 1
+                firstClose = 1
+                endCommand = 0
+                inputSeqArr = []
+                
+                print("started the command")
+    if endSeq == True:
+        if int(np.array(inputSeqArr).shape[0]) >= EndSeqArr.SeqLength and endCommand == 0 and startCommand == 1:
+            if compareSeq(Sequence(inputSeqArr[-EndSeqArr.SeqLength:]),EndSeqArr):
+                print("ended the command")
+                startCommand = 0
+                endCommand = 1
+                firstClose = 1
+                openCloseState = 0
+                openCloseTime = 0
+                closeOpenTime = 0
+                for i in range(EndSeqArr.SeqLength):
+                    inputSeqArr.pop()
+                Sequence(inputSeqArr).printSeq()
+                returnCommand = checkSeq(Sequence(inputSeqArr),SeqArray)
+                print("choosed Sequence is: ",returnCommand)
+                inputSeqArr = []
+        return returnCommand
+        
+    else:
+        if openCloseTime > 1:
             startCommand = 0
             endCommand = 1
             firstClose = 1
             openCloseState = 0
             openCloseTime = 0
             closeOpenTime = 0
-            for i in range(EndSeqArr.SeqLength):
-                inputSeqArr.pop()
-            Sequence(inputSeqArr).printSeq()
-            print("choosed Sequence is: ",checkSeq(Sequence(inputSeqArr)))
+            outputSeq = checkSeq(Sequence(inputSeqArr),SeqArray)
+            print("choosed Sequence is: ",outputSeq)
+            if outputSeq == "rightSequence":
+                returnValue = 1
+                    
+            elif outputSeq == "leftSequence":
+                returnValue = 2
+                    
+            elif outputSeq == "outSequence":
+                returnValue = 3
+            elif  outputSeq == "selectSequence":
+                returnValue = 4
+            else:
+                returnValue = 0
             inputSeqArr = []
+            outputSeq = ""
+        return returnValue
+         
             
-    
+def applyCommand(command,nowControlling):
+    pass
 
 ########### check inputed sequence functions ###
 
@@ -493,11 +491,11 @@ def compareSeq(sequence:Sequence,compSeq:Sequence)-> bool:
     if maching == False:
         return False
 
-def checkSeq(sequence:Sequence):
-    global SeqArray
+def checkSeq(sequence:Sequence , selectedSeqArr):
+    # global SeqArray
     maching = False
     machingArr = []
-    for contSeq in SeqArray:
+    for contSeq in selectedSeqArr:
         if int(sequence.SeqLength) == int(contSeq.SeqLength):
             for i in range(contSeq.SeqLength):
                 if contSeq.Seq[i].length[0] <= sequence.Seq[i].length[0] <= contSeq.Seq[i].length[1] \
@@ -530,34 +528,31 @@ def readMorseCode(inputInlet:StreamInlet):
     global lowerTH
     global upperTH
     global startCommand
-    global secondStartBlinkTime
-    global firstStartBlinkTime
-    global startTime
-    global command
+    global BlinkMorseCode
     morseBlinkLength = -1
     startCommand = 1
     while True:
-        # if end signal is sent reak from this loop
+        # if end signal is sent break from this loop
         eegData, timestamp = inputInlet.pull_chunk(
-                timeout=1, max_samples=int(51))
-        rdata, ldata = filter_dataFreq(eegData)
-        morseBlinkLength = getBlinklength(rdata,ldata,lowerTH,upperTH)
+                timeout=1, max_samples=int(10))
+        # rdata, ldata = filter_dataFreq(eegData)
+        morseBlinkLength = getBlinklength(eegData,windowLength=10,lowerlimit=lowerTH,upperlimit=upperTH)
         if morseBlinkLength > 0.6:
-            print("LongBlink")
+            print("Very Long Blink")
             startCommand = 0
             morseBlinkLength = -1
-            print(command)
-            print(decodeMorse(command))
-            command = ""
+            print(BlinkMorseCode)
+            print(decodeMorse(BlinkMorseCode))
+            BlinkMorseCode = ""
             startCommand = 1
         else:
             if startCommand == 1:
                 if 0.2 > morseBlinkLength >= 0:
-                    command = command + '.'
+                    BlinkMorseCode = BlinkMorseCode + '.'
                     morseBlinkLength = -1
                     print("short Blink")
                 elif 0.6 > morseBlinkLength > 0.2:
-                    command = command + '-'
+                    BlinkMorseCode = BlinkMorseCode + '-'
                     morseBlinkLength = -1
                     print("long Blink")
 
@@ -565,41 +560,7 @@ def readMorseCode(inputInlet:StreamInlet):
 
 def decodeMorse(morseCode):
     try:
-        mqttClient.publish("/Morse/char",MORSE_CODE_DICT[morseCode])
+        # mqttClient.publish("/Morse/char",MORSE_CODE_DICT[morseCode])
         return MORSE_CODE_DICT[morseCode]
     except:
         return None
-
-
-########### ACC & GYRO & PPG data collection ### need modification
-
-def readAccGyroPPG():
-    AccStream = resolve_byprop('type', 'Accelerometer', timeout=2)
-    AccInlet = StreamInlet(AccStream[0], max_chunklen=12)
-    GyroStream = resolve_byprop('type', 'Gyroscope', timeout=2)
-    GyroInlet = StreamInlet(GyroStream[0], max_chunklen=12)
-    PPGStream = resolve_byprop('type', 'PPG', timeout=2)
-    PPGInlet = StreamInlet(PPGStream[0], max_chunklen=12)
-    while True:
-        Acc_data, Acctimestamp = AccInlet.pull_chunk(timeout=1, max_samples=int(52))
-        mqttClient.publish("/ACC/X",np.array(Acc_data)[:,0])
-        mqttClient.publish("/ACC/Y",np.array(Acc_data)[:,1])
-        mqttClient.publish("/ACC/Z",np.array(Acc_data)[:,2])
-        Gyro_data, Gyrotimestamp = GyroInlet.pull_chunk(timeout=1, max_samples=int(52))
-        mqttClient.publish("/Gyro/X",np.array(Gyro_data)[:,0])
-        mqttClient.publish("/Gyro/Y",np.array(Gyro_data)[:,1])
-        mqttClient.publish("/Gyro/Z",np.array(Gyro_data)[:,2])
-        PPG_data, PPGtimestamp = PPGInlet.pull_chunk(timeout=1, max_samples=int(64))
-        mqttClient.publish("/PPG/PPG1",np.array(PPG_data)[:,0])
-        mqttClient.publish("/PPG/PPG2",np.array(PPG_data)[:,1])
-        mqttClient.publish("/PPG/PPG3",np.array(PPG_data)[:,2])
-
-# def readPPG():
-#     PPGStream = resolve_byprop('type', 'PPG', timeout=2)
-#     PPGInlet = StreamInlet(PPGStream[0], max_chunklen=12)
-#     while True:
-#         PPG_data, PPGtimestamp = PPGInlet.pull_chunk(timeout=1, max_samples=int(64))
-#         mqttClient.publish("/PPG/PPG1",np.array(PPG_data)[:,0])
-#         mqttClient.publish("/PPG/PPG2",np.array(PPG_data)[:,1])
-#         mqttClient.publish("/PPG/PPG3",np.array(PPG_data)[:,2])
-    
