@@ -4,7 +4,7 @@ from PyQt5.QtGui import QPixmap
 import room, bathroom, kitchen, corridor
 import sys
 import main
-from main import start_threads
+from main import start_threads,startEEG
 from PyQt5.QtCore import *
 
 
@@ -142,7 +142,8 @@ class Smarthome(qtw.QMainWindow):
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
-    start_threads()
+    # start_threads()
+    startEEG()
     home = Smarthome()
     home.cnt_thr.start()
     sys.exit(app.exec_())
