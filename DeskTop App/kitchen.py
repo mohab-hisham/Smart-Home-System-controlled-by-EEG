@@ -7,18 +7,18 @@ import sys
 class Kitchen(qtw.QWidget):
     def __init__(self):
         super().__init__()
-        bath = "DeskTop App/"
-        uic.loadUi(bath + "UIs/kitchen.ui", self)
-        self.light_img = QPixmap(bath + "imgs/lamp2.jpeg")
+        #bath = "DeskTop App/"
+        uic.loadUi("UIs/kitchen.ui", self)
+        self.light_img = QPixmap("imgs/lamp2.jpeg")
         self.light_label.setPixmap(self.light_img)
 
-        self.washer_img = QPixmap(bath + "imgs/washer.jpeg")
+        self.washer_img = QPixmap("imgs/washer.jpeg")
         self.washer_label.setPixmap(self.washer_img)
 
-        self.stove_img = QPixmap(bath + "imgs/stove.jpeg")
+        self.stove_img = QPixmap("imgs/stove.jpeg")
         self.stove_label.setPixmap(self.stove_img)
 
-        self.chimney_img = QPixmap(bath + "imgs/smoke.jpeg")
+        self.chimney_img = QPixmap("imgs/smoke.jpeg")
         self.chimney_label.setPixmap(self.chimney_img)
 
         self.homeButton.clicked.connect(self.closeKitchen)
