@@ -73,6 +73,9 @@
          <pointsize>14</pointsize>
         </font>
        </property>
+       <property name="maximum">
+        <double>2000.000000000000000</double>
+       </property>
       </widget>
      </item>
      <item>
@@ -138,6 +141,12 @@
          <family>Times New Roman</family>
          <pointsize>14</pointsize>
         </font>
+       </property>
+       <property name="minimum">
+        <double>-300.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>0.000000000000000</double>
        </property>
       </widget>
      </item>

@@ -219,6 +219,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionMessage"/>
+    <addaction name="actionFall_Detection"/>
    </widget>
    <addaction name="menuUser_Settings"/>
    <addaction name="menuTools"/>
@@ -250,6 +251,11 @@
   <action name="actionMessage">
    <property name="text">
     <string>Message</string>
+   </property>
+  </action>
+  <action name="actionFall_Detection">
+   <property name="text">
+    <string>Fall Detection</string>
    </property>
   </action>
  </widget>

@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
-import room, bathroom, kitchen, corridor, calibration, controls, message
+import room, bathroom, kitchen, corridor, calibration, controls, message, fall
 import sys
 import main
 from PyQt5.QtCore import *
@@ -19,24 +19,24 @@ class Smarthome(qtw.QMainWindow):
         self.cnt_thr.started.connect(self.cnt_worker.choose)
         self.cnt_worker.eeg_cnt.connect(self.control)
         self.cnt_worker.fin.connect(self.cnt_thr.quit)
-
-        uic.loadUi("UIs/home.ui", self)
-        self.living_img = QPixmap("imgs/living.jpeg")
+        bath = "DeskTop App/"
+        uic.loadUi(bath + "UIs/home.ui", self)
+        self.living_img = QPixmap(bath + "imgs/living.jpeg")
         self.living_label.setPixmap(self.living_img)
 
-        self.room1_img = QPixmap("imgs/room1.jpeg")
+        self.room1_img = QPixmap(bath + "imgs/room1.jpeg")
         self.room1_label.setPixmap(self.room1_img)
 
-        self.room2_img = QPixmap("imgs/room.jpeg")
+        self.room2_img = QPixmap(bath + "imgs/room.jpeg")
         self.room2_label.setPixmap(self.room2_img)
 
-        self.kitchen_img = QPixmap("imgs/kit.jpeg")
+        self.kitchen_img = QPixmap(bath + "imgs/kit.jpeg")
         self.kitchen_label.setPixmap(self.kitchen_img)
 
-        self.lobby_img = QPixmap("imgs/lobby.jpeg")
+        self.lobby_img = QPixmap(bath + "imgs/lobby.jpeg")
         self.lobby_label.setPixmap(self.lobby_img)
 
-        self.bath_img = QPixmap("imgs/toilet.jpeg")
+        self.bath_img = QPixmap(bath + "imgs/toilet.jpeg")
         self.bath_label.setPixmap(self.bath_img)
 
         self.room1 = room.Room()
@@ -48,17 +48,10 @@ class Smarthome(qtw.QMainWindow):
 
         self.room1.homeButton.clicked.connect(self.returnHome)
         self.room2.homeButton.clicked.connect(self.returnHome)
-        ###############################################################################################################
-        self.room2.homeButton.clicked.connect(lambda: self.room2_Button.setStyleSheet("background-color: #ffffff; "))
-        ###############################################################################################################
         self.living.homeButton.clicked.connect(self.returnHome)
         self.room1_Button.clicked.connect(lambda: self.room1.open("Room 1"))
         self.room1_Button.clicked.connect(self.close)
         self.room2_Button.clicked.connect(lambda: self.room2.open("Room 2"))
-        ###############################################################################################################
-        self.room2_Button.clicked.connect(lambda: self.room2.message_label.setText("Hiiiiii"))
-        self.room2_Button.clicked.connect(lambda: self.room2.homeButton.setStyleSheet("background-color: #ff91ff; "))
-        ###############################################################################################################
         self.room2_Button.clicked.connect(self.close)
         self.livingButton.clicked.connect(lambda: self.living.open("Living Room"))
         self.livingButton.clicked.connect(self.close)
@@ -94,14 +87,8 @@ class Smarthome(qtw.QMainWindow):
         self.room2_worker.moveToThread(self.room2_thr)
         self.room2_thr.started.connect(self.room2_worker.navigate)
         self.room2_worker.eeg_sig.connect(lambda: self.room2.open("Room 2"))
-        ################################################################################################
-        self.room2_worker.eeg_sig.connect(lambda: self.room2.message_label.setText("Hiiiiii"))
-        ################################################################################################
         self.room2_worker.eeg_sig.connect(self.close)
         self.room2_worker.fin.connect(self.room2.close)
-        ###############################################################################################################
-        self.room2_worker.cnt_return.connect(lambda: self.room2_Button.setStyleSheet("background-color: #ffffff; "))
-        ###############################################################################################################
         self.room2_worker.cnt_return.connect(self.cnt_thr.start)
         self.room2_worker.fin.connect(self.room2_thr.quit)
 
@@ -132,17 +119,20 @@ class Smarthome(qtw.QMainWindow):
         self.kitchen_worker.cnt_return.connect(self.cnt_thr.start)
         self.kitchen_worker.fin.connect(self.kitchen_thr.quit)
 
-
+        #############################################################################################
         self.calib = calibration.Calibration()
         self.control = controls.Controls()
         self.msg = message.Message()
+        self.fall = fall.Fall()
         self.actionCalibration_2.triggered.connect(self.openCalibration)
         self.actionControls.triggered.connect(self.openControls)
         self.actionMessage.triggered.connect(self.openMessage)
+        self.actionFall_Detection.triggered.connect(self.openFall)
 
         self.calib.submitButton.clicked.connect(self.returnHome)
         self.control.doneButton.clicked.connect(self.returnHome)
         self.msg.saveButton.clicked.connect(self.returnHome)
+        self.fall.backButton.clicked.connect(self.returnHome)
 
         self.calib_thr = QThread()
         self.calib_worker = main.EEG_Worker()
@@ -171,14 +161,33 @@ class Smarthome(qtw.QMainWindow):
         self.msg_worker.cnt_return.connect(self.cnt_thr.start)
         self.msg_worker.fin.connect(self.msg_thr.quit)
 
+        self.fall_thr = QThread()
+        self.fall_worker = main.EEG_Worker()
+        self.fall_worker.moveToThread(self.fall_thr)
+        self.fall_thr.started.connect(self.fall_worker.navigate)
+        self.fall_worker.eeg_sig.connect(self.openFall)
+        self.fall_worker.fin.connect(self.fall.close)
+        self.fall_worker.cnt_return.connect(self.cnt_thr.start)
+        self.fall_worker.fin.connect(self.fall_thr.quit)
+
+        ############################################################################################
+
+        # styles #
+
+        self.room2.homeButton.clicked.connect(lambda: self.room2_Button.setStyleSheet("background-color: #ffffff; "))
+        self.room2_Button.clicked.connect(lambda: self.room2.message_label.setText("Hiiiiii"))
+        self.room2_Button.clicked.connect(lambda: self.room2.homeButton.setStyleSheet("background-color: #ff91ff; "))
+        self.room2_worker.eeg_sig.connect(lambda: self.room2.message_label.setText("Hiiiiii"))
+        self.room2_worker.cnt_return.connect(lambda: self.room2_Button.setStyleSheet("background-color: #ffffff; "))
+
     def control(self, code):
         dic = {1: self.living_thr, 2: self.room1_thr, 3: self.room2_thr,
                4: self.kitchen_thr, 5: self.corridor_thr, 6: self.bath_thr, 7: self.calib_thr,
-               8: self.control_thr, 9: self.msg_thr}
+               8: self.control_thr, 9: self.msg_thr, 10: self.fall_thr}
         btn_dic = {1: self.livingButton, 2: self.room1_Button, 3: self.room2_Button,
-               4: self.kitchenButton, 5: self.lobbyButton, 6: self.bathButton}
+                   4: self.kitchenButton, 5: self.lobbyButton, 6: self.bathButton}
 
-        #btn_dic[code].setStyleSheet(" border: 2px solid gray;")
+        # btn_dic[code].setStyleSheet(" border: 2px solid gray;")
         dic[code].start()
 
     def returnHome(self):
@@ -208,12 +217,15 @@ class Smarthome(qtw.QMainWindow):
         self.msg.show()
         self.close()
 
+    def openFall(self):
+        self.fall.show()
+        self.close()
 
 if __name__ == '__main__':
-
     app = qtw.QApplication(sys.argv)
     startMUSEconnection()
     home = Smarthome()
     home.cnt_thr.start()
     sys.exit(app.exec_())
+
 
