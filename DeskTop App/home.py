@@ -127,6 +127,8 @@ class Smarthome(qtw.QMainWindow):
         self.actionCalibration_2.triggered.connect(self.openCalibration)
         self.actionControls.triggered.connect(self.openControls)
         self.actionMessage.triggered.connect(self.openMessage)
+
+
         self.actionFall_Detection.triggered.connect(self.openFall)
 
         self.calib.submitButton.clicked.connect(self.returnHome)
@@ -171,6 +173,8 @@ class Smarthome(qtw.QMainWindow):
         self.fall_worker.fin.connect(self.fall.close)
         self.fall_worker.cnt_return.connect(self.cnt_thr.start)
         self.fall_worker.fin.connect(self.fall_thr.quit)
+
+        self.actionMessage.triggered.connect(self.self.msg_thr.start)
 
         ############################################################################################
 
