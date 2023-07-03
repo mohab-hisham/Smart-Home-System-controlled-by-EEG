@@ -537,16 +537,15 @@ def checkSeq(sequence:Sequence , selectedSeqArr):
 
 ########### MORSE code functions ############### need modification
 
-def readMorseCode(inputInlet:StreamInlet = MUSEns.EEGinlet):
-    global lowerTH
-    global upperTH
+def readMorseCode():
+    
     global startCommand
     global BlinkMorseCode
     morseBlinkLength = -1
     startCommand = 1
     while True:
         # if end signal is sent break from this loop
-        eegData, timestamp = inputInlet.pull_chunk(
+        eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
                 timeout=1, max_samples=int(10))
         # rdata, ldata = filter_dataFreq(eegData)
         morseBlinkLength = getBlinklength(eegData,windowLength=10)
