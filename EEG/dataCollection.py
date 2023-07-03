@@ -163,13 +163,13 @@ if __name__ == "__main__":
     
         
     print('Looking for an EEG stream...')
-    streams = resolve_byprop('type', 'EEG', timeout=2) #maxchunklenght = 12
+    # streams = resolve_byprop('type', 'EEG', timeout=2) #maxchunklenght = 12
     # Name: Muse-D222 (00:55:da:b5:d2:22) EEG - Nominal Rate: 256 - Channels (5): TP9,AF7,AF8,TP10,Right AUX	1685755616.05209	262.686567164179
     # streams = resolve_byprop('type', 'Accelerometer', timeout=2)#0:x, 1:y, 2:z #maxchunklenght = 1
     # Name: Muse-D222 (00:55:da:b5:d2:22) Accelerometer - Nominal Rate: 52 - Channels (3): X,Y,Z	1685755057.94798	53.7735849056604
     # streams = resolve_byprop('type', 'Gyroscope', timeout=2)#0:x, 1:y, 2:z #maxchunklenght = 1
     # Name: Muse-D222 (00:55:da:b5:d2:22) Gyroscope - Nominal Rate: 52 - Channels (3): X,Y,Z	1685755371.95998	53.8384845463609
-    # streams = resolve_byprop('type', 'PPG', timeout=2)#PPG1:0, PPG2:1, PPG3:2 #maxchunklenght = 6
+    streams = resolve_byprop('type', 'PPG', timeout=2)#PPG1:0, PPG2:1, PPG3:2 #maxchunklenght = 6
     # Name: Muse-D222 (00:55:da:b5:d2:22) PPG - Nominal Rate: 64 - Channels (3): PPG1,PPG2,PPG3	1685755453.57998	63.8297872340426
 
 
@@ -233,8 +233,12 @@ if __name__ == "__main__":
 
         # Only keep the channel we're interested in
         
-        ch_data = np.array(eeg_data)[:, 2]
-        print(ch_data)
+        ch_data1 = np.array(eeg_data)[:, 0]
+        ch_data2 = np.array(eeg_data)[:, 1]
+        ch_data3 = np.array(eeg_data)[:, 2]
+        print("PPG1: ",ch_data1)
+        print("PPG2: ",ch_data2)
+        print("PPG3: ",ch_data3)
         
             
         
