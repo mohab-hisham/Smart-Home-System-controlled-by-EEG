@@ -5,6 +5,7 @@ import room, bathroom, kitchen, corridor, calibration, controls, message
 import sys
 import main
 from PyQt5.QtCore import *
+from Utils import startMUSEconnection, calibrate, CheckSignalQuality,MUSEns
 
 
 class Smarthome(qtw.QMainWindow):
@@ -211,6 +212,7 @@ class Smarthome(qtw.QMainWindow):
 if __name__ == '__main__':
 
     app = qtw.QApplication(sys.argv)
+    startMUSEconnection()
     home = Smarthome()
     home.cnt_thr.start()
     sys.exit(app.exec_())

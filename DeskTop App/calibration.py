@@ -1,15 +1,16 @@
 from PyQt5 import QtWidgets as qtw
 from PyQt5 import uic
-import main
+import main 
 import sys
+from Utils import EEGns
 
 class Calibration(qtw.QWidget):
     def __init__(self):
         super().__init__()
 
         uic.loadUi("UIs/calib.ui", self)
-        self.maxt_SpinBox.setValue(main.upperTH)
-        self.mint_SpinBox.setValue(main.lowerTH)
+        self.maxt_SpinBox.setValue(EEGns.upperTH)
+        self.mint_SpinBox.setValue(EEGns.lowerTH)
 
         self.submitButton.clicked.connect(self.closeCalibration)
         self.maxt_SpinBox.valueChanged.connect(self.changeTH)
@@ -20,11 +21,11 @@ class Calibration(qtw.QWidget):
 
     def changeTH(self):
         upper = self.maxt_SpinBox.value()
-        main.upperTH = upper
+        EEGns.upperTH = upper
 
     def changeTL(self):
         lower = self.mint_SpinBox.value()
-        main.lowerTH = lower
+        EEGns.lowerTH = lower
 
 
 if __name__ == '__main__':
