@@ -80,6 +80,8 @@ class EEG_Worker(QObject):
         BlinkMorseCode = ""
         paragraph = ""
 
+        self.eeg_sig.emit()
+
         while True:
             # if end signal is sent break from this loop
             morseBlinkLength = EEGutils.getMorseData()
