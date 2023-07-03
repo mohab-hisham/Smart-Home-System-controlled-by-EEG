@@ -13,6 +13,12 @@ class Message(qtw.QWidget):
     def closeMessage(self):
         self.close()
 
+    def write_pragraph(self, paragraph):
+        self.message_label.setText(paragraph)
+
+    def show_code(self, code):
+        self.code_label.setText(code)
+
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)

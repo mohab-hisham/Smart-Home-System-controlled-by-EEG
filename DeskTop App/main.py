@@ -12,7 +12,7 @@ import asyncio
 # import variables
 from types import SimpleNamespace
 
-from Utils import collectEEGsignal,readFullinputedSeq,MUSEns,EEGns
+from Utils import collectEEGsignal,readFullinputedSeq,MUSEns,EEGns, EEGutils
 
 
 ns = SimpleNamespace()
@@ -65,6 +65,8 @@ class CntWorker(QObject):
 
 class EEG_Worker(QObject):
     eeg_sig = pyqtSignal()
+    str_sig = pyqtSignal(str)
+    m_letter = pyqtSignal(str)
     fin = pyqtSignal()
     cnt_return = pyqtSignal()
     def navigate(self):
@@ -73,6 +75,42 @@ class EEG_Worker(QObject):
         time.sleep(5)
         self.cnt_return.emit()
         self.fin.emit()
+
+    def morse(self):
+        BlinkMorseCode = ""
+        paragraph = ""
+
+        while True:
+            # if end signal is sent break from this loop
+            morseBlinkLength = EEGutils.getMorseData()
+            # rdata, ldata = filter_dataFreq(eegData)
+
+            if morseBlinkLength > 0.9:
+                letter = EEGutils.decodeMorse(BlinkMorseCode)
+                if letter == 'save':
+                    self.fin.emit()
+                    self.cnt_return.emit()
+                    break
+                elif letter == 'clr':
+                    paragraph = ""
+                else:
+                    paragraph += letter
+
+                self.str_sig.emit(paragraph)
+                BlinkMorseCode = ""
+                self.m_letter.emit(BlinkMorseCode)
+            else:
+                    if 0.2 > morseBlinkLength >= 0:
+                        BlinkMorseCode = BlinkMorseCode + '.'
+                        self.m_letter.emit(BlinkMorseCode)
+
+                    elif 0.6 > morseBlinkLength > 0.2:
+                        BlinkMorseCode = BlinkMorseCode + '-'
+                        self.m_letter.emit(BlinkMorseCode)
+
+                    elif 0.9 > morseBlinkLength > 0.6:
+                        BlinkMorseCode = BlinkMorseCode + '*'
+                        self.m_letter.emit(BlinkMorseCode)
 
 
 

@@ -132,21 +132,31 @@ consbuffer = []
 databuff = 0
 
 # Dictionary representing the morse code chart
-MORSE_CODE_DICT = { '.-':'A', '-...':'B',
-                    '-.-.':'C', '-..':'D', '.':'E',
-                    '..-.':'F', '--.':'G', '....':'H',
-                    '..':'I', '.---':'J', '-.-':'K',
-                    '.-..':'L', '--':'M', '-.':'N',
-                    '---':'O', '.--.':'P', '--.-':'Q',
-                    '.-.':'R', '...':'S', '-':'T',
-                    '..-':'U', '...-':'V', '.--':'W',
-                    '-..-':'X', '-.--':'Y', '--..':'Z',
+MORSE_CODE_DICT = { '.-':'a', '-...':'b',
+                    '-.-.':'c', '-..':'d', '.':'e',
+                    '..-.':'f', '--.':'g', '....':'h',
+                    '..':'i', '.---':'j', '-.-':'k',
+                    '.-..':'l', '--':'m', '-.':'n',
+                    '---':'o', '.--.':'p', '--.-':'q',
+                    '.-.':'r', '...':'s', '-':'t',
+                    '..-':'u', '...-':'v', '.--':'w',
+                    '-..-':'x', '-.--':'y', '--..':'z',
                     '.----':'1', '..---':'2', '...--':'3',
                     '....-':'4', '.....':'5', '-....':'6',
                     '--...':'7', '---..':'8', '----.':'9',
                     '-----':'0', '--..--':', ', '.-.-.-':'.',
                     '..--..':'?', '-..-.':'/', '-....-':'-',
-                    '-.--.':'(', '-.--.-':')'}
+                    '-.--.':'(', '-.--.-':')', '*': ' ',
+                    '**': 'clr', '*-*': 'save','*-':'A',
+                    '-*..':'B', '-*-.':'C', '-*.':'D', '.*':'E',
+                    '*.-.':'F', '--*':'G', '*...':'H',
+                    '*.':'I', '*--.':'J', '-*-':'K',
+                    '*-..':'L', '.*-.':'M', '-*':'N',
+                    '...*':'O', '.*..':'P', '..*.':'Q',
+                    '*-.':'R', '*..':'S', '*.*':'T',
+                    '*.-':'U', '*..-':'V', '*--':'W',
+                    '-*.-':'X', '-*--':'Y', '--*.':'Z'
+                    }
 
 
 ########### check signal quality ###############
@@ -537,6 +547,12 @@ def checkSeq(sequence:Sequence , selectedSeqArr):
 
 ########### MORSE code functions ############### need modification
 
+def getMorseData():
+    eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
+        timeout=1, max_samples=int(10))
+    morseBlinkLength = getBlinklength(eegData, windowLength=10)
+    return morseBlinkLength
+
 def readMorseCode():
     
     global startCommand
@@ -545,11 +561,10 @@ def readMorseCode():
     startCommand = 1
     while True:
         # if end signal is sent break from this loop
-        eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
-                timeout=1, max_samples=int(10))
+        morseBlinkLength = getMorseData()
         # rdata, ldata = filter_dataFreq(eegData)
-        morseBlinkLength = getBlinklength(eegData,windowLength=10)
-        if morseBlinkLength > 0.6:
+
+        if morseBlinkLength > 0.9:
             print("Very Long Blink")
             startCommand = 0
             morseBlinkLength = -1
@@ -567,6 +582,10 @@ def readMorseCode():
                     BlinkMorseCode = BlinkMorseCode + '-'
                     morseBlinkLength = -1
                     print("long Blink")
+                elif 0.9 > morseBlinkLength > 0.6:
+                    BlinkMorseCode = BlinkMorseCode + '*'
+                    morseBlinkLength = -1
+                    print("modified long Blink")
 
     
 
