@@ -22,7 +22,13 @@ ns = SimpleNamespace()
 class CntWorker(QObject):
     eeg_cnt = pyqtSignal(int)
     fin = pyqtSignal()
+
+    mouse_int =  pyqtSignal()
     
+    def __init__(self):
+        super().__init__()
+        self.intr_val = 0
+        self.mouse_int.connect(lambda: self.setIntr(1))
 
     def getinput(self):
         
@@ -31,7 +37,8 @@ class CntWorker(QObject):
 
             """ 3.1 ACQUIRE DATA """
             # Obtain EEG data from the LSL stream
-           
+            if self.intr_val:
+                return -1
 
             # Only keep the channel we're interested in
             # ch_data = np.array(eeg_data)[:, INDEX_CHANNEL]
@@ -52,15 +59,20 @@ class CntWorker(QObject):
         # time.sleep(5)
         print("started")
         code = self.getinput()
-        # code = int(code)
-        # print("In choose")
-        # print(code)
-        # time.sleep(5)
-        self.eeg_cnt.emit(code)
-        print("sig is emitted")
-        time.sleep(2)
+
+        if code != -1:
+            # code = int(code)
+            # print("In choose")
+            # print(code)
+            # time.sleep(5)
+            self.eeg_cnt.emit(code)
+            print("sig is emitted")
+            time.sleep(2)
         self.fin.emit()
         print("fin is emitted")
+
+    def setIntr(self, val):
+        self.intr_val = val
 
 
 class EEG_Worker(QObject):
@@ -97,8 +109,6 @@ class EEG_Worker(QObject):
 
             if self.intr_val:
                 self.intr_val = 0
-                self.str_sig.emit("")
-                self.m_letter.emit("")
                 break
 
             if morseBlinkLength > 0.6:

@@ -12,7 +12,7 @@ class Smarthome(qtw.QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.interrupt = [0, 0]
+        #self.interrupt = [0, 0]
         self.cnt_thr = QThread()
         self.cnt_worker = m.CntWorker()
         self.cnt_worker.moveToThread(self.cnt_thr)
@@ -175,7 +175,7 @@ class Smarthome(qtw.QMainWindow):
         self.fall_worker.cnt_return.connect(self.cnt_thr.start)
         self.fall_worker.fin.connect(self.fall_thr.quit)
 
-        self.actionMessage.triggered.connect(lambda: self.setInterrupt([1,9]))
+        self.actionMessage.triggered.connect(self.cnt_worker.mouse_int.emit)
         self.msg.saveButton.clicked.connect(self.msg_worker.intr.emit)
 
         ############################################################################################
@@ -233,8 +233,8 @@ class Smarthome(qtw.QMainWindow):
         self.fall.show()
         self.close()
         
-    def setInterrupt(self, val):
-        self.interrupt = val
+    #def setInterrupt(self, val):
+       #self.interrupt = val
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
