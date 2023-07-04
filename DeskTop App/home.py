@@ -20,7 +20,7 @@ class Smarthome(qtw.QMainWindow):
         self.cnt_thr.started.connect(self.cnt_worker.choose)
         self.cnt_worker.eeg_cnt.connect(self.control)
         self.cnt_worker.fin.connect(self.cnt_thr.quit)
-        bath = "DeskTop App/"
+        bath = ""
         uic.loadUi(bath + "UIs/home.ui", self)
         self.living_img = QPixmap(bath + "imgs/living.jpeg")
         self.living_label.setPixmap(self.living_img)
@@ -232,6 +232,9 @@ class Smarthome(qtw.QMainWindow):
     def openFall(self):
         self.fall.show()
         self.close()
+        
+    def setInterrupt(self, val):
+        self.interrupt = val
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)

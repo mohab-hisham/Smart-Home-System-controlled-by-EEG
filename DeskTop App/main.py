@@ -109,7 +109,7 @@ class EEG_Worker(QObject):
                     break
                 elif letter == 'clr':
                     paragraph = ""
-                else:
+                elif letter != None:
                     paragraph += letter
 
                 self.str_sig.emit(paragraph)
