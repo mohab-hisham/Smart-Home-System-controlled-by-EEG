@@ -39,7 +39,33 @@ class Blink:
                 durationAfterBlink[1] = 1000
         except:
             pass
-        self.durationAfterBlink = durationAfterBlink # 0 if no limit after blink else there is limit 
+        self.durationAfterBlink = durationAfterBlink # 0 if no limit after blink else there is limit
+        self.type = self.classify()
+
+    def classify(self):
+        if self.length[0] < 30:
+            if self.durationAfterBlink[0] < 0.3:
+                return 1
+            elif self.durationAfterBlink[0] < 0.62:
+                return 2
+            else:
+                return 3
+
+        elif self.length[0] < 62:
+            if self.durationAfterBlink[0] < 0.3:
+                return 4
+            elif self.durationAfterBlink[0] < 0.62:
+                return 5
+            else:
+                return 6
+
+        else:
+            if self.durationAfterBlink[0] < 0.3:
+                return 7
+            elif self.durationAfterBlink[0] < 0.62:
+                return 8
+            else:
+                return 9
         
 
     def printBlink(self):
@@ -376,16 +402,81 @@ def getBlinkData(inputChar):
     return addedBlink
 
 ########### construct sequence from blinks #####
-
-def readFullinputedSeq(EEGData,windowLength = 10,startSeq = False,endSeq = False):
+##################################################################################################
+## mans update##
+def readInputedSeq(EEGData, windowLength=10):
     global inputSeqArr
-    global openTime 
-    global closeTime 
-    global firstClose 
+    global openTime
+    global closeTime
+    global firstClose
     global openCloseState
     global openCloseTime
     global closeOpenTime
-    global startCommand 
+    global startCommand
+    global endCommand
+    global SeqArray
+    returnValue = 0
+
+    rightData, leftData = filter_dataFreq(EEGData, wind_len=windowLength)
+    if (min(rightData) < EEGns.lowerTH) and (min(leftData) < EEGns.lowerTH) and openCloseState == 0:  # close
+        print("eye closed")
+        openCloseState = 1
+        if firstClose == 1:
+            closeTime = time.time()
+            firstClose = 0
+        else:
+            closeTime = time.time()
+            openCloseTime = closeTime - openTime
+            # inputSeqArr.append(Blink(openCloseTime,BlinkType="eyeOpen"))
+            # print("added a Blink!")
+
+            inputSeqArr[-1].durationAfterBlink = [openCloseTime]
+            Sequence(inputSeqArr).printSeq()
+            # print("eyeOpen: ", openCloseTime)
+    elif (300 > max(rightData) > EEGns.upperTH) and (
+            300 > max(leftData) > EEGns.upperTH) and openCloseState == 1:  # open
+        print("eye opend")
+        openCloseState = 0
+        openTime = time.time()
+        closeOpenTime = openTime - closeTime
+        inputSeqArr.append(Blink(length=[closeOpenTime]))
+        Sequence(inputSeqArr).printSeq()
+
+    if openCloseTime > 1:
+        startCommand = 0
+        endCommand = 1
+        firstClose = 1
+        openCloseState = 0
+        openCloseTime = 0
+        closeOpenTime = 0
+        outputSeq = checkSeq(Sequence(inputSeqArr), SeqArray)
+        print("choosed Sequence is: ", outputSeq)
+        if outputSeq == "rightSequence":
+            returnValue = 1
+
+        elif outputSeq == "leftSequence":
+            returnValue = 2
+
+        elif outputSeq == "outSequence":
+            returnValue = 3
+        elif outputSeq == "selectSequence":
+            returnValue = 9
+        else:
+            returnValue = 0
+        inputSeqArr = []
+        outputSeq = ""
+    return returnValue
+##################################################################################################
+
+def readFullinputedSeq(EEGData,windowLength = 10,startSeq = False,endSeq = False):
+    global inputSeqArr
+    global openTime
+    global closeTime
+    global firstClose
+    global openCloseState
+    global openCloseTime
+    global closeOpenTime
+    global startCommand
     global endCommand
     global SeqArray
     returnValue = 0

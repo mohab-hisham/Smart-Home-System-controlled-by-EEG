@@ -175,7 +175,7 @@ class Smarthome(qtw.QMainWindow):
         self.fall_worker.cnt_return.connect(self.cnt_thr.start)
         self.fall_worker.fin.connect(self.fall_thr.quit)
 
-        self.actionMessage.triggered.connect(self.cnt_worker.mouse_int.emit)
+        self.actionMessage.triggered.connect(lambda:self.cnt_worker.mouse_int.emit(9))
         self.msg.saveButton.clicked.connect(self.msg_worker.intr.emit)
 
         ############################################################################################
