@@ -3,16 +3,16 @@ from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
 import room, bathroom, kitchen, corridor, calibration, controls, message, fall
 import sys
-import main as m
+import main1 as m
 from PyQt5.QtCore import *
-from Utils import startMUSEconnection, calibrate, CheckSignalQuality,MUSEns
+#from Utils import startMUSEconnection, calibrate, CheckSignalQuality,MUSEns
 
 
 class Smarthome(qtw.QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.interrupt = [0, 0]
+        self.interrupt = [0,0]
         self.cnt_thr = QThread()
         self.cnt_worker = m.CntWorker()
         self.cnt_worker.moveToThread(self.cnt_thr)
@@ -20,7 +20,7 @@ class Smarthome(qtw.QMainWindow):
         self.cnt_thr.started.connect(self.cnt_worker.choose)
         self.cnt_worker.eeg_cnt.connect(self.control)
         self.cnt_worker.fin.connect(self.cnt_thr.quit)
-        bath = "DeskTop App/"
+        bath = ""
         uic.loadUi(bath + "UIs/home.ui", self)
         self.living_img = QPixmap(bath + "imgs/living.jpeg")
         self.living_label.setPixmap(self.living_img)
@@ -127,7 +127,7 @@ class Smarthome(qtw.QMainWindow):
         self.fall = fall.Fall()
         self.actionCalibration_2.triggered.connect(self.openCalibration)
         self.actionControls.triggered.connect(self.openControls)
-        #self.actionMessage.triggered.connect(self.openMessage)
+
 
 
         self.actionFall_Detection.triggered.connect(self.openFall)
@@ -177,6 +177,8 @@ class Smarthome(qtw.QMainWindow):
 
         self.actionMessage.triggered.connect(lambda: self.setInterrupt([1,9]))
         self.msg.saveButton.clicked.connect(self.msg_worker.intr.emit)
+
+
 
         ############################################################################################
 
@@ -233,9 +235,12 @@ class Smarthome(qtw.QMainWindow):
         self.fall.show()
         self.close()
 
+    def setInterrupt(self, val):
+        self.interrupt = val
+
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
-    startMUSEconnection()
+    #startMUSEconnection()
     home = Smarthome()
     home.cnt_thr.start()
     sys.exit(app.exec_())

@@ -9,6 +9,9 @@ class Message(qtw.QWidget):
 
         uic.loadUi("UIs/message.ui", self)
         self.saveButton.clicked.connect(self.closeMessage)
+        self.saveButton.clicked.connect(lambda:self.write_pragraph(""))
+        self.saveButton.clicked.connect(lambda: self.show_code(""))
+        self.clearButton.clicked.connect(lambda: self.write_pragraph(""))
 
     def closeMessage(self):
         self.close()

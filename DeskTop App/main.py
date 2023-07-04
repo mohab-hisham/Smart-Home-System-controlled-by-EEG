@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 
 import numpy as np  # Module that simplifies computations on matrices
 import matplotlib.pyplot as plt  # Module used for plotting
-from pylsl import StreamInlet, resolve_byprop  # Module to receive EEG data
+
 
 import time
 
@@ -69,6 +69,14 @@ class EEG_Worker(QObject):
     m_letter = pyqtSignal(str)
     fin = pyqtSignal()
     cnt_return = pyqtSignal()
+
+    intr = pyqtSignal()
+
+    def __init__(self):
+        super().__init__()
+        self.intr_val = 0
+        self.intr.connect(lambda: self.setIntr(1))
+
     def navigate(self):
         # time.sleep(5)
         self.eeg_sig.emit()
@@ -87,11 +95,17 @@ class EEG_Worker(QObject):
             morseBlinkLength = EEGutils.getMorseData()
             # rdata, ldata = filter_dataFreq(eegData)
 
-            if morseBlinkLength > 0.9:
+            if self.intr_val:
+                self.intr_val = 0
+                self.str_sig.emit("")
+                self.m_letter.emit("")
+                break
+
+            if morseBlinkLength > 0.6:
                 letter = EEGutils.decodeMorse(BlinkMorseCode)
                 if letter == 'save':
-                    self.fin.emit()
-                    self.cnt_return.emit()
+                    self.str_sig.emit("")
+                    self.m_letter.emit("")
                     break
                 elif letter == 'clr':
                     paragraph = ""
@@ -110,12 +124,10 @@ class EEG_Worker(QObject):
                         BlinkMorseCode = BlinkMorseCode + '-'
                         self.m_letter.emit(BlinkMorseCode)
 
-                    elif 0.9 > morseBlinkLength > 0.6:
-                        BlinkMorseCode = BlinkMorseCode + '*'
-                        self.m_letter.emit(BlinkMorseCode)
+        self.fin.emit()
+        self.cnt_return.emit()
 
-
-
-
+    def setIntr(self, val):
+        self.intr_val = val
 
 
