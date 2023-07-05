@@ -19,6 +19,7 @@ class Smarthome(qtw.QMainWindow):
         self.cnt_thr.started.connect(self.show)
         self.cnt_thr.started.connect(self.cnt_worker.choose)
         self.cnt_worker.eeg_cnt.connect(self.control)
+        self.cnt_worker.eye_state.connect(self.show_state)
         self.cnt_worker.fin.connect(self.cnt_thr.quit)
         bath = ""
         uic.loadUi(bath + "UIs/home.ui", self)
@@ -228,6 +229,9 @@ class Smarthome(qtw.QMainWindow):
     def openFall(self):
         self.fall.show()
         self.close()
+
+    def show_state(self, msg):
+        self.message_label.setText(msg)
         
     #def setInterrupt(self, val):
        #self.interrupt = val
