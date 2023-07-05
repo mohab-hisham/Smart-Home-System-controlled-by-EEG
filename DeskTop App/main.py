@@ -14,8 +14,8 @@ from types import SimpleNamespace
 
 from Utils import collectEEGsignal,readFullinputedSeq,MUSEns,EEGns, EEGutils
 global home_seq
-home_seq= {'living':[1,1], 'room1': [1,3], 'room2': [1,5], 'kitchen': [1,7], 'lobby': [1,9], 'toilet': [4,2],
-           'calibration': [4,4], 'control': [4,6], 'message': [4,8], 'fall': [6, 3]}
+home_seq= {[1, 1]: 1, [1, 3]: 2, [1, 5]: 3, [1, 7]: 4, [1, 9]: 5, [4, 2]: 6,
+           [4, 4]: 7, [4, 6]: 8, [4, 8]: 9, [6, 3]: 10}
 
 ns = SimpleNamespace()
 
@@ -34,7 +34,8 @@ class CntWorker(QObject):
         self.intr_val = [0,0]
         self.mouse_int.connect(self.setIntr)
 
-    def readInputedSeq(self, EEGData, windowLength=10):
+    def readInputedSeq(self, windowLength=10):
+        global home_seq
         inputSeqArr = []
         openTime = 0
         closeTime = 0
@@ -42,11 +43,16 @@ class CntWorker(QObject):
         openCloseState = 0
         openCloseTime = 0
         closeOpenTime = 0
-        #global SeqArray
-        returnValue = 0
 
         while 1:
-            rightData, leftData = EEGutils.filter_dataFreq(EEGData, wind_len=windowLength)
+
+            if self.intr_val[0]:
+                return -1
+
+            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+                timeout=0.5, max_samples=int(10))
+            rightData, leftData = EEGutils.filter_dataFreq(eeg_data, wind_len=windowLength)
+
             if (min(rightData) < EEGns.lowerTH) and (min(leftData) < EEGns.lowerTH) and openCloseState == 0:  # close
 
                 openCloseState = 1
@@ -57,72 +63,48 @@ class CntWorker(QObject):
                     closeTime = time.time()
                     openCloseTime = closeTime - openTime
                     if openCloseTime < 0.3:
-                        self.eye_state.emit("Short relaxation time!!")
+                        self.eye_state.emit("Short Relaxation Time")
                     elif openCloseTime < 0.62:
-                        self.eye_state.emit("Medium relaxation time!!")
+                        self.eye_state.emit("Medium Relaxation Time")
                     else:
-                        self.eye_state.emit("long relaxation time!!")
-                    # inputSeqArr.append(Blink(openCloseTime,BlinkType="eyeOpen"))
-                    # print("added a Blink!")
+                        self.eye_state.emit("Long Relaxation Time")
 
                     inputSeqArr[-1].durationAfterBlink = [openCloseTime]
                     if len(inputSeqArr) == 2:
                         break
-                    #EEGutils.Sequence(inputSeqArr).printSeq()
-                    # print("eyeOpen: ", openCloseTime)
+
             elif (300 > max(rightData) > EEGns.upperTH) and (
                     300 > max(leftData) > EEGns.upperTH) and openCloseState == 1:  # open
-                self.eye_state.emit("Eyes are opened!!")
                 openCloseState = 0
                 openTime = time.time()
                 closeOpenTime = openTime - closeTime
                 if closeOpenTime < 0.3:
-                    self.eye_state.emit("Short blink time!!")
+                    self.eye_state.emit("Short Blink Time")
                 elif closeOpenTime < 0.62:
-                    self.eye_state.emit("Medium blink time!!")
+                    self.eye_state.emit("Medium Blink Time")
                 else:
-                    self.eye_state.emit("long blink time!!")
+                    self.eye_state.emit("Long Blink Time")
                 inputSeqArr.append(EEGutils.Blink(length=[closeOpenTime]))
-                #EEGutils.Sequence(inputSeqArr).printSeq()
 
-        return (inputSeqArr[0].classify(), inputSeqArr[1].classify())
+        try:
+            seq = [inputSeqArr[0].classify(), inputSeqArr[1].classify()]
+            return home_seq[seq]
+        except:
+            self.eye_state.emit("Error: Unknown sequence is entered, Try again!!!! ")
+            return 0
 
 
-    def getinput(self):
-        
-        
-        while True:
 
-            """ 3.1 ACQUIRE DATA """
-            # Obtain EEG data from the LSL stream
-            if self.intr_val[0]:
-                return -1
-
-            # Only keep the channel we're interested in
-            # ch_data = np.array(eeg_data)[:, INDEX_CHANNEL]
-
-        
-            # print(fs)
-            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-                timeout=0.5, max_samples=int(10))
-
-            # print(eeg_data)
-            outValue = readFullinputedSeq(eeg_data)
-            
-
-            if outValue != 0 and outValue:
-                return outValue
 
     def choose(self):
         # time.sleep(5)
         print("started")
-        code = self.getinput()
+        code = self.readInputedSeq()
+
+        while code == 0:
+            code = self.readInputedSeq()
 
         if code != -1:
-            # code = int(code)
-            # print("In choose")
-            # print(code)
-            # time.sleep(5)
             self.eeg_cnt.emit(code)
             print("sig is emitted")
             time.sleep(2)
