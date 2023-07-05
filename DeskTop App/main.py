@@ -14,9 +14,10 @@ from types import SimpleNamespace
 
 from Utils import collectEEGsignal,readFullinputedSeq,MUSEns,EEGns, EEGutils
 global home_seq
-home_seq= {[1, 1]: 1, [1, 3]: 2, [1, 5]: 3, [1, 7]: 4, [1, 9]: 5, [4, 2]: 6,
-           [4, 4]: 7, [4, 6]: 8, [4, 8]: 9, [6, 3]: 10}
+# home_seq= {[1, 1]: 1, [1, 3]: 2, [1, 5]: 3, [1, 7]: 4, [1, 9]: 5, [4, 2]: 6,
+#            [4, 4]: 7, [4, 6]: 8, [4, 8]: 9, [6, 3]: 10}
 
+home_seq = {"11":1,"13":2,"15":3,"17":4,"19":5,"42":6,"44":7,"46":8,"48":9,"63":10}
 ns = SimpleNamespace()
 
 # Handy little enum to make code more readable
@@ -87,7 +88,9 @@ class CntWorker(QObject):
                 inputSeqArr.append(EEGutils.Blink(length=[closeOpenTime]))
 
         try:
-            seq = [inputSeqArr[0].classify(), inputSeqArr[1].classify()]
+            
+            seq = str(inputSeqArr[0].classify())+ str(inputSeqArr[1].classify())
+            print(seq)
             return home_seq[seq]
         except:
             self.eye_state.emit("Error: Unknown sequence is entered, Try again!!!! ")
