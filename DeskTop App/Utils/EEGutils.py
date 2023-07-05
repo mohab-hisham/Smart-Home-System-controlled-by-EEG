@@ -173,7 +173,8 @@ MORSE_CODE_DICT = { '.-':'A', '-...':'B',
                     '--...':'7', '---..':'8', '----.':'9',
                     '-----':'0', '--..--':', ', '.-.-.-':'.',
                     '..--..':'?', '-..-.':'/', '-....-':'-',
-                    '-.--.':'(', '-.--.-':')'}
+                    '-.--.':'(', '-.--.-':')', '......':'save',
+                    '..-..':'clr'}
 
 
 ########### check signal quality ###############
@@ -676,7 +677,9 @@ def readMorseCode(ns):
                 timeout=1, max_samples=int(10))
         # rdata, ldata = filter_dataFreq(eegData)
         morseBlinkLength = getBlinklength(eegData,windowLength=10)
-        if morseBlinkLength > 0.6:
+        if morseBlinkLength >= 1 :
+            paragraph += " "
+        elif 1 > morseBlinkLength > 0.6:
             print("Very Long Blink")
             startCommand = 0
             morseBlinkLength = -1
@@ -773,6 +776,7 @@ def heartRate():
     return heartRateValue
 
 # if __name__ == '__main__':
+#     print(MORSE_CODE_DICT['-.'])
 #     startMUSEconnection()
 #     HR = 0
 #     while True:
