@@ -10,8 +10,9 @@ import time
 from types import SimpleNamespace
 from scipy import signal
 from pandas import *
-from Utils.MUSEutils import MUSEns
-from Utils.MQTTutils import MQTTns
+import pyautogui as pg
+from Utils.MUSEutils import MUSEns,startMUSEconnection
+# from MQTTutils import MQTTns
 
 
 ########### classes ############################
@@ -39,37 +40,23 @@ class Blink:
                 durationAfterBlink[1] = 1000
         except:
             pass
-        self.durationAfterBlink = durationAfterBlink # 0 if no limit after blink else there is limit
-        self.type = self.classify()
-
-    def classify(self):
-        if self.length[0] < 30:
-            if self.durationAfterBlink[0] < 0.3:
-                return 1
-            elif self.durationAfterBlink[0] < 0.62:
-                return 2
-            else:
-                return 3
-
-        elif self.length[0] < 62:
-            if self.durationAfterBlink[0] < 0.3:
-                return 4
-            elif self.durationAfterBlink[0] < 0.62:
-                return 5
-            else:
-                return 6
-
-        else:
-            if self.durationAfterBlink[0] < 0.3:
-                return 7
-            elif self.durationAfterBlink[0] < 0.62:
-                return 8
-            else:
-                return 9
+        self.durationAfterBlink = durationAfterBlink # 0 if no limit after blink else there is limit 
         
 
     def printBlink(self):
         print("blink length: ", self.length, "duration after Blink: ",self.durationAfterBlink)
+    
+    def blinkType(self):
+        if self.length[0] < 0.2:
+            return "short BL"
+        else:
+            return "long BL"
+    
+    def durationAfterBlinkType(self):
+        if self.durationAfterBlink[0] < 1:
+            return "short DAB"
+        else:
+            return "long DAB"
 
 class Sequence:
     def __init__(self,seqArr,whatToControll = None) -> None:
@@ -126,7 +113,7 @@ testData = np.array([])
 setTH = 0
 EEGns.calibratingFlag = 1
 EEGns.lowerTH = -140
-EEGns.upperTH = 40
+EEGns.upperTH = 20
 serverIsConnected = False
 
 EEGns.signalQuality = False
@@ -136,14 +123,28 @@ muses = []
 homeOrCar = 1
 
 # modular sequence variables
-StartSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,0.5]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="startSequence")
-EndSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,0.5]),Blink(length=[0,0.5],durationAfterBlink=[0,0.5]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="endSequence")
+StartSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,0.5]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="startSequence")
+EndSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,0.5]),Blink(length=[0,0.2],durationAfterBlink=[0,0.5]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="endSequence")
 # SeqArray = [Sequence([Blink(length=[0,1],durationAfterBlink=[0,0]),Blink(length=[0,1],durationAfterBlink=[0,0])],whatToControll="home")]
-rightSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="rightSequence")
-leftSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="leftSequence")
-selectSeqArr = Sequence([Blink(length=[0.6,2],durationAfterBlink=[0,0])],whatToControll="selectSequence")
-outSeqArr = Sequence([Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,1]),Blink(length=[0,0.5],durationAfterBlink=[0,0])],whatToControll="outSequence")
-SeqArray = [rightSeqArr,leftSeqArr,selectSeqArr,outSeqArr]
+rightSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="rightSequence")
+leftSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="leftSequence")
+selectSeq = Sequence([Blink(length=[0.6,2],durationAfterBlink=[0,0])],whatToControll="selectSequence")
+outSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="outSequence")
+blinkNavSeqArray = [rightSeq,leftSeq,selectSeq,outSeq]
+tabOneSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="tabOne") # ..
+tabTwoSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,0])],whatToControll="tabTwo") # .-
+tabThreeSeq = Sequence([Blink(length=[0.2,1],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="tabThree") # -.
+tabFourSeq = Sequence([Blink(length=[0.2,1],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,0])],whatToControll="tabFour") # --
+tabFiveSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="tabFive") #...
+tabSixSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,0])],whatToControll="tabSix") # ..-
+tabSevenSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="tabSeven") # .-.
+tabEightSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,0])],whatToControll="tabEight") # .--
+tabNineSeq = Sequence([Blink(length=[0.2,1],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="tabNine") # -..
+tabTenSeq = Sequence([Blink(length=[0.2,1],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,0])],whatToControll="tabTen") # -.-
+tabSelectSeqArr = [tabOneSeq,tabTwoSeq,tabThreeSeq,tabFourSeq,tabFiveSeq,tabSixSeq,tabSevenSeq,tabEightSeq,tabNineSeq,tabTenSeq]
+falseFallSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,0])],whatToControll="falseFall") # .-
+falseFallSeqArr = [falseFallSeq]
+SeqArray = [rightSeq,leftSeq,selectSeq,outSeq]
 inputSeqArr = []
 openTime = time.time()
 closeTime = time.time()
@@ -158,21 +159,21 @@ consbuffer = []
 databuff = 0
 
 # Dictionary representing the morse code chart
-MORSE_CODE_DICT = { '.-':'a', '-...':'b', '-.-.':'c', '-..':'d',
-                    '--...-': 'e', '..-.':'f', '--.':'g',
-                    '....':'h', '..':'i', '.---':'j', '-.-':'k',
-                    '.-..':'l', '--':'m', '-.':'n',
-                    '---':'o', '.--.':'p', '--.-':'q',
-                    '.-.':'r', '...':'s', '-':'t',
-                    '..-':'u', '...-':'v', '.--':'w',
-                    '-..-':'x', '-.--':'y', '--..':'z', '.':' ',
+MORSE_CODE_DICT = { '.-':'A', '-...':'B',
+                    '-.-.':'C', '-..':'D', '.':'E',
+                    '..-.':'F', '--.':'G', '....':'H',
+                    '..':'I', '.---':'J', '-.-':'K',
+                    '.-..':'L', '--':'M', '-.':'N',
+                    '---':'O', '.--.':'P', '--.-':'Q',
+                    '.-.':'R', '...':'S', '-':'T',
+                    '..-':'U', '...-':'V', '.--':'W',
+                    '-..-':'X', '-.--':'Y', '--..':'Z',
                     '.----':'1', '..---':'2', '...--':'3',
                     '....-':'4', '.....':'5', '-....':'6',
                     '--...':'7', '---..':'8', '----.':'9',
                     '-----':'0', '--..--':', ', '.-.-.-':'.',
                     '..--..':'?', '-..-.':'/', '-....-':'-',
-                    '-.--.':'(', '-.--.-':')', '--.-.-': 'clr', '--.-.': 'save'
-                    }
+                    '-.--.':'(', '-.--.-':')'}
 
 
 ########### check signal quality ###############
@@ -226,15 +227,37 @@ def filter_dataFreq(eeg_data, fs=256, wind_len=10, lower_freq=0.5, upper_freq=4)
 
     return(r_alpha,l_alpha)
 
+def filter_PPGdataFreq(PPG_data, fs=62, wind_len=60, lower_freq=0.5, upper_freq=4):
+    freq_step = fs / wind_len
+    alpha_band = (int(lower_freq / freq_step), int(upper_freq / freq_step))
+    
+    PPG2_data = np.array(PPG_data)[:, 1] 
+    PPG3_data = np.array(PPG_data)[:, 2] 
+    PPG2_fft = np.fft.rfft(PPG2_data)
+    PPG3_fft = np.fft.rfft(PPG3_data)
+
+    PPG2_alpha_freq = np.zeros(int(wind_len / 2) + 1, dtype="complex_")
+    PPG2_alpha_freq[alpha_band[0]: alpha_band[1] + 1] = PPG2_fft[alpha_band[0]: alpha_band[1] + 1]
+
+    PPG3_alpha_freq = np.zeros(int(wind_len / 2) + 1, dtype="complex_")
+    PPG3_alpha_freq[alpha_band[0]: alpha_band[1] + 1] = PPG3_fft[alpha_band[0]: alpha_band[1] + 1]
+
+    PPG2_alpha = np.fft.irfft(PPG2_alpha_freq)
+    PPG3_alpha = np.fft.irfft(PPG3_alpha_freq)
+
+    return(PPG2_alpha,PPG3_alpha)
 ########### calibration functions ##############
 
 def calibrate():
-    testData = []
+    rtestData = []
+    ltestData = []
     # global calibratingFlag
     calbStartTime = time.time()
     
-    lowerarr = []
-    upperarr = []
+    rlowerarr = []
+    rupperarr = []
+    llowerarr = []
+    lupperarr = []
     EEGns.calibratingFlag = 1
     while (time.time() - calbStartTime) < 5:
         if EEGns.calibratingFlag == 0:
@@ -242,9 +265,10 @@ def calibrate():
         eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
                 timeout=1, max_samples=int(255))
         rdata, ldata = filter_dataFreq(eegData,wind_len=255)
-        testData= np.append(testData, rdata)
+        rtestData= np.append(rtestData, rdata)
+        ltestData= np.append(ltestData, ldata)
         
-        print("counter = ", testcounttest)
+        # print("counter = ", testcounttest)
         # mqttClient.publish("/calibrate/counter",testcounttest)
         # setTH = 0
         
@@ -252,26 +276,54 @@ def calibrate():
         
     print("done calibrating")
     # mqttClient.publish("/calibrate","done calibrating")
-    upperPeaks, _ = signal.find_peaks(testData,width=25)
-    lowerPeaks, _ = signal.find_peaks(-testData,width=25)
-    for i in range(upperPeaks.size-1):
-        for j in range(lowerPeaks.size):
-            if upperPeaks[i]<lowerPeaks[j]<upperPeaks[i+1]:
-                if np.std(testData[upperPeaks[i]:lowerPeaks[j]]) < 200:
-                    lowerarr.append(testData[lowerPeaks[j]])
-                    upperarr.append(testData[upperPeaks[i]])
+    rupperPeaks, _ = signal.find_peaks(rtestData,width=25)
+    rlowerPeaks, _ = signal.find_peaks(-rtestData,width=25)
+    lupperPeaks, _ = signal.find_peaks(ltestData,width=25)
+    llowerPeaks, _ = signal.find_peaks(-ltestData,width=25)
+    for i in range(rupperPeaks.size-1):
+        for j in range(rlowerPeaks.size):
+            if rupperPeaks[i]<rlowerPeaks[j]<rupperPeaks[i+1]:
+                if np.std(rtestData[rupperPeaks[i]:rlowerPeaks[j]]) < 200:
+                    if -100< rtestData[rlowerPeaks[j]] < -160:
+                        rlowerarr.append(rtestData[rlowerPeaks[j]])
+                    if 10 < rtestData[rupperPeaks[i]] < 60:
+                        rupperarr.append(rtestData[rupperPeaks[i]])
                 break
-            elif upperPeaks[i+1]<lowerPeaks[j]:
+            elif rupperPeaks[i+1]<rlowerPeaks[j]:
+                break
+    for i in range(lupperPeaks.size-1):
+        for j in range(llowerPeaks.size):
+            if lupperPeaks[i]<llowerPeaks[j]<lupperPeaks[i+1]:
+                if np.std(ltestData[lupperPeaks[i]:llowerPeaks[j]]) < 200:
+                    if -100< ltestData[llowerPeaks[j]] < -160:
+                        llowerarr.append(ltestData[llowerPeaks[j]])
+                    if 10 < ltestData[lupperPeaks[i]] < 60:
+                        lupperarr.append(ltestData[lupperPeaks[i]])
+                break
+            elif lupperPeaks[i+1]<llowerPeaks[j]:
                 break
     try:
-        calbLowerTH = np.min(lowerarr)
-        calbUpperTH = np.mean(upperarr)
+        rtestLowerTH = np.min(rlowerarr)
+        rtestUpperTH = np.mean(rupperarr)
+        ltestLowerTH = np.min(llowerarr)
+        ltestUpperTH = np.mean(lupperarr)
+        calbLowerTH = -140
+        calbUpperTH = 40
+
+        if rtestLowerTH < ltestLowerTH:
+            calbLowerTH = ltestLowerTH
+        else:
+            calbLowerTH = rtestLowerTH
+        if rtestUpperTH > ltestUpperTH:
+            calbUpperTH = ltestUpperTH
+        else:
+            calbUpperTH = rtestUpperTH
         # mqttClient.publish("/calibrate/minTH",calbLowerTH)
         # mqttClient.publish("/calibrate/maxTH",calbUpperTH)
         print("min= ",calbLowerTH)
         print("max= ",calbUpperTH)
-        print(np.max(testData),np.min(testData))
-        print("avr= ",np.mean(testData))
+        print(np.max(rtestData),np.min(rtestData))
+        print("avr= ",np.mean(rtestData))
         
         
         # setTH = 1
@@ -402,85 +454,29 @@ def getBlinkData(inputChar):
     return addedBlink
 
 ########### construct sequence from blinks #####
-##################################################################################################
-## mans update##
-def readInputedSeq(EEGData, windowLength=10):
+
+def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = False, controllMethod = "tabSelect"):
     global inputSeqArr
-    global openTime
-    global closeTime
-    global firstClose
+    global openTime 
+    global closeTime 
+    global firstClose 
     global openCloseState
     global openCloseTime
     global closeOpenTime
-    global startCommand
+    global startCommand 
     global endCommand
     global SeqArray
+    global tabSelectSeqArr
+    global blinkNavSeqArray
     returnValue = 0
+    compSeqArr = tabSelectSeqArr
 
-    rightData, leftData = filter_dataFreq(EEGData, wind_len=windowLength)
-    if (min(rightData) < EEGns.lowerTH) and (min(leftData) < EEGns.lowerTH) and openCloseState == 0:  # close
-        print("eye closed")
-        openCloseState = 1
-        if firstClose == 1:
-            closeTime = time.time()
-            firstClose = 0
-        else:
-            closeTime = time.time()
-            openCloseTime = closeTime - openTime
-            # inputSeqArr.append(Blink(openCloseTime,BlinkType="eyeOpen"))
-            # print("added a Blink!")
-
-            inputSeqArr[-1].durationAfterBlink = [openCloseTime]
-            Sequence(inputSeqArr).printSeq()
-            # print("eyeOpen: ", openCloseTime)
-    elif (300 > max(rightData) > EEGns.upperTH) and (
-            300 > max(leftData) > EEGns.upperTH) and openCloseState == 1:  # open
-        print("eye opend")
-        openCloseState = 0
-        openTime = time.time()
-        closeOpenTime = openTime - closeTime
-        inputSeqArr.append(Blink(length=[closeOpenTime]))
-        Sequence(inputSeqArr).printSeq()
-
-    if openCloseTime > 1:
-        startCommand = 0
-        endCommand = 1
-        firstClose = 1
-        openCloseState = 0
-        openCloseTime = 0
-        closeOpenTime = 0
-        outputSeq = checkSeq(Sequence(inputSeqArr), SeqArray)
-        print("choosed Sequence is: ", outputSeq)
-        if outputSeq == "rightSequence":
-            returnValue = 1
-
-        elif outputSeq == "leftSequence":
-            returnValue = 2
-
-        elif outputSeq == "outSequence":
-            returnValue = 3
-        elif outputSeq == "selectSequence":
-            returnValue = 9
-        else:
-            returnValue = 0
-        inputSeqArr = []
-        outputSeq = ""
-    return returnValue
-##################################################################################################
-
-def readFullinputedSeq(EEGData,windowLength = 10,startSeq = False,endSeq = False):
-    global inputSeqArr
-    global openTime
-    global closeTime
-    global firstClose
-    global openCloseState
-    global openCloseTime
-    global closeOpenTime
-    global startCommand
-    global endCommand
-    global SeqArray
-    returnValue = 0
-
+    if controllMethod == "tabSelect":
+        compSeqArr = tabSelectSeqArr
+    elif controllMethod == "blinkNavigator":
+        compSeqArr = blinkNavSeqArray
+    elif controllMethod == "falseFallDetection":
+        compSeqArr = falseFallSeqArr
     rightData, leftData = filter_dataFreq(EEGData, wind_len=windowLength) 
     if (min(rightData) < EEGns.lowerTH ) and (min(leftData) < EEGns.lowerTH ) and openCloseState == 0: #close
         print("eye closed")
@@ -495,6 +491,7 @@ def readFullinputedSeq(EEGData,windowLength = 10,startSeq = False,endSeq = False
             # print("added a Blink!")
             
             inputSeqArr[-1].durationAfterBlink = [openCloseTime]
+            ns.eye_state.emit(inputSeqArr[-1].durationAfterBlinkType())
             Sequence(inputSeqArr).printSeq()
             # print("eyeOpen: ", openCloseTime)
     elif (300 > max(rightData) > EEGns.upperTH) and (300 > max(leftData) > EEGns.upperTH) and openCloseState == 1: #open
@@ -503,13 +500,14 @@ def readFullinputedSeq(EEGData,windowLength = 10,startSeq = False,endSeq = False
         openTime = time.time()
         closeOpenTime = openTime-closeTime
         inputSeqArr.append(Blink(length=[closeOpenTime]))
+        ns.eye_state.emit(inputSeqArr[-1].blinkType())
         Sequence(inputSeqArr).printSeq()
     # return returnValue
    
     if startSeq == True:
-        if int(np.array(inputSeqArr).shape[0]) >= StartSeqArr.SeqLength and startCommand == 0:
+        if int(np.array(inputSeqArr).shape[0]) >= StartSeq.SeqLength and startCommand == 0:
             
-            if compareSeq(Sequence(inputSeqArr[-StartSeqArr.SeqLength:]),StartSeqArr):
+            if compareSeq(Sequence(inputSeqArr[-StartSeq.SeqLength:]),StartSeq):
                 startCommand = 1
                 firstClose = 1
                 endCommand = 0
@@ -517,8 +515,8 @@ def readFullinputedSeq(EEGData,windowLength = 10,startSeq = False,endSeq = False
                 
                 print("started the command")
     if endSeq == True:
-        if int(np.array(inputSeqArr).shape[0]) >= EndSeqArr.SeqLength and endCommand == 0 and startCommand == 1:
-            if compareSeq(Sequence(inputSeqArr[-EndSeqArr.SeqLength:]),EndSeqArr):
+        if int(np.array(inputSeqArr).shape[0]) >= EndSeq.SeqLength and endCommand == 0 and startCommand == 1:
+            if compareSeq(Sequence(inputSeqArr[-EndSeq.SeqLength:]),EndSeq):
                 print("ended the command")
                 startCommand = 0
                 endCommand = 1
@@ -526,13 +524,13 @@ def readFullinputedSeq(EEGData,windowLength = 10,startSeq = False,endSeq = False
                 openCloseState = 0
                 openCloseTime = 0
                 closeOpenTime = 0
-                for i in range(EndSeqArr.SeqLength):
+                for i in range(EndSeq.SeqLength):
                     inputSeqArr.pop()
                 Sequence(inputSeqArr).printSeq()
-                returnCommand = checkSeq(Sequence(inputSeqArr),SeqArray)
+                returnCommand = checkSeq(Sequence(inputSeqArr),compSeqArr)
                 print("choosed Sequence is: ",returnCommand)
                 inputSeqArr = []
-        return returnCommand
+        return applyCommand(returnCommand,controllMethod)
         
     else:
         if openCloseTime > 1:
@@ -542,27 +540,61 @@ def readFullinputedSeq(EEGData,windowLength = 10,startSeq = False,endSeq = False
             openCloseState = 0
             openCloseTime = 0
             closeOpenTime = 0
-            outputSeq = checkSeq(Sequence(inputSeqArr),SeqArray)
+            outputSeq = checkSeq(Sequence(inputSeqArr),compSeqArr)
             print("choosed Sequence is: ",outputSeq)
-            if outputSeq == "rightSequence":
-                returnValue = 1
-                    
-            elif outputSeq == "leftSequence":
-                returnValue = 2
-                    
-            elif outputSeq == "outSequence":
-                returnValue = 3
-            elif  outputSeq == "selectSequence":
-                returnValue = 9
-            else:
-                returnValue = 0
+            returnValue = applyCommand(outputSeq,controllMethod)
             inputSeqArr = []
-            outputSeq = ""
+            # outputSeq = ""
         return returnValue
          
             
-def applyCommand(command,nowControlling):
-    pass
+def applyCommand(command,controlMethod):
+    if controlMethod == "tabSelect":
+        if command == "tabOne":
+            return 1
+        elif command == "tabTwo":
+            return 2
+        elif command == "tabThree":
+            return 3
+        elif command == "tabFour":
+            return 4
+        elif command == "tabFive":
+            return 5
+        elif command == "tabSix":
+            return 6
+        elif command == "tabSeven":
+            return 7
+        elif command == "tabEight":
+            return 8
+        elif command == "tabNine":
+            return 9
+        elif command == "tabTen":
+            return 10
+        else:
+            return 0
+    elif controlMethod == "blinkNavigator":
+        if command == "rightSequence":
+            pg.typewrite(["right"])
+                    
+        elif command == "leftSequence":
+            pg.typewrite(["left"])
+                
+        elif command == "outSequence":
+            # pg.typewrite(["right"])
+            pass
+        elif  command == "selectSequence":
+            pg.typewrite(["space"])
+        else:
+            return 0
+        return 0
+    elif controlMethod == "falseFallDetection":
+        if command == "falseFall":
+            return 1
+        else:
+            return 0
+    
+        
+    
 
 ########### check inputed sequence functions ###
 
@@ -628,29 +660,40 @@ def checkSeq(sequence:Sequence , selectedSeqArr):
 
 ########### MORSE code functions ############### need modification
 
-def getMorseData():
-    eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
-        timeout=1, max_samples=int(10))
-    morseBlinkLength = getBlinklength(eegData, windowLength=10)
-    return morseBlinkLength
-
-def readMorseCode():
-    
+def readMorseCode(ns):
     global startCommand
     global BlinkMorseCode
     morseBlinkLength = -1
     startCommand = 1
+    paragraph = ""
     while True:
-        # if end signal is sent break from this loop
-        morseBlinkLength = getMorseData()
-        # rdata, ldata = filter_dataFreq(eegData)
 
-        if morseBlinkLength > 0.9:
+        if ns.intr_val:
+            ns.intr_val = 0
+            break
+        # if end signal is sent break from this loop
+        eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
+                timeout=1, max_samples=int(10))
+        # rdata, ldata = filter_dataFreq(eegData)
+        morseBlinkLength = getBlinklength(eegData,windowLength=10)
+        if morseBlinkLength > 0.6:
             print("Very Long Blink")
             startCommand = 0
             morseBlinkLength = -1
+            letter = decodeMorse(BlinkMorseCode)
             print(BlinkMorseCode)
-            print(decodeMorse(BlinkMorseCode))
+            print(letter)
+            if letter == 'save':
+                ns.str_sig.emit("")
+                ns.m_letter.emit("")
+                break
+            elif letter == 'clr':
+                paragraph = ""
+            elif letter != None:
+                paragraph += letter
+            
+            ns.str_sig.emit(paragraph)
+            ns.m_letter.emit(BlinkMorseCode)
             BlinkMorseCode = ""
             startCommand = 1
         else:
@@ -659,14 +702,12 @@ def readMorseCode():
                     BlinkMorseCode = BlinkMorseCode + '.'
                     morseBlinkLength = -1
                     print("short Blink")
-                elif 0.6 > morseBlinkLength > 0.2:
+                    ns.m_letter.emit(BlinkMorseCode)
+                elif 0.6 > morseBlinkLength >= 0.2:
                     BlinkMorseCode = BlinkMorseCode + '-'
                     morseBlinkLength = -1
                     print("long Blink")
-                elif 0.9 > morseBlinkLength > 0.6:
-                    BlinkMorseCode = BlinkMorseCode + '*'
-                    morseBlinkLength = -1
-                    print("modified long Blink")
+                    ns.m_letter.emit(BlinkMorseCode)
 
     
 
@@ -676,3 +717,64 @@ def decodeMorse(morseCode):
         return MORSE_CODE_DICT[morseCode]
     except:
         return None
+
+############ Gyro Acc functions ###################################
+def getGyroAccData():
+    acc_data, accTimestamp = MUSEns.ACCinlet.pull_chunk(
+            timeout=1, max_samples=int(10))
+        
+    gyro_data, gyroTimestamp = MUSEns.GYROinlet.pull_chunk(
+        timeout=1, max_samples=int(10))
+    
+    accelerationX = np.mean(np.array(acc_data)[:,0]) * np.pi
+    accelerationY = np.mean(np.array(acc_data)[:,1]) * np.pi
+    accelerationZ = np.mean(np.array(acc_data)[:,2]) * np.pi
+    gyroscpeX = np.mean(np.array(gyro_data)[:,0]) * np.pi
+    gyroscpeY = np.mean(np.array(gyro_data)[:,1]) * np.pi
+    gyroscpeZ = np.mean(np.array(gyro_data)[:,2]) * np.pi
+    return accelerationX,accelerationY,accelerationZ,gyroscpeX,gyroscpeY,gyroscpeZ
+
+def handelFalls(accX,accY,accZ,gyroX,gyroY,gyroZ):
+    #if fall is detected 
+    #give user five seconds to do the false fall sequence to terminate it
+    falseFallFlage = 0
+    calbStartTime = time.time()
+    while (time.time() - calbStartTime) < 10:
+        eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+                timeout=0.5, max_samples=int(10))
+
+        # print(eeg_data)
+        falseFallFlage = readFullinputedSeq(eeg_data,controllMethod="falseFallDetection")
+        if falseFallFlage == 1:
+            print("false fall")
+            break
+    if falseFallFlage == 0:
+        print("fall detected!!!")   
+        # send message to the one who in charge of the user
+
+
+def heartRate():
+    # currentTime = time.time()
+    # PPGBuffer = []
+    # PPG3Buffer = []
+    # PPG2 = []
+    # PPG3 = []
+    # while (time.time() - currentTime) < 5:
+    ppg_data, ppgTimestamp = MUSEns.PPGinlet.pull_chunk(
+            timeout=5, max_samples=int(300)) 
+
+    print(np.array(ppg_data).shape)
+    PPG2, PPG3 = filter_PPGdataFreq(ppg_data,wind_len=300)
+    PPG2_peaks, _ = signal.find_peaks(PPG2,width=10)
+    PPG3_peaks, _ = signal.find_peaks(PPG3,width=10)
+    print(np.array(PPG2_peaks).shape[0],np.array(PPG3_peaks).shape[0])
+
+    heartRateValue = int(np.max([np.array(PPG2_peaks).shape[0] , np.array(PPG3_peaks).shape[0]])) * 12
+    return heartRateValue
+
+# if __name__ == '__main__':
+#     startMUSEconnection()
+#     HR = 0
+#     while True:
+#         HR = heartRate()
+#         print(HR)

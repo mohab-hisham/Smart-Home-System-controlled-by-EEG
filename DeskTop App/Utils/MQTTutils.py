@@ -1,8 +1,8 @@
 import paho.mqtt.client as mqtt
 import threading
 from types import SimpleNamespace
-# from Utils.MUSEutils import MUSEns
-# from Utils.EEGutils import EEGns
+# from MUSEutils import MUSEns
+# from EEGutils import EEGns
 MQTTns = SimpleNamespace()
 
 serverAddress = "raspberrypi.local"

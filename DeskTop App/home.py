@@ -239,6 +239,8 @@ class Smarthome(qtw.QMainWindow):
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
     startMUSEconnection()
+    CheckSignalQuality()
+    # calibrate()
     home = Smarthome()
     home.cnt_thr.start()
     sys.exit(app.exec_())
