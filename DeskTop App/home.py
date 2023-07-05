@@ -196,11 +196,11 @@ class Smarthome(qtw.QMainWindow):
                    4: self.kitchenButton, 5: self.lobbyButton, 6: self.bathButton}
 
         # btn_dic[code].setStyleSheet(" border: 2px solid gray;")
-        if self.interrupt[0]:
-            self.interrupt[0] = 0
-            dic[self.interrupt[1]].start()
-        else:
-            dic[code].start()
+        # if self.interrupt[0]:
+        #     self.interrupt[0] = 0
+        #     dic[self.interrupt[1]].start()
+        # else:
+        dic[code].start()
 
     def returnHome(self):
         self.show()
