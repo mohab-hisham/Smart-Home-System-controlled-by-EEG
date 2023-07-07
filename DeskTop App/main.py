@@ -35,79 +35,12 @@ class CntWorker(QObject):
         self.intr_val = [0,0]
         self.mouse_int.connect(self.setIntr)
 
-    def readInputedSeq(self, windowLength=10):
-        # global home_seq
-        # inputSeqArr = []
-        # openTime = 0
-        # closeTime = 0
-        # firstClose = 1
-        # openCloseState = 0
-        # openCloseTime = 0
-        # closeOpenTime = 0
-
-        while True:
-
-            if self.intr_val[0]:
-                return -1
-
-            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-                timeout=0.5, max_samples=int(10))
-            
-            outSeqValue = EEGutils.readFullinputedSeq(ns = self,EEGData=eeg_data)
-
-            if outSeqValue != 0:
-                return outSeqValue
-            # rightData, leftData = EEGutils.filter_dataFreq(eeg_data, wind_len=windowLength)
-
-            # if (min(rightData) < EEGns.lowerTH) and (min(leftData) < EEGns.lowerTH) and openCloseState == 0:  # close
-
-            #     openCloseState = 1
-            #     if firstClose == 1:
-            #         closeTime = time.time()
-            #         firstClose = 0
-            #     else:
-            #         closeTime = time.time()
-            #         openCloseTime = closeTime - openTime
-            #         if openCloseTime < 0.3:
-            #             self.eye_state.emit("Short Relaxation Time")
-            #         elif openCloseTime < 0.62:
-            #             self.eye_state.emit("Medium Relaxation Time")
-            #         else:
-            #             self.eye_state.emit("Long Relaxation Time")
-
-            #         inputSeqArr[-1].durationAfterBlink = [openCloseTime]
-            #         if len(inputSeqArr) == 2:
-            #             break
-
-            # elif (300 > max(rightData) > EEGns.upperTH) and (
-            #         300 > max(leftData) > EEGns.upperTH) and openCloseState == 1:  # open
-            #     openCloseState = 0
-            #     openTime = time.time()
-            #     closeOpenTime = openTime - closeTime
-            #     if closeOpenTime < 0.3:
-            #         self.eye_state.emit("Short Blink Time")
-            #     elif closeOpenTime < 0.62:
-            #         self.eye_state.emit("Medium Blink Time")
-            #     else:
-            #         self.eye_state.emit("Long Blink Time")
-            #     inputSeqArr.append(EEGutils.Blink(length=[closeOpenTime]))
-
-        # try:
-            
-        #     seq = str(inputSeqArr[0].classify())+ str(inputSeqArr[1].classify())
-        #     print(seq)
-        #     return home_seq[seq]
-        # except:
-        #     self.eye_state.emit("Error: Unknown sequence is entered, Try again!!!! ")
-        #     return 0
-
-
 
 
     def choose(self):
         # time.sleep(5)
         print("started")
-        code = self.readInputedSeq()
+        code = EEGutils.readInputedSeq(self,homeOrRoom=True)
 
         # while code == 0:
         #     code = self.readInputedSeq()
@@ -140,13 +73,31 @@ class EEG_Worker(QObject):
 
     def __init__(self):
         super().__init__()
-        self.intr_val = 0
+        self.intr_val = [0,0]
         self.intr.connect(lambda: self.setIntr(1))
+
+    # def readInputedSeq(self, windowLength=10,homeOrRoom = False):
+    #     while True:
+    #         if self.intr_val:
+    #             self.intr_val=0
+    #             return -1
+
+    #         eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+    #             timeout=0.5, max_samples=int(10))
+            
+    #         outSeqValue = EEGutils.readFullinputedSeq(ns = self,EEGData=eeg_data,homeOrRoom=homeOrRoom)
+
+    #         if outSeqValue != 0:
+    #             return outSeqValue
 
     def navigate(self):
         # time.sleep(5)
         self.eeg_sig.emit()
-        time.sleep(5)
+        time.sleep(2)
+        code = EEGutils.readInputedSeq(self,homeOrRoom=False)
+
+        print(code)
+        
         self.cnt_return.emit()
         self.fin.emit()
 

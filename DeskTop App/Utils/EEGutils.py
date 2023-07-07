@@ -113,7 +113,7 @@ testData = np.array([])
 setTH = 0
 EEGns.calibratingFlag = 1
 EEGns.lowerTH = -140
-EEGns.upperTH = 20
+EEGns.upperTH = 40
 serverIsConnected = False
 
 EEGns.signalQuality = False
@@ -142,6 +142,7 @@ tabEightSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(len
 tabNineSeq = Sequence([Blink(length=[0.2,1],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="tabNine") # -..
 tabTenSeq = Sequence([Blink(length=[0.2,1],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,0])],whatToControll="tabTen") # -.-
 tabSelectSeqArr = [tabOneSeq,tabTwoSeq,tabThreeSeq,tabFourSeq,tabFiveSeq,tabSixSeq,tabSevenSeq,tabEightSeq,tabNineSeq,tabTenSeq]
+roomSelectSeqArr = [tabOneSeq,tabTwoSeq,tabThreeSeq,tabFourSeq,tabFiveSeq]
 falseFallSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,0])],whatToControll="falseFall") # .-
 falseFallSeqArr = [falseFallSeq]
 SeqArray = [rightSeq,leftSeq,selectSeq,outSeq]
@@ -455,8 +456,22 @@ def getBlinkData(inputChar):
     return addedBlink
 
 ########### construct sequence from blinks #####
+def readInputedSeq(ns, windowLength=10,homeOrRoom = True):
+    while True:
+        if ns.intr_val[0]:
+            # ns.intr_val[0]=0
+            return -1
 
-def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = False, controllMethod = "tabSelect"):
+        eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+            timeout=0.5, max_samples=int(windowLength))
+        
+        outSeqValue = readFullinputedSeq(ns = ns,EEGData=eeg_data,windowLength=windowLength,homeOrRoom=homeOrRoom)
+
+        if outSeqValue != 0:
+            return outSeqValue
+
+
+def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = False, controllMethod = "tabSelect",homeOrRoom = True):
     global inputSeqArr
     global openTime 
     global closeTime 
@@ -469,87 +484,100 @@ def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = Fa
     global SeqArray
     global tabSelectSeqArr
     global blinkNavSeqArray
+    global roomSelectSeqArr
     returnValue = 0
     compSeqArr = tabSelectSeqArr
+    mesageController = None
 
     if controllMethod == "tabSelect":
-        compSeqArr = tabSelectSeqArr
+        if homeOrRoom:
+            compSeqArr = tabSelectSeqArr
+            mesageController = ns.eye_state
+        else:
+            compSeqArr = roomSelectSeqArr
+            # mesageController = ns.
+            # print("in room")
     elif controllMethod == "blinkNavigator":
         compSeqArr = blinkNavSeqArray
     elif controllMethod == "falseFallDetection":
         compSeqArr = falseFallSeqArr
-    rightData, leftData = filter_dataFreq(EEGData, wind_len=windowLength) 
-    if (min(rightData) < EEGns.lowerTH ) and (min(leftData) < EEGns.lowerTH ) and openCloseState == 0: #close
-        print("eye closed")
-        openCloseState = 1
-        if firstClose == 1:
-            closeTime = time.time()
-            firstClose = 0
-        else:
-            closeTime = time.time()
-            openCloseTime = closeTime-openTime
-            # inputSeqArr.append(Blink(openCloseTime,BlinkType="eyeOpen"))
-            # print("added a Blink!")
-            
-            inputSeqArr[-1].durationAfterBlink = [openCloseTime]
-            ns.eye_state.emit(inputSeqArr[-1].durationAfterBlinkType())
-            Sequence(inputSeqArr).printSeq()
-            # print("eyeOpen: ", openCloseTime)
-    elif (300 > max(rightData) > EEGns.upperTH) and (300 > max(leftData) > EEGns.upperTH) and openCloseState == 1: #open
-        print("eye opend")
-        openCloseState = 0
-        openTime = time.time()
-        closeOpenTime = openTime-closeTime
-        inputSeqArr.append(Blink(length=[closeOpenTime]))
-        ns.eye_state.emit(inputSeqArr[-1].blinkType())
-        Sequence(inputSeqArr).printSeq()
-    # return returnValue
-   
-    if startSeq == True:
-        if int(np.array(inputSeqArr).shape[0]) >= StartSeq.SeqLength and startCommand == 0:
-            
-            if compareSeq(Sequence(inputSeqArr[-StartSeq.SeqLength:]),StartSeq):
-                startCommand = 1
-                firstClose = 1
-                endCommand = 0
-                inputSeqArr = []
+    try:
+        rightData, leftData = filter_dataFreq(EEGData, wind_len=windowLength) 
+        if (min(rightData) < EEGns.lowerTH ) and (min(leftData) < EEGns.lowerTH ) and openCloseState == 0: #close
+            print("eye closed")
+            openCloseState = 1
+            if firstClose == 1:
+                closeTime = time.time()
+                firstClose = 0
+            else:
+                closeTime = time.time()
+                openCloseTime = closeTime-openTime
+                # inputSeqArr.append(Blink(openCloseTime,BlinkType="eyeOpen"))
+                # print("added a Blink!")
                 
-                print("started the command")
-    if endSeq == True:
-        if int(np.array(inputSeqArr).shape[0]) >= EndSeq.SeqLength and endCommand == 0 and startCommand == 1:
-            if compareSeq(Sequence(inputSeqArr[-EndSeq.SeqLength:]),EndSeq):
-                print("ended the command")
+                inputSeqArr[-1].durationAfterBlink = [openCloseTime]
+                if mesageController != None:
+                    mesageController.emit(inputSeqArr[-1].durationAfterBlinkType())
+                Sequence(inputSeqArr).printSeq()
+                # print("eyeOpen: ", openCloseTime)
+        elif (300 > max(rightData) > EEGns.upperTH) and (300 > max(leftData) > EEGns.upperTH) and openCloseState == 1: #open
+            print("eye opend")
+            openCloseState = 0
+            openTime = time.time()
+            closeOpenTime = openTime-closeTime
+            inputSeqArr.append(Blink(length=[closeOpenTime]))
+            if mesageController != None:
+                mesageController.emit(inputSeqArr[-1].blinkType())
+            Sequence(inputSeqArr).printSeq()
+        # return returnValue
+    
+        if startSeq == True:
+            if int(np.array(inputSeqArr).shape[0]) >= StartSeq.SeqLength and startCommand == 0:
+                
+                if compareSeq(Sequence(inputSeqArr[-StartSeq.SeqLength:]),StartSeq):
+                    startCommand = 1
+                    firstClose = 1
+                    endCommand = 0
+                    inputSeqArr = []
+                    
+                    print("started the command")
+        if endSeq == True:
+            if int(np.array(inputSeqArr).shape[0]) >= EndSeq.SeqLength and endCommand == 0 and startCommand == 1:
+                if compareSeq(Sequence(inputSeqArr[-EndSeq.SeqLength:]),EndSeq):
+                    print("ended the command")
+                    startCommand = 0
+                    endCommand = 1
+                    firstClose = 1
+                    openCloseState = 0
+                    openCloseTime = 0
+                    closeOpenTime = 0
+                    for i in range(EndSeq.SeqLength):
+                        inputSeqArr.pop()
+                    Sequence(inputSeqArr).printSeq()
+                    returnCommand = checkSeq(Sequence(inputSeqArr),compSeqArr)
+                    print("choosed Sequence is: ",returnCommand)
+                    inputSeqArr = []
+            return applyCommand(mesageController,returnCommand,controllMethod)
+            
+        else:
+            if openCloseTime > 1:
                 startCommand = 0
                 endCommand = 1
                 firstClose = 1
                 openCloseState = 0
                 openCloseTime = 0
                 closeOpenTime = 0
-                for i in range(EndSeq.SeqLength):
-                    inputSeqArr.pop()
-                Sequence(inputSeqArr).printSeq()
-                returnCommand = checkSeq(Sequence(inputSeqArr),compSeqArr)
-                print("choosed Sequence is: ",returnCommand)
+                outputSeq = checkSeq(Sequence(inputSeqArr),compSeqArr)
+                print("choosed Sequence is: ",outputSeq)
+                returnValue = applyCommand(mesageController,outputSeq,controllMethod)
                 inputSeqArr = []
-        return applyCommand(returnCommand,controllMethod)
-        
-    else:
-        if openCloseTime > 1:
-            startCommand = 0
-            endCommand = 1
-            firstClose = 1
-            openCloseState = 0
-            openCloseTime = 0
-            closeOpenTime = 0
-            outputSeq = checkSeq(Sequence(inputSeqArr),compSeqArr)
-            print("choosed Sequence is: ",outputSeq)
-            returnValue = applyCommand(outputSeq,controllMethod)
-            inputSeqArr = []
-            # outputSeq = ""
-        return returnValue
+                # outputSeq = ""
+            return returnValue
+    except:
+        return 0
          
             
-def applyCommand(command,controlMethod):
+def applyCommand(mesageController,command,controlMethod):
     if controlMethod == "tabSelect":
         if command == "tabOne":
             return 1
@@ -572,6 +600,8 @@ def applyCommand(command,controlMethod):
         elif command == "tabTen":
             return 10
         else:
+            if mesageController != None:
+                mesageController.emit("Error: Unknown sequence is entered, Try again!!!! ")
             return 0
     elif controlMethod == "blinkNavigator":
         if command == "rightSequence":
@@ -586,12 +616,16 @@ def applyCommand(command,controlMethod):
         elif  command == "selectSequence":
             pg.typewrite(["space"])
         else:
+            if mesageController != None:
+                mesageController.emit("Error: Unknown sequence is entered, Try again!!!! ")
             return 0
         return 0
     elif controlMethod == "falseFallDetection":
         if command == "falseFall":
             return 1
         else:
+            if mesageController != None:
+                mesageController.emit("Real Fall Detected, Calling Help!!! ")
             return 0
     
         
