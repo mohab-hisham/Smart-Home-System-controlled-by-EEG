@@ -12,6 +12,7 @@ from scipy import signal
 from pandas import *
 import pyautogui as pg
 from Utils.MUSEutils import MUSEns,startMUSEconnection
+import tensorflow as tf
 # from MQTTutils import MQTTns
 
 
@@ -456,16 +457,25 @@ def getBlinkData(inputChar):
     return addedBlink
 
 ########### construct sequence from blinks #####
-def readInputedSeq(ns, windowLength=10,homeOrRoom = True):
+def readInputedSeq(ns, windowLength=10,homeOrRoom = True,eyeNav = 0):
+    outSeqValue = 0
+    startTime = time.time()
     while True:
         if ns.intr_val[0]:
             # ns.intr_val[0]=0
             return -1
-
-        eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-            timeout=0.5, max_samples=int(windowLength))
-        
-        outSeqValue = readFullinputedSeq(ns = ns,EEGData=eeg_data,windowLength=windowLength,homeOrRoom=homeOrRoom)
+        if eyeNav == 2:
+            AccX, AccY, AccZ,_,_,_ = getGyroAccData(windowLength)
+        else:
+            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+                timeout=3, max_samples=int(windowLength))
+        if eyeNav == 1:
+            getL_R_eyeMovement(ns=ns,eegData=eeg_data)
+        elif eyeNav == 2:
+            # AccX, AccY, AccZ,_,_,_ = getGyroAccData()
+            outSeqValue = gyroController(ns = ns,accX = AccX, accY = AccY, accZ = AccZ,currentTime=startTime)
+        else:
+            outSeqValue = readFullinputedSeq(ns = ns,EEGData=eeg_data,windowLength=windowLength,homeOrRoom=homeOrRoom)
 
         if outSeqValue != 0:
             return outSeqValue
@@ -693,6 +703,53 @@ def checkSeq(sequence:Sequence , selectedSeqArr):
     if maching == False:
         return 'no match!'
 
+############### L R eye movement ##################
+def TFModelInit():
+    path = "E:/Graduation_Project/"
+    lite_file = "model.tflite"
+    EEGns.fulleegData = []
+    ####################### INITIALIZE TF Lite #########################
+    # Load TFLite model and allocate tensors.
+    EEGns.interpreter = tf.lite.Interpreter(model_path=path + lite_file)
+
+    # Get input and output tensors.
+    EEGns.input_details = EEGns.interpreter.get_input_details()
+    EEGns.output_details = EEGns.interpreter.get_output_details()
+
+    # Allocate tensors
+    EEGns.interpreter.allocate_tensors()
+def getL_R_eyeMovement(ns,eegData):
+    mesageController = ns.eye_state
+    EEGns.fulleegData = np.vstack([EEGns.fulleegData, np.array(eegData)[:,1:-2]]) if len(EEGns.fulleegData) else np.array(eegData)[:,1:-2]
+   
+    print(EEGns.fulleegData.shape)
+    
+
+    EEGns.fulleegData = np.float32(EEGns.fulleegData)
+    
+    EEGns.interpreter.set_tensor(EEGns.input_details[0]['index'], [EEGns.fulleegData])
+
+    # run the inference
+    EEGns.interpreter.invoke()
+
+    # output_details[0]['index'] = the index which provides the input
+    output_data = EEGns.interpreter.get_tensor(EEGns.output_details[0]['index'])
+
+    print(output_data)
+
+    if int(np.array(output_data[0]).argmax()) == 0:
+        mesageController.emit("left")
+        pg.typewrite(["left"])
+        print("look Left")
+    elif int(np.array(output_data[0]).argmax()) == 1:
+        print("look center")
+    elif int(np.array(output_data[0]).argmax()) == 2:
+        mesageController.emit("right")
+        pg.typewrite(["right"])
+        print("look right")
+
+    EEGns.fulleegData = []
+
 ########### MORSE code functions ############### need modification
 
 def readMorseCode(ns):
@@ -756,21 +813,53 @@ def decodeMorse(morseCode):
         return None
 
 ############ Gyro Acc functions ###################################
-def getGyroAccData():
+def getGyroAccData(windowLenght = 10):
     acc_data, accTimestamp = MUSEns.ACCinlet.pull_chunk(
-            timeout=1, max_samples=int(10))
+            timeout=1, max_samples=int(windowLenght))
         
     gyro_data, gyroTimestamp = MUSEns.GYROinlet.pull_chunk(
-        timeout=1, max_samples=int(10))
+        timeout=1, max_samples=int(windowLenght))
     
-    accelerationX = np.mean(np.array(acc_data)[:,0]) * np.pi
-    accelerationY = np.mean(np.array(acc_data)[:,1]) * np.pi
-    accelerationZ = np.mean(np.array(acc_data)[:,2]) * np.pi
+    accelerationX = np.mean(np.array(acc_data)[:,0]) #* np.pi
+    accelerationY = np.mean(np.array(acc_data)[:,1]) #* np.pi
+    accelerationZ = np.mean(np.array(acc_data)[:,2]) #* np.pi
     gyroscpeX = np.mean(np.array(gyro_data)[:,0]) * np.pi
     gyroscpeY = np.mean(np.array(gyro_data)[:,1]) * np.pi
     gyroscpeZ = np.mean(np.array(gyro_data)[:,2]) * np.pi
     return accelerationX,accelerationY,accelerationZ,gyroscpeX,gyroscpeY,gyroscpeZ
 
+def gyroController(ns,accX,accY,accZ,currentTime):
+    mesageController = ns.eye_state
+    returnVal = 0
+    if accY > 0.35 and accX < 0.05:
+        mesageController.emit("tab 3")
+        returnVal = 3
+        print("tab 3") # x: -0.001 , y: 0.4
+    elif accY < -0.2 and accX < 0:
+        mesageController.emit("tab 1")
+        returnVal = 1
+        print("tab 1") # x: -0.03 , y: -0.25
+    elif accY > 0.2 and accX > 0.1:
+        mesageController.emit("tab 6")
+        returnVal = 6
+        print("tab 6") # x: 0.22 , y: 0.38
+    elif accY < -0.2 and accX > 0.1:
+        mesageController.emit("tab 4")
+        returnVal = 4
+        print("tab 4") # x: 0.13 , y: -0.25
+    elif -0.2 < accY < 0.2 and accX < 0:
+        mesageController.emit("tab 2")
+        returnVal = 2
+        print("tab 2") # x: -0.001 , y: 0.10
+    else:
+        mesageController.emit("tab 5")
+        returnVal = 5
+        print("tab 5") # x: 0.15 , y: 0.15
+    print("")
+    if time.time()-currentTime > 5:
+        return returnVal
+    return 0
+################### fall detection Handler ############################
 def handelFalls(accX,accY,accZ,gyroX,gyroY,gyroZ):
     #if fall is detected 
     #give user five seconds to do the false fall sequence to terminate it
@@ -789,7 +878,7 @@ def handelFalls(accX,accY,accZ,gyroX,gyroY,gyroZ):
         print("fall detected!!!")   
         # send message to the one who in charge of the user
 
-
+################### heart rate ############################
 def heartRate():
     # currentTime = time.time()
     # PPGBuffer = []

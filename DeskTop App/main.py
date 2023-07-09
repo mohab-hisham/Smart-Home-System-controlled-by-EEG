@@ -40,7 +40,7 @@ class CntWorker(QObject):
     def choose(self):
         # time.sleep(5)
         print("started")
-        code = EEGutils.readInputedSeq(self,homeOrRoom=True)
+        code = EEGutils.readInputedSeq(self,windowLength=10,homeOrRoom=True,eyeNav=2)
 
         # while code == 0:
         #     code = self.readInputedSeq()

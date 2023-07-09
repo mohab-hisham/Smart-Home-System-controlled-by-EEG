@@ -235,8 +235,8 @@ if __name__ == "__main__":
 
         """ 3.1 ACQUIRE DATA """
         # Obtain EEG data from the LSL stream
-        eeg_data, timestamp = inlet.pull_chunk(
-            timeout=1, max_samples=int(SHIFT_LENGTH*fs))
+        # eeg_data, timestamp = inlet.pull_chunk(
+        #     timeout=1, max_samples=int(SHIFT_LENGTH*fs))
         
 
         acc_data, accTimestamp = accInlet.pull_chunk(
@@ -249,9 +249,9 @@ if __name__ == "__main__":
         ch_data = np.array(acc_data)[:, 2]
         # print(ch_data)
         # for i in range(52):
-        accelerationX = np.mean(np.array(acc_data)[:,0]) * np.pi
-        accelerationY = np.mean(np.array(acc_data)[:,1]) * np.pi
-        accelerationZ = np.mean(np.array(acc_data)[:,2]) * np.pi
+        accelerationX = np.mean(np.array(acc_data)[:,0]) #* np.pi
+        accelerationY = np.mean(np.array(acc_data)[:,1]) #* np.pi
+        accelerationZ = np.mean(np.array(acc_data)[:,2]) #* np.pi
         gyroscpeX = np.mean(np.array(gyro_data)[:,0]) * np.pi
         gyroscpeY = np.mean(np.array(gyro_data)[:,1]) * np.pi
         gyroscpeZ = np.mean(np.array(gyro_data)[:,2]) * np.pi
@@ -260,9 +260,9 @@ if __name__ == "__main__":
         # yaw = 0
         if gyroscpeZ>10 or gyroscpeZ<-10:
             yaw = yaw + gyroscpeZ/52
-        print("pitch: ", pitch)
-        print("roll: ", roll)
-        print("yaw: ", yaw)
+        # print("pitch: ", pitch)
+        # print("roll: ", roll)
+        # print("yaw: ", yaw)
         print("")
         
 
@@ -270,10 +270,37 @@ if __name__ == "__main__":
         # print("gyrox: ", gyroscpeX) #-750
         # print("gyroy: ", gyroscpeY)#-450
         # print("gyroz: ", gyroscpeZ)#80
-        # print("accx: ", accelerationX) #-750
-        # print("accy: ", accelerationY)#-450
-        # print("accz: ", accelerationZ)#80
-        # print("")
+        print("accx: ", accelerationX) #-750
+        print("accy: ", accelerationY)#-450
+        print("accz: ", accelerationZ)#80
+        print(" ")
+        # if accelerationX < -0.1:
+        #     if accelerationY < -0.2:
+        #         print("tab 1")
+        #     elif accelerationY > 0.2:
+        #         print("tab 3")
+        #     else:
+        #         print("tab 2")
+        # elif accelerationX > 0.3:
+        #     if accelerationY < -0.2:
+        #         print("tab 4")
+        #     elif accelerationY > 0.2:
+        #         print("tab 6")
+        #     else:
+        #         print("tab 5")
+        if accelerationY > 0.35 and accelerationX < 0.05:
+            print("tab 3") # x: -0.001 , y: 0.4
+        elif accelerationY < -0.2 and accelerationX < 0:
+            print("tab 1") # x: -0.03 , y: -0.25
+        elif accelerationY > 0.2 and accelerationX > 0.1:
+            print("tab 6") # x: 0.22 , y: 0.38
+        elif accelerationY < -0.2 and accelerationX > 0.1:
+            print("tab 4") # x: 0.13 , y: -0.25
+        elif -0.2 < accelerationY < 0.2 and accelerationX < 0:
+            print("tab 2") # x: -0.001 , y: 0.10
+        else:
+            print("tab 5") # x: 0.15 , y: 0.15
+        print("")
         sensetevity = 2
         # xpos = (25-yaw)*(1920/50)
         # ypos = 540
@@ -285,7 +312,7 @@ if __name__ == "__main__":
             xpos = 1910
         if ypos > 1080:
             ypos = 1070
-        pg.moveTo(xpos, ypos)
+        # pg.moveTo(xpos, ypos)
         # endtime = time.time()
         # if (endtime - starttime)<10 :
         #     xposarr.append(gyroscpeX)
