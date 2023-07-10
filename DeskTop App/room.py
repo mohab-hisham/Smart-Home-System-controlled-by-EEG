@@ -14,6 +14,7 @@ class Room(qtw.QWidget):
 
         common_style = "background-color: #fffff0; border-radius: 90px; border-color: white; background-repeat: no-repeat; "
         self.message_label.setStyleSheet(common_style)
+        self.info_label.setStyleSheet(common_style)
 
         self.homeButton.setStyleSheet(common_style + "border-image: url(imgs/home.png);")
         self.fanButton.setStyleSheet(common_style + "border-image: url(imgs/fan.png);")

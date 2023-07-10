@@ -3,7 +3,7 @@ from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
 import sys
 from PyQt5.QtCore import *
-import main as m
+
 
 
 class Kitchen(qtw.QWidget):
@@ -16,6 +16,7 @@ class Kitchen(qtw.QWidget):
 
         common_style = "background-color: #fffff0; border-radius: 90px; border-color: white; background-repeat: no-repeat; "
         self.message_label.setStyleSheet(common_style)
+        self.info_label.setStyleSheet(common_style)
 
         self.homeButton.setStyleSheet(common_style+"border-image: url(imgs/home.png);")
         self.lightButton.setStyleSheet(common_style+"border-image: url(imgs/light-bulb.png);")
@@ -23,18 +24,6 @@ class Kitchen(qtw.QWidget):
         self.washerButton.setStyleSheet(common_style+"border-image: url(imgs/washing-machine.png);")
         self.chimneyButton.setStyleSheet(common_style+"border-image: url(imgs/food.png);")
 
-        #self.homeButton.clicked.connect(self.closeKitchen)
-
-        self.kitchen_thr = QThread()
-        self.kitchen_worker = m.EEG_Worker()
-        self.kitchen_worker.moveToThread(self.kitchen_thr)
-        self.kitchen_thr.started.connect(lambda: self.kitchen_worker.navigate(4))
-        # self.kitchen_worker.start_sig.connect(self.openKitchen)
-        self.kitchen_worker.eye_state.connect(self.show_state)                                                                     #self.kitchen_worker.eye_state.connect(self.kitchen.show_state)
-        self.kitchen_worker.cnt_sig.connect(self.cnt_feedback)                                                                       #self.kitchen_worker.cnt_sig.connect(self.kitchen.cnt_feedback)
-        self.kitchen_worker.fin.connect(self.close)                                                                    #self.kitchen_worker.fin.connect(self.kitchen.close)
-        #self.kitchen_worker.cnt_return.connect(self.cnt_thr.start)
-        self.kitchen_worker.fin.connect(self.kitchen_thr.quit)
 
         self.lightButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(1))
         self.stoveButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(2))
@@ -62,5 +51,5 @@ class Kitchen(qtw.QWidget):
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
     kitchen = Kitchen()
-    kitchen.show()
+    kitchen.showFullScreen()
     sys.exit(app.exec_())
