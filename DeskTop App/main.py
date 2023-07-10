@@ -13,6 +13,7 @@ import threading
 import asyncio
 # import variables
 from types import SimpleNamespace
+from Utils import EEGutils
 
 #from Utils import collectEEGsignal,readFullinputedSeq,MUSEns,EEGns, EEGutils
 global home_seq, calib_seq, all_cnt_sig, rooms
@@ -53,79 +54,79 @@ class CntWorker(QObject):
         self.intr_val = [0,0]
         self.mouse_interrupt_msg.connect(self.setIntr)
 
-    def readInputedSeq(self, windowLength=10):
-        global home_seq
-        seq = ""
-        for i in range(25):
+    # def readInputedSeq(self, windowLength=10):
+    #     global home_seq
+    #     seq = ""
+    #     for i in range(25):
 
-            if self.intr_val[0]:
-                return -1
+    #         if self.intr_val[0]:
+    #             return -1
 
-            time.sleep(1)
+    #         time.sleep(1)
 
-            if i == 10:
-                seq += "4"
-                self.type_of_blink_msg.emit("type 4")
+    #         if i == 10:
+    #             seq += "4"
+    #             self.type_of_blink_msg.emit("type 4")
 
-            elif i == 20:
-                seq += "4"
-                self.type_of_blink_msg.emit("type 4")
+    #         elif i == 20:
+    #             seq += "4"
+    #             self.type_of_blink_msg.emit("type 4")
 
-        try:
-            return home_seq[seq]
+    #     try:
+    #         return home_seq[seq]
 
-        except:
-            self.type_of_blink_msg.emit("Error: Unknown sequence is entered, Try again!!!! ")
-            return 0
+    #     except:
+    #         self.type_of_blink_msg.emit("Error: Unknown sequence is entered, Try again!!!! ")
+    #         return 0
 
-    def morse(self):
-        BlinkMorseCode = ""
+    # def morse(self):
+    #     BlinkMorseCode = ""
 
-
-        for i in range(3):
-            time.sleep(3)
-            if i == 0:
-                morseBlinkLength = 0.1
-            elif i == 1:
-                morseBlinkLength = 0.4
-            else:
-                morseBlinkLength = 0.7
+    #     EEGutils.readMorseCode(self)
+        # for i in range(3):
+        #     time.sleep(3)
+        #     if i == 0:
+        #         morseBlinkLength = 0.1
+        #     elif i == 1:
+        #         morseBlinkLength = 0.4
+        #     else:
+        #         morseBlinkLength = 0.7
 
 
             # if end signal is sent break from this loop
             #morseBlinkLength = getMorseData()
             # rdata, ldata = filter_dataFreq(eegData)
 
-            if self.intr_val[0]:
-                self.selected_item_code_msg.emit(self.intr_val[1])
-                self.intr_val = [0, 0]
-                break
+        # if self.intr_val[0]:
+        #     self.selected_item_code_msg.emit(self.intr_val[1])
+        #     self.intr_val = [0, 0]
+        #     # break
 
-            if morseBlinkLength > 0.6:
-                #letter = decodeMorse(BlinkMorseCode)
-                letter = "A"
-                if letter == 'save':
-                    self.selected_item_code_msg.emit(5)
-                elif letter == 'clr':
-                    self.selected_item_code_msg.emit(1)
-                elif letter != None:
-                    self.morse_statment_msg.emit(letter)
-                    self.selected_item_code_msg.emit(2)
-                    print("after emitting letter")
-                else:
-                    self.type_of_blink_msg.emit("Error: Unknown sequence is entered, Try again!!!! ")
-                    self.selected_item_code_msg.emit(3)
+        # if morseBlinkLength > 0.6:
+        #     #letter = decodeMorse(BlinkMorseCode)
+        #     letter = "A"
+        #     if letter == 'save':
+        #         self.selected_item_code_msg.emit(5)
+        #     elif letter == 'clr':
+        #         self.selected_item_code_msg.emit(1)
+        #     elif letter != None:
+        #         self.morse_statment_msg.emit(letter)
+        #         self.selected_item_code_msg.emit(2)
+        #         print("after emitting letter")
+        #     else:
+        #         self.type_of_blink_msg.emit("Error: Unknown sequence is entered, Try again!!!! ")
+        #         self.selected_item_code_msg.emit(3)
 
-                break
+        #     # break
 
-            else:
-                if 0.2 > morseBlinkLength >= 0:
-                    BlinkMorseCode = BlinkMorseCode + '.'
-                    self.type_of_blink_msg.emit(BlinkMorseCode)
+        # else:
+        #     if 0.2 > morseBlinkLength >= 0:
+        #         BlinkMorseCode = BlinkMorseCode + '.'
+        #         self.type_of_blink_msg.emit(BlinkMorseCode)
 
-                elif 0.6 > morseBlinkLength > 0.2:
-                    BlinkMorseCode = BlinkMorseCode + '-'
-                    self.type_of_blink_msg.emit(BlinkMorseCode)
+        #     elif 0.6 > morseBlinkLength > 0.2:
+        #         BlinkMorseCode = BlinkMorseCode + '-'
+        #         self.type_of_blink_msg.emit(BlinkMorseCode)
 
 
 
@@ -134,13 +135,13 @@ class CntWorker(QObject):
         print("in choose!!!!!!!")
 
         if CntWorker.morse_falg:
-            self.morse()
+            EEGutils.readMorseCode(self)
         else:
-            code = self.readInputedSeq()
+            code = EEGutils.readInputedSeq(self,windowLength=10,homeOrRoom=True,eyeNav=0)
 
-            while code == 0:
-                # loop for taking input
-                code = self.readInputedSeq()
+            # while code == 0:
+            #     # loop for taking input
+            #     code = self.readInputedSeq()
 
             if code != -1:
                 # if no button is clicked:
