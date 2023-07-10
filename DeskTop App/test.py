@@ -134,11 +134,16 @@ class Smarthome(qtw.QMainWindow):
 
         # if any button other than 'return to home' button is selected:
         elif widget_no != 5:
-            if m.CntWorker.morse_falg and widget_no ==1 :
-                self.msg.paragraph = ""
-                self.msg.write_pragraph("")
+            if m.CntWorker.morse_falg:
+                if widget_no == 1 :
+                    self.msg.paragraph = ""
+                    self.msg.write_pragraph("")
+                elif widget_no == 3:
+                    self.msg.show_code("Error: Unknown sequence is entered, Try again!!!! ")
+                else:
+                    pass
             else:
-                #self.self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is pressed" )
+                self.self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is pressed" )
                 print("in second if")
                 print("any button is clicked")
 
@@ -147,7 +152,7 @@ class Smarthome(qtw.QMainWindow):
             if m.CntWorker.morse_falg:
                 self.msg.paragraph = ""
                 self.msg.write_pragraph("")
-                self.msg.show_code("")
+                #self.msg.show_code("")
                 m.CntWorker.morse_falg = 0
 
             print("in third if")

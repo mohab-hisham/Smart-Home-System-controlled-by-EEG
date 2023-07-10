@@ -99,22 +99,25 @@ class CntWorker(QObject):
 
             if self.intr_val[0]:
                 self.selected_item_code_msg.emit(self.intr_val[1])
+                self.type_of_blink_msg.emit("")
                 self.intr_val = [0, 0]
                 break
 
             if morseBlinkLength > 0.6:
                 #letter = decodeMorse(BlinkMorseCode)
-                letter = "A"
+                letter = "None "
                 if letter == 'save':
                     self.selected_item_code_msg.emit(5)
+                    self.type_of_blink_msg.emit("")
                 elif letter == 'clr':
                     self.selected_item_code_msg.emit(1)
                 elif letter != None:
                     self.morse_statment_msg.emit(letter)
                     self.selected_item_code_msg.emit(2)
+                    self.type_of_blink_msg.emit("")
                     print("after emitting letter")
                 else:
-                    self.type_of_blink_msg.emit("Error: Unknown sequence is entered, Try again!!!! ")
+                    #self.type_of_blink_msg.emit("Error: Unknown sequence is entered, Try again!!!! ")
                     self.selected_item_code_msg.emit(3)
 
                 break
@@ -155,7 +158,7 @@ class CntWorker(QObject):
                 self.selected_item_code_msg.emit(self.intr_val[1])
                 self.intr_val = [0, 0]
 
-        self.type_of_blink_msg.emit("")
+            self.type_of_blink_msg.emit("")
 
         #self.fin.emit()
 
