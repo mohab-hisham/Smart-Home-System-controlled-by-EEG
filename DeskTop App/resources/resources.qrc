@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="imgs">
+    <file>background.jpg</file>
+    <file>sky.jpg</file>
+    <file>sakura.jpg</file>
+  </qresource>
+</RCC>
