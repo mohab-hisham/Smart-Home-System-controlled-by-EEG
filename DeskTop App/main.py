@@ -8,7 +8,7 @@ from PyQt5 import QtWidgets as qtw
 import sys
 
 import time
-from EEGutils import getMorseData, decodeMorse
+from Utils.EEGutils import getMorseData, decodeMorse
 import threading
 import asyncio
 # import variables
@@ -82,7 +82,7 @@ class CntWorker(QObject):
 
         while True:
             # if end signal is sent break from this loop
-            morseBlinkLength = EEGutils.getMorseData()
+            morseBlinkLength = getMorseData()
             # rdata, ldata = filter_dataFreq(eegData)
 
             if self.intr_val[0]:
@@ -91,7 +91,7 @@ class CntWorker(QObject):
                 break
 
             if morseBlinkLength > 0.6:
-                letter = EEGutils.decodeMorse(BlinkMorseCode)
+                letter = decodeMorse(BlinkMorseCode)
                 if letter == 'save':
                     self.selected_item_code_msg.emit(5)
                 elif letter == 'clr':
