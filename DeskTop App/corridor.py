@@ -7,27 +7,36 @@ import sys
 class Corridor(qtw.QWidget):
     def __init__(self):
         super().__init__()
-        bath = "DeskTop App/"
-        uic.loadUi(bath + "UIs/corridorui.ui", self)
-        self.light_img = QPixmap(bath + "imgs/lamp2.jpeg")
-        self.light_label.setPixmap(self.light_img)
+        #bath = "DeskTop App/"
+        uic.loadUi("UIs/cori.ui", self)
 
-        self.door1_img = QPixmap(bath + "imgs/door.jpeg")
-        self.door1_label.setPixmap(self.door1_img)
+        self.setStyleSheet("background-color: #122222; ")
+        #
 
-        self.door2_img = QPixmap(bath + "imgs/door.jpeg")
-        self.door2_label.setPixmap(self.door2_img)
+        common_style = "background-color: #fffff0; border-radius: 90px; border-color: white; background-repeat: no-repeat; "
+        self.message_label.setStyleSheet(common_style)
 
-        self.toilet_img = QPixmap(bath + "imgs/door.jpeg")
-        self.toilet_label.setPixmap(self.toilet_img)
+        self.homeButton.setStyleSheet(common_style + "border-image: url(imgs/home.png);")
+        self.lightButton.setStyleSheet(common_style + "border-image: url(imgs/light-bulb.png);")
+        self.door2Button.setStyleSheet(common_style + "border-image: url(imgs/door.png);")
+        self.door1Button.setStyleSheet(common_style + "border-image: url(imgs/door1.png);")
+        self.toiletButton.setStyleSheet(common_style + "border-image: url(imgs/wc.png);")
 
-        self.homeButton.clicked.connect(self.closeCorridor)
+        #self.homeButton.clicked.connect(self.closeCorridor)
 
     def open(self):
-        self.show()
+        self.showFullScreen()
 
     def closeCorridor(self):
         self.close()
+
+    def show_state(self, msg):
+        self.message_label.setText(msg)
+
+    def cnt_feedback(self, cnt_val):
+        mapp = {17: 'Light', 18: 'Door 1', 19: 'Door 2', 20: "Toilet Door" }
+        msg = mapp[cnt_val] + " is turned on."
+        self.show_state(msg)
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)

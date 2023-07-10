@@ -6,28 +6,37 @@ import sys
 class BathRoom(qtw.QWidget):
     def __init__(self):
         super().__init__()
-        bath = "DeskTop App/"
-        uic.loadUi(bath + "UIs/toilet.ui", self)
-        self.light_img = QPixmap(bath + "imgs/light.jpeg")
-        self.light_label.setPixmap(self.light_img)
+        #bath = "DeskTop App/"
+        uic.loadUi("UIs/toi.ui", self)
 
-        self.bidet_img = QPixmap(bath + "imgs/bidet.jpeg")
-        self.bidet_label.setPixmap(self.bidet_img)
+        self.setStyleSheet("background-color: #122222; ")
+        #
 
-        self.flush_img = QPixmap(bath + "imgs/flush.jpeg")
-        self.flush_label.setPixmap(self.flush_img)
+        common_style = "background-color: #fffff0; border-radius: 90px; border-color: white; background-repeat: no-repeat; "
+        self.message_label.setStyleSheet(common_style)
 
-        self.cover_img = QPixmap(bath + "imgs/cover.jpeg")
-        self.cover_label.setPixmap(self.cover_img)
+        self.homeButton.setStyleSheet(common_style + "border-image: url(imgs/home.png);")
+        self.lightButton.setStyleSheet(common_style + "border-image: url(imgs/light-bulb.png);")
+        self.bidetButton.setStyleSheet(common_style + "border-image: url(imgs/bidet.jpeg);")
+        self.coverButton.setStyleSheet(common_style + "border-image: url(imgs/cover.jpeg);")
+        self.flushButton.setStyleSheet(common_style + "border-image: url(imgs/flush.jpeg);")
 
-        self.homeButton.clicked.connect(self.closeBath)
+        #self.homeButton.clicked.connect(self.closeBath)
 
     def open(self):
         self.setWindowTitle("Bath Room")
-        self.show()
+        self.showFullScreen()
 
     def closeBath(self):
         self.close()
+
+    def show_state(self, msg):
+        self.message_label.setText(msg)
+
+    def cnt_feedback(self, cnt_val):
+        mapp = {21: 'Light', 22: 'Bidet', 23: 'Toilet Cover', 24: 'Flush'}
+        msg = mapp[cnt_val] + " is turned on."
+        self.show_state(msg)
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
