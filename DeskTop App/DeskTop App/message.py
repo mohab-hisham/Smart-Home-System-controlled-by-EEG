@@ -19,9 +19,7 @@ class Message(qtw.QWidget):
         self.message_label.setStyleSheet(label_style)
         self.info_label.setStyleSheet(label_style)
 
-        #self.saveButton.clicked.connect(lambda:self.write_pragraph(""))
-        #self.saveButton.clicked.connect(lambda: self.show_code(""))
-        #self.clearButton.clicked.connect(lambda: self.write_pragraph(""))
+
 
     def closeMessage(self):
         self.close()

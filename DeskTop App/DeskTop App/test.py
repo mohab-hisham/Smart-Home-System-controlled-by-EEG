@@ -41,10 +41,10 @@ class Smarthome(qtw.QMainWindow):
         self.testLayout.addWidget(self.house)
         self.current_widget = 0
 
-        self.kitchen.lightButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(1))
-        self.kitchen.stoveButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(2))
-        self.kitchen.washerButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(3))
-        self.kitchen.chimneyButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(4))
+        self.kitchen.lightButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(1))
+        self.kitchen.stoveButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(2))
+        self.kitchen.washerButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(3))
+        self.kitchen.chimneyButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(4))
         self.kitchen.homeButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
 
         self.living.lightButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(1))
@@ -53,13 +53,13 @@ class Smarthome(qtw.QMainWindow):
         self.living.fanButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(4))
         self.living.homeButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
 
-        self.room1.homeButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
+        self.room1.lightButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(1))
         self.room1.cartensButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(2))
         self.room1.tvButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(3))
         self.room1.fanButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(4))
         self.room1.homeButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
 
-        self.room2.homeButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
+        self.room2.lightButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(1))
         self.room2.cartensButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(2))
         self.room2.tvButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(3))
         self.room2.fanButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(4))
@@ -143,7 +143,7 @@ class Smarthome(qtw.QMainWindow):
                 else:
                     pass
             else:
-                self.self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is pressed" )
+                self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is pressed" )
                 print("in second if")
                 print("any button is clicked")
 
