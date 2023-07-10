@@ -31,7 +31,7 @@ class Home(qtw.QWidget):
         self.lobbyButton.setStyleSheet(common_style + "border-image: url(imgs/lobby.jpeg);")
         self.bathButton.setStyleSheet(common_style + "border-image: url(imgs/to.jpg);")
 
-        self.exitButton.clicked.connect(self.closeHome)
+        #self.exitButton.clicked.connect(self.closeHome)
 
     def closeHome(self):
         self.close()

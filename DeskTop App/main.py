@@ -8,7 +8,7 @@ from PyQt5 import QtWidgets as qtw
 import sys
 
 import time
-from Utils.EEGutils import getMorseData, decodeMorse
+#from Utils.EEGutils import getMorseData, decodeMorse
 import threading
 import asyncio
 # import variables
@@ -38,6 +38,7 @@ ns = SimpleNamespace()
 # Handy little enum to make code more readable
 
 class CntWorker(QObject):
+    morse_falg =0
     selected_item_code_msg = pyqtSignal(int)
     #fin = pyqtSignal()
 
@@ -61,6 +62,7 @@ class CntWorker(QObject):
                 return -1
 
             time.sleep(1)
+
             if i == 10:
                 seq += "4"
                 self.type_of_blink_msg.emit("type 4")
@@ -80,9 +82,18 @@ class CntWorker(QObject):
         BlinkMorseCode = ""
 
 
-        while True:
+        for i in range(3):
+            time.sleep(3)
+            if i == 0:
+                morseBlinkLength = 0.1
+            elif i == 1:
+                morseBlinkLength = 0.4
+            else:
+                morseBlinkLength = 0.7
+
+
             # if end signal is sent break from this loop
-            morseBlinkLength = getMorseData()
+            #morseBlinkLength = getMorseData()
             # rdata, ldata = filter_dataFreq(eegData)
 
             if self.intr_val[0]:
@@ -91,7 +102,8 @@ class CntWorker(QObject):
                 break
 
             if morseBlinkLength > 0.6:
-                letter = decodeMorse(BlinkMorseCode)
+                #letter = decodeMorse(BlinkMorseCode)
+                letter = "A"
                 if letter == 'save':
                     self.selected_item_code_msg.emit(5)
                 elif letter == 'clr':
@@ -99,6 +111,7 @@ class CntWorker(QObject):
                 elif letter != None:
                     self.morse_statment_msg.emit(letter)
                     self.selected_item_code_msg.emit(2)
+                    print("after emitting letter")
                 else:
                     self.type_of_blink_msg.emit("Error: Unknown sequence is entered, Try again!!!! ")
                     self.selected_item_code_msg.emit(3)
@@ -117,25 +130,29 @@ class CntWorker(QObject):
 
 
 
-    def choose(self, morse =0):
+    def choose(self):
+        print("in choose!!!!!!!")
 
-        code = self.readInputedSeq()
-
-        while code == 0:
-            # loop for taking input
+        if CntWorker.morse_falg:
+            self.morse()
+        else:
             code = self.readInputedSeq()
 
-        if code != -1:
-            # if no button is clicked:
-            self.selected_item_code_msg.emit(code)
-            print("sig is emitted")
-            time.sleep(2)
+            while code == 0:
+                # loop for taking input
+                code = self.readInputedSeq()
 
-        else:
-            # if button is clicked:
-            #print("button clicked")
-            self.selected_item_code_msg.emit(self.intr_val[1])
-            self.intr_val = [0, 0]
+            if code != -1:
+                # if no button is clicked:
+                self.selected_item_code_msg.emit(code)
+                print("sig is emitted")
+                time.sleep(2)
+
+            else:
+                # if button is clicked:
+                print("button clicked")
+                self.selected_item_code_msg.emit(self.intr_val[1])
+                self.intr_val = [0, 0]
 
         self.type_of_blink_msg.emit("")
 
@@ -144,126 +161,5 @@ class CntWorker(QObject):
 
     def setIntr(self, val):
         self.intr_val = [1, val]
-
-
-class EEG_Worker(QObject):
-    start_sig = pyqtSignal()
-    str_sig = pyqtSignal(str)
-    m_letter = pyqtSignal(str)
-    fin = pyqtSignal()
-    cnt_return = pyqtSignal()
-    eye_state = pyqtSignal(str)
-
-    intr = pyqtSignal()
-    mouse_intr = pyqtSignal(int)
-
-    cnt_sig = pyqtSignal(int)
-
-    def __init__(self):
-        super().__init__()
-        self.intr_val = 0
-        self.cnt_intr_val = [0,0]
-        self.intr.connect(lambda: self.setIntr(1))
-        self.mouse_intr.connect(self.set_cnt_intr)
-
-    def readInputedSeq(self, windowLength=10):
-        inputSeqArr = []
-        openTime = 0
-        closeTime = 0
-        firstClose = 1
-        openCloseState = 0
-        openCloseTime = 0
-        closeOpenTime = 0
-
-        seq = ""
-
-        i=0
-        for i in range(25):
-            print("in kitchen loop")
-            if self.intr_val or self.cnt_intr_val[0]:
-                print("home button is clicked")
-                self.intr_val=0
-                return -1
-
-
-            if i == 10:
-                seq += "8"
-                self.eye_state.emit("type 1")
-
-            elif i == 20:
-                seq += "8"
-                self.eye_state.emit("type 8")
-            time.sleep(1)
-
-        return seq
-
-
-
-    def navigate(self, room_code):
-        global all_cnt_sig
-        global rooms
-        #app = qtw.QApplication(sys.argv)
-        #app.exec_()
-        #self.start_sig.emit()
-        code = 0
-
-        while code == 0:
-            if room_code == 4:
-                print("kitchen started")
-
-            blink = self.readInputedSeq()
-            if blink == -1:
-                print("button is clicked in kitchen")
-                code = self.cnt_intr_val[1]
-                self.cnt_intr_val = [0, 0]
-                break
-            try:
-                code = rooms[room_code][blink]
-            except:
-                self.eye_state.emit("Error: Unknown sequence is entered, Try again!!!! ")
-                code = 0
-
-        if code != 5:
-            cnt = all_cnt_sig[str(room_code) + str(code)]
-            self.cnt_sig.emit(cnt)
-
-        self.cnt_return.emit()
-        self.fin.emit()
-        print("kitchen thread is finished")
-
-    def morse(self):
-        BlinkMorseCode = ""
-        paragraph = ""
-
-        self.start_sig.emit()
-
-
-
-        self.fin.emit()
-        self.cnt_return.emit()
-
-    def calibrate(self):
-        global calib_seq
-        self.start_sig.emit()
-        code = 0
-
-        while code == 0:
-            blink = self.readInputedSeq()
-            if blink == -1:
-                break
-            try:
-                code = calib_seq[blink]
-            except:
-                code = 0
-
-        self.fin.emit()
-        self.cnt_return.emit()
-
-    def setIntr(self, val):
-        self.intr_val = val
-
-    def set_cnt_intr(self, val):
-        self.cnt_intr_val = [1, val]
-        print("button interupt is set")
 
 
