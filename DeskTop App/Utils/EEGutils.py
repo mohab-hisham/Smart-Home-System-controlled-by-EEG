@@ -718,6 +718,7 @@ def TFModelInit():
 
     # Allocate tensors
     EEGns.interpreter.allocate_tensors()
+    
 def getL_R_eyeMovement(ns,eegData):
     mesageController = ns.eye_state
     EEGns.fulleegData = np.vstack([EEGns.fulleegData, np.array(eegData)[:,1:-2]]) if len(EEGns.fulleegData) else np.array(eegData)[:,1:-2]
