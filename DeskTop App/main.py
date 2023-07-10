@@ -53,7 +53,7 @@ class CntWorker(QObject):
         self.intr_val = [0,0]
         self.mouse_interrupt_msg.connect(self.setIntr)
 
-
+# github try
     def readInputedSeq(self, windowLength=10):
         global home_seq
         seq = ""
