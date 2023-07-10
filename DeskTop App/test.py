@@ -33,7 +33,7 @@ class Smarthome(qtw.QMainWindow):
         self.msg = message.Message()
         self.fall = fall.Fall()
 
-        self.morse_flag = 0
+        #self.morse_flag = 0
         self.room_dic = {0: self.house, 1: self.living, 2: self.room1, 3: self.room2,
                4: self.kitchen, 5: self.corridor, 6: self.bath, 7: self.calib,
                8: self.control, 9: self.msg, 10: self.fall}
@@ -91,7 +91,7 @@ class Smarthome(qtw.QMainWindow):
         self.cnt_thr = QThread()
         self.cnt_worker = m.CntWorker()
         self.cnt_worker.moveToThread(self.cnt_thr)
-        self.cnt_thr.started.connect(lambda: self.cnt_worker.choose(morse=self.morse_flag))
+        self.cnt_thr.started.connect(self.cnt_worker.choose)
         self.cnt_worker.selected_item_code_msg.connect(self.change)
         self.cnt_thr.finished.connect(self.cnt_thr.start)
 
@@ -128,30 +128,33 @@ class Smarthome(qtw.QMainWindow):
             self.current_widget = widget_no
             self.room_dic[self.current_widget].show()
 
-            if self.widget_no == 9:
-                self.morse_flag = 1
+            if widget_no == 9:
+                m.CntWorker.morse_falg = 1
 
 
         # if any button other than 'return to home' button is selected:
         elif widget_no != 5:
-            if self.morse_flag and widget_no ==1 :
+            if m.CntWorker.morse_falg and widget_no ==1 :
+                self.msg.paragraph = ""
                 self.msg.write_pragraph("")
             else:
-                self.self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is pressed" )
+                #self.self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is pressed" )
                 print("in second if")
                 print("any button is clicked")
 
         # if 'return to home button' is selected:
         else:
+            if m.CntWorker.morse_falg:
+                self.msg.paragraph = ""
+                self.msg.write_pragraph("")
+                self.msg.show_code("")
+                m.CntWorker.morse_falg = 0
+
             print("in third if")
             self.room_dic[self.current_widget].close()
             self.house.show()
             self.current_widget = 0
 
-            if self.morse_flag:
-                self.msg.write_pragraph("")
-                self.msg.show_code("")
-                self.morse_flag = 0
 
         self.cnt_thr.quit()
 

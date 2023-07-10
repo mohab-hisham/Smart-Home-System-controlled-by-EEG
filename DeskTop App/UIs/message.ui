@@ -43,6 +43,11 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>30</pointsize>
+      </font>
+     </property>
      <property name="frameShape">
       <enum>QFrame::WinPanel</enum>
      </property>
@@ -50,7 +55,10 @@
       <enum>QFrame::Raised</enum>
      </property>
      <property name="text">
-      <string/>
+      <string>   </string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
      </property>
     </widget>
    </item>
@@ -221,6 +229,11 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="font">
+        <font>
+         <pointsize>25</pointsize>
+        </font>
+       </property>
        <property name="frameShape">
         <enum>QFrame::WinPanel</enum>
        </property>
@@ -255,6 +268,11 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>25</pointsize>
+        </font>
        </property>
        <property name="frameShape">
         <enum>QFrame::WinPanel</enum>
