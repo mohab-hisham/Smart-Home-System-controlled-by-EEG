@@ -497,12 +497,12 @@ def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = Fa
     global roomSelectSeqArr
     returnValue = 0
     compSeqArr = tabSelectSeqArr
-    mesageController = None
+    mesageController = ns.type_of_blink_msg
 
     if controllMethod == "tabSelect":
         if homeOrRoom:
             compSeqArr = tabSelectSeqArr
-            mesageController = ns.eye_state
+            mesageController = ns.type_of_blink_msg
         else:
             compSeqArr = roomSelectSeqArr
             # mesageController = ns.
@@ -758,20 +758,26 @@ def readMorseCode(ns):
     global BlinkMorseCode
     morseBlinkLength = -1
     startCommand = 1
-    paragraph = ""
+    BlinkMorseCode = ""
+    # ns.type_of_blink_msg.emit("Helllllloooooo")
     while True:
-
-        if ns.intr_val:
-            ns.intr_val = 0
+        
+        if ns.intr_val[0]:
+            ns.selected_item_code_msg.emit(ns.intr_val[1])
+            ns.intr_val = [0, 0]
             break
         # if end signal is sent break from this loop
         eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
                 timeout=1, max_samples=int(10))
         # rdata, ldata = filter_dataFreq(eegData)
         morseBlinkLength = getBlinklength(eegData,windowLength=10)
-        if morseBlinkLength >= 1 :
-            paragraph += " "
-        elif 1 > morseBlinkLength > 0.6:
+        # print(morseBlinkLength)
+        if morseBlinkLength != -1:
+            
+            ns.type_of_blink_msg.emit("")
+        # if morseBlinkLength >= 1 :
+        #     paragraph += " "
+        if morseBlinkLength > 0.6:
             print("Very Long Blink")
             startCommand = 0
             morseBlinkLength = -1
@@ -779,30 +785,31 @@ def readMorseCode(ns):
             print(BlinkMorseCode)
             print(letter)
             if letter == 'save':
-                ns.str_sig.emit("")
-                ns.m_letter.emit("")
-                break
+                ns.selected_item_code_msg.emit(5)
+                
             elif letter == 'clr':
-                paragraph = ""
+                ns.selected_item_code_msg.emit(1)
             elif letter != None:
-                paragraph += letter
-            
-            ns.str_sig.emit(paragraph)
-            ns.m_letter.emit(BlinkMorseCode)
-            BlinkMorseCode = ""
-            startCommand = 1
+                ns.morse_statment_msg.emit(letter)
+                ns.selected_item_code_msg.emit(2)
+                print("after emitting letter")
+            else:
+                # print("in Error")
+                # ns.type_of_blink_msg.emit("Error")
+                ns.selected_item_code_msg.emit(3)
+            break
         else:
             if startCommand == 1:
                 if 0.2 > morseBlinkLength >= 0:
                     BlinkMorseCode = BlinkMorseCode + '.'
                     morseBlinkLength = -1
                     print("short Blink")
-                    ns.m_letter.emit(BlinkMorseCode)
+                    ns.type_of_blink_msg.emit(BlinkMorseCode)
                 elif 0.6 > morseBlinkLength >= 0.2:
                     BlinkMorseCode = BlinkMorseCode + '-'
                     morseBlinkLength = -1
                     print("long Blink")
-                    ns.m_letter.emit(BlinkMorseCode)
+                    ns.type_of_blink_msg.emit(BlinkMorseCode)
 
     
 
