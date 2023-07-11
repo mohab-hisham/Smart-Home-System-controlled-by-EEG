@@ -12,7 +12,6 @@ class Kitchen(qtw.QWidget):
         #bath = "DeskTop App/"
         uic.loadUi("UIs/ki.ui", self)
         self.setStyleSheet("background-color: #122222; ")
-        #
 
         common_style = "background-color: #fffff0; border-radius: 90px; border-color: white; background-repeat: no-repeat; "
         self.message_label.setStyleSheet(common_style)
@@ -25,11 +24,6 @@ class Kitchen(qtw.QWidget):
         self.chimneyButton.setStyleSheet(common_style+"border-image: url(imgs/food.png);")
 
 
-        self.lightButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(1))
-        self.stoveButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(2))
-        self.washerButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(3))
-        self.chimneyButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(4))
-        #self.homeButton.clicked.connect(lambda: self.kitchen_worker.mouse_intr.emit(5))
 
 
     def open(self):

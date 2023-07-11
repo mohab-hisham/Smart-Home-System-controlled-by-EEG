@@ -21,7 +21,7 @@ class Room(qtw.QWidget):
         self.tvButton.setStyleSheet(common_style + "border-image: url(imgs/smart-tv.png);")
         self.cartensButton.setStyleSheet(common_style + "border-image: url(imgs/curtains.png);")
         self.lightButton.setStyleSheet(common_style + "border-image: url(imgs/light-bulb.png);")
-        #self.homeButton.clicked.connect(self.closeRoom)
+
 
 
 
