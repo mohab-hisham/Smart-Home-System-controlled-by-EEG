@@ -759,9 +759,9 @@ def readMorseCode(ns):
     morseBlinkLength = -1
     startCommand = 1
     BlinkMorseCode = ""
-    ns.type_of_blink_msg.emit("Helllllloooooo")
+    # ns.type_of_blink_msg.emit("Helllllloooooo")
     while True:
-
+        
         if ns.intr_val[0]:
             ns.selected_item_code_msg.emit(ns.intr_val[1])
             ns.intr_val = [0, 0]
@@ -771,6 +771,10 @@ def readMorseCode(ns):
                 timeout=1, max_samples=int(10))
         # rdata, ldata = filter_dataFreq(eegData)
         morseBlinkLength = getBlinklength(eegData,windowLength=10)
+        # print(morseBlinkLength)
+        if morseBlinkLength != -1:
+            
+            ns.type_of_blink_msg.emit("")
         # if morseBlinkLength >= 1 :
         #     paragraph += " "
         if morseBlinkLength > 0.6:
@@ -790,8 +794,8 @@ def readMorseCode(ns):
                 ns.selected_item_code_msg.emit(2)
                 print("after emitting letter")
             else:
-                print("in Error")
-                ns.type_of_blink_msg.emit("Error")
+                # print("in Error")
+                # ns.type_of_blink_msg.emit("Error")
                 ns.selected_item_code_msg.emit(3)
             break
         else:
