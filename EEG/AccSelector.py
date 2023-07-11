@@ -274,17 +274,17 @@ if __name__ == "__main__":
         # print("accy: ", accelerationY)#-450
         # print("accz: ", accelerationZ)#80
         # print("")
-        # sensetevity = 2
-        xpos = (25-yaw)*(1920/50)
-        ypos = 540
-        # xpos = (accelerationY)*sensetevity*960 + 960
-        # ypos = (accelerationX)*sensetevity*540 + 540
+        sensetevity = 2
+        # xpos = (25-yaw)*(1920/50)
+        # ypos = 540
+        xpos = (accelerationY)*sensetevity*960 + 960
+        ypos = (accelerationX)*sensetevity*540 + 540
         # print("xpos: ", (accelerationY)*sensetevity*960)
         # print("ypos: ", (accelerationX)*sensetevity*540)
         if xpos > 1920:
             xpos = 1910
-        # if ypos > 1080:
-        #     ypos = 1070
+        if ypos > 1080:
+            ypos = 1070
         pg.moveTo(xpos, ypos)
         # endtime = time.time()
         # if (endtime - starttime)<10 :

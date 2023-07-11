@@ -13,13 +13,16 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_5">
+  <layout class="QVBoxLayout" name="verticalLayout_5" stretch="9,2,2">
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
         <widget class="QLabel" name="light_label">
+         <property name="frameShape">
+          <enum>QFrame::WinPanel</enum>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -30,6 +33,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="lightButton">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Light</string>
          </property>
@@ -41,6 +50,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
         <widget class="QLabel" name="bidet_label">
+         <property name="frameShape">
+          <enum>QFrame::WinPanel</enum>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -51,6 +63,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="bidetButton">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Bidet</string>
          </property>
@@ -62,6 +80,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QLabel" name="cover_label">
+         <property name="frameShape">
+          <enum>QFrame::WinPanel</enum>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -72,6 +93,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="coverButton">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Toilet Cover</string>
          </property>
@@ -83,6 +110,9 @@
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QLabel" name="flush_label">
+         <property name="frameShape">
+          <enum>QFrame::WinPanel</enum>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -93,6 +123,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="flushButton">
+         <property name="font">
+          <font>
+           <family>Times New Roman</family>
+           <pointsize>14</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>Flush</string>
          </property>
@@ -101,6 +137,28 @@
       </layout>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="message_label">
+     <property name="font">
+      <font>
+       <family>Times New Roman</family>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::WinPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3,1">
@@ -119,6 +177,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="homeButton">
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+         <pointsize>14</pointsize>
+        </font>
+       </property>
        <property name="text">
         <string>Home</string>
        </property>
