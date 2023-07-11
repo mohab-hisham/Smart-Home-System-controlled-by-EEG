@@ -13,7 +13,6 @@ class Smarthome(qtw.QMainWindow):
 
     def __init__(self):
         super().__init__()
-
         uic.loadUi("UIs/test.ui", self)
         self.menubar.setStyleSheet("background-color: #fffff0; border-radius: 10px; border-color: white; ")
 
@@ -50,6 +49,7 @@ class Smarthome(qtw.QMainWindow):
         self.living.lightButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(1))
         self.living.cartensButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(2))
         self.living.tvButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(3))
+        #self.living.fanButton.clicked.connect(lambda: self.living.select(4))
         self.living.fanButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(4))
         self.living.homeButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
 
@@ -79,6 +79,7 @@ class Smarthome(qtw.QMainWindow):
 
         self.calib.submitButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
 
+        self.control.doneButton.clicked.connect(self.get_control_mode)
         self.control.doneButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
 
         self.msg.saveButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
@@ -87,12 +88,16 @@ class Smarthome(qtw.QMainWindow):
         self.fall.backButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
 
         self.house.exitButton.clicked.connect(self.close)
+        #self.control.addButton.clicked.connect(lambda: self.cnt_worker.setMode(1))
+        #self.control.addButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
+        #self.control.pushButton.clicked.connect(lambda: self.cnt_worker.setMode(0))
 
         self.cnt_thr = QThread()
         self.cnt_worker = m.CntWorker()
         self.cnt_worker.moveToThread(self.cnt_thr)
         self.cnt_thr.started.connect(self.cnt_worker.choose)
         self.cnt_worker.selected_item_code_msg.connect(self.change)
+        self.cnt_worker.left_right_msg.connect(self.left_right)
         self.cnt_thr.finished.connect(self.cnt_thr.start)
 
         self.house.livingButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(1))
@@ -119,7 +124,19 @@ class Smarthome(qtw.QMainWindow):
 
         self.showFullScreen()
 
+    def get_control_mode(self):
+        m.CntWorker.control_mode = self.control.get_control_option()
+        if m.CntWorker.control_mode:
+            self.house.select(1)
+            #self.house.message_label.setText("Living is selected.")
+            print("new done!!")
+        else:
+            self.house.reset_selection()
+            self.house.selected = 0
+
+
     def change(self, widget_no):
+        print("in sequence")
         # if I am in main menue to select rooms:
         if self.current_widget == 0:
             print("in first if")
@@ -143,7 +160,8 @@ class Smarthome(qtw.QMainWindow):
                 else:
                     pass
             else:
-                self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is pressed" )
+                self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is turned on !!" )
+                self.room_dic[self.current_widget].select(widget_no)
                 print("in second if")
                 print("any button is clicked")
 
@@ -156,9 +174,58 @@ class Smarthome(qtw.QMainWindow):
                 m.CntWorker.morse_falg = 0
 
             print("in third if")
+            try:
+                self.room_dic[self.current_widget].select(widget_no)
+            except:
+                print("in pass")
+                pass
             self.room_dic[self.current_widget].close()
             self.house.show()
+            if m.CntWorker.control_mode:
+                try:
+                    self.room_dic[self.current_widget].reset_selection()
+                    self.room_dic[self.current_widget].selected = 0
+                except:
+                    pass
+                self.house.message_label.setText("Living is selected.")
             self.current_widget = 0
+
+
+        self.cnt_thr.quit()
+
+    def left_right(self, left_right_state):
+
+        print("in left right")
+        print(f"{left_right_state} is needed")
+        if self.current_widget != 0 or left_right_state != 0:
+            selected_item = self.room_dic[self.current_widget].selected + left_right_state
+
+            if selected_item > list(self.room_dic[self.current_widget].dic)[-1]:
+                selected_item = list(self.room_dic[self.current_widget].dic)[0]
+            elif selected_item < list(self.room_dic[self.current_widget].dic)[0]:
+                selected_item = list(self.room_dic[self.current_widget].dic)[-1]
+
+            self.room_dic[self.current_widget].select(selected_item)
+            self.room_dic[self.current_widget].message_label.setText(f"{selected_item} is selected.")
+
+            if left_right_state == 0:
+                if selected_item == 5:
+                    # if user wants to go home:
+                    self.cnt_worker.mouse_interrupt_msg.emit(5)
+                else:
+                    # if user wants to turn a devices without returning to home menue:
+                    self.room_dic[self.current_widget].message_label.setText(f"{selected_item} is turned on !!")
+
+
+        else:
+            print("in elseeeeeee")
+            self.house.close()
+            self.testLayout.addWidget(self.room_dic[self.house.selected])
+            self.current_widget = self.house.selected
+            self.house.selected = 0
+            self.room_dic[self.current_widget].show()
+            self.room_dic[self.current_widget].select(1)
+
 
 
         self.cnt_thr.quit()
