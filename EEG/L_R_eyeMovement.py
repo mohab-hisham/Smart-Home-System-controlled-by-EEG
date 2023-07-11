@@ -169,7 +169,9 @@ def CheckSignalQuality(inputInlet:StreamInlet):
         LF_ch_STD = np.std(LF_ch_data)
         RF_ch_STD = np.std(RF_ch_data)
         RE_ch_STD = np.std(RE_ch_data)
-        if LE_ch_STD < 80 and LF_ch_STD < 80 and RF_ch_STD < 80 and RE_ch_STD < 80:
+        print(LE_ch_STD,LF_ch_STD,RF_ch_STD,RE_ch_STD)
+        if LE_ch_STD < 25 and LF_ch_STD < 25 and RF_ch_STD < 25 and RE_ch_STD < 25:
+            
             ch_Quality = True
             
 
@@ -236,12 +238,14 @@ if __name__ == "__main__":
     # The try/except structure allows to quit the while loop by aborting the
     # script with <Ctrl-C>
     print('Press Ctrl-C in the console to break the while loop.')
-    CheckSignalQuality(inlet)
+    # CheckSignalQuality(inlet)
     secondFlag = 0
     fulleegData = []
 
-    path = "E:/Graduation_Project/Smart-Home-System-controlled-by-EEG/"
-    lite_file = "Left_Right_Mohab_initial_v2.tflite"
+
+    path = "E:/Graduation_Project/Smart-Home-System-controlled-by-EEG/Classifications using deep learning Algorithms/Left-Right-Center-Eye-Movements-Classification/"
+    lite_file = "model.tflite"
+
 
     ####################### INITIALIZE TF Lite #########################
     # Load TFLite model and allocate tensors.
@@ -262,34 +266,43 @@ if __name__ == "__main__":
         """ 3.1 ACQUIRE DATA """
         # Obtain EEG data from the LSL stream
         eeg_data, timestamp = inlet.pull_chunk(
-            timeout=1, max_samples=int(250))
+
+            timeout=3, max_samples=int(480))
+
         # fulleegData = eeg_data
         # Only keep the channel we're interested in
-        fulleegData = np.vstack([fulleegData, np.array(eeg_data)[:,:-1]]) if len(fulleegData) else np.array(eeg_data)[:,:-1]
-        if secondFlag == 1:
-            secondFlag =-1
-            # fulleegData = np.transpose(fulleegData)
-            # print(fulleegData.shape)
-            # fulleegData = np.vstack([fulleegData, eeg_data]) 
-        # ch_data = np.array(eeg_data)[:, INDEX_CHANNEL]
-            # print(np.array(eeg_data)[:,:-1].shape)
-            freqDomainData = time_to_freq_domain(fulleegData)
+        fulleegData = np.vstack([fulleegData, np.array(eeg_data)[:,1:-2]]) if len(fulleegData) else np.array(eeg_data)[:,1:-2]
+        # if secondFlag == 1:
+        #     secondFlag =-1
+        # fulleegData = np.transpose(fulleegData)
+        print(fulleegData.shape)
+        # fulleegData = np.vstack([fulleegData, eeg_data]) 
+    # ch_data = np.array(eeg_data)[:, INDEX_CHANNEL]
+        # print(np.array(eeg_data)[:,:-1].shape)
+        # freqDomainData = time_to_freq_domain(fulleegData)
 
-            freqDomainData = np.float32(np.transpose(freqDomainData))
-            # print(np.array(freqDomainData).shape)
-            interpreter.set_tensor(input_details[0]['index'], [freqDomainData])
+        fulleegData = np.float32(fulleegData)
+        # print(np.array(freqDomainData).shape)
+        interpreter.set_tensor(input_details[0]['index'], [fulleegData])
 
-            # run the inference
-            interpreter.invoke()
+        # run the inference
+        interpreter.invoke()
 
-            # output_details[0]['index'] = the index which provides the input
-            output_data = interpreter.get_tensor(output_details[0]['index'])
+        # output_details[0]['index'] = the index which provides the input
+        output_data = interpreter.get_tensor(output_details[0]['index'])
 
-            print(output_data)
+        print(output_data)
 
-            fulleegData = []
+        if int(np.array(output_data[0]).argmax()) == 0:
+            print("look Left")
+        elif int(np.array(output_data[0]).argmax()) == 1:
+            print("look center")
+        elif int(np.array(output_data[0]).argmax()) == 2:
+            print("look right")
+
+        fulleegData = []
         
-        secondFlag +=1
+        # secondFlag +=1
 
         #print(calibratingFlag,type(calibratingFlag))
         
