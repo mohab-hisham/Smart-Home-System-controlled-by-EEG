@@ -7,12 +7,19 @@ class Controls(qtw.QWidget):
     def __init__(self):
         super().__init__()
 
-        uic.loadUi("UIs/controls.ui", self)
-
-        #self.doneButton.clicked.connect(self.closeControl)
+        uic.loadUi("UIs/cont.ui", self)
+        self.setStyleSheet("background-color: #fffff1; ")
 
     def closeControl(self):
         self.close()
+
+    def get_control_option(self):
+        if self.seq_radioButton.isChecked():
+            return 0
+        elif self.left_right_radioButton.isChecked():
+            return 1
+        else:
+            return 2
 
 
 if __name__ == '__main__':

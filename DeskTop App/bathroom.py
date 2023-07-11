@@ -22,7 +22,7 @@ class BathRoom(qtw.QWidget):
         self.coverButton.setStyleSheet(common_style + "border-image: url(imgs/cover.jpeg);")
         self.flushButton.setStyleSheet(common_style + "border-image: url(imgs/flush.jpeg);")
 
-        #self.homeButton.clicked.connect(self.closeBath)
+
 
     def open(self):
         self.setWindowTitle("Bath Room")

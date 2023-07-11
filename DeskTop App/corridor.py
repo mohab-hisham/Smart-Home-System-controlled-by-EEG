@@ -23,7 +23,6 @@ class Corridor(qtw.QWidget):
         self.door1Button.setStyleSheet(common_style + "border-image: url(imgs/door1.png);")
         self.toiletButton.setStyleSheet(common_style + "border-image: url(imgs/wc.png);")
 
-        #self.homeButton.clicked.connect(self.closeCorridor)
 
     def open(self):
         self.showFullScreen()
