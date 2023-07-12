@@ -147,6 +147,9 @@ roomSelectSeqArr = [tabOneSeq,tabTwoSeq,tabThreeSeq,tabFourSeq,tabFiveSeq]
 falseFallSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0.2,1],durationAfterBlink=[0,0])],whatToControll="falseFall") # .-
 falseFallSeqArr = [falseFallSeq]
 SeqArray = [rightSeq,leftSeq,selectSeq,outSeq]
+gyroSelectSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="selectSequence")
+gyroOutSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,1]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="outSequence")
+gyroNavSeqArray = [gyroSelectSeq,gyroOutSeq]
 inputSeqArr = []
 openTime = time.time()
 closeTime = time.time()
@@ -457,23 +460,23 @@ def getBlinkData(inputChar):
     return addedBlink
 
 ########### construct sequence from blinks #####
-def readInputedSeq(ns, windowLength=10,homeOrRoom = True,eyeNav = 0):
+def readInputedSeq(ns, windowLength=10,homeOrRoom = True,controlMethod = 0):
     outSeqValue = 0
     startTime = time.time()
     while True:
         if ns.intr_val[0]:
             # ns.intr_val[0]=0
             return -1
-        if eyeNav == 2:
-            AccX, AccY, AccZ,_,_,_ = getGyroAccData(windowLength)
-        else:
-            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+        # 256 in 1 sec , 52 in 1 sec
+        AccX, AccY, AccZ,_,_,_ = getGyroAccData(2)
+    
+        eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
                 timeout=3, max_samples=int(windowLength))
-        if eyeNav == 1:
-            getL_R_eyeMovement(ns=ns,eegData=eeg_data)
-        elif eyeNav == 2:
+        if controlMethod == 1:
+            outSeqValue = getL_R_eyeMovement(ns=ns,eegData=eeg_data)
+        elif controlMethod == 2:
             # AccX, AccY, AccZ,_,_,_ = getGyroAccData()
-            outSeqValue = gyroController(ns = ns,accX = AccX, accY = AccY, accZ = AccZ,currentTime=startTime)
+            outSeqValue = gyroController(ns = ns,accX = AccX, accY = AccY, accZ = AccZ,EEG_data=eeg_data)
         else:
             outSeqValue = readFullinputedSeq(ns = ns,EEGData=eeg_data,windowLength=windowLength,homeOrRoom=homeOrRoom)
 
@@ -509,6 +512,8 @@ def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = Fa
             # print("in room")
     elif controllMethod == "blinkNavigator":
         compSeqArr = blinkNavSeqArray
+    elif controllMethod == "gyroNavigator":
+        compSeqArr = gyroNavSeqArray
     elif controllMethod == "falseFallDetection":
         compSeqArr = falseFallSeqArr
     try:
@@ -630,6 +635,12 @@ def applyCommand(mesageController,command,controlMethod):
                 mesageController.emit("Error: Unknown sequence is entered, Try again!!!! ")
             return 0
         return 0
+    elif controlMethod == "gyroNavigator":
+        if command == "selectSequence":
+            return 1
+        else:
+            return 0
+        
     elif controlMethod == "falseFallDetection":
         if command == "falseFall":
             return 1
@@ -720,6 +731,7 @@ def TFModelInit():
     EEGns.interpreter.allocate_tensors()
     
 def getL_R_eyeMovement(ns,eegData):
+    returnValue = 0
     mesageController = ns.eye_state
     EEGns.fulleegData = np.vstack([EEGns.fulleegData, np.array(eegData)[:,1:-2]]) if len(EEGns.fulleegData) else np.array(eegData)[:,1:-2]
    
@@ -740,16 +752,19 @@ def getL_R_eyeMovement(ns,eegData):
 
     if int(np.array(output_data[0]).argmax()) == 0:
         mesageController.emit("left")
-        pg.typewrite(["left"])
+        # pg.typewrite(["left"])
+        returnValue = -1
         print("look Left")
     elif int(np.array(output_data[0]).argmax()) == 1:
         print("look center")
     elif int(np.array(output_data[0]).argmax()) == 2:
         mesageController.emit("right")
-        pg.typewrite(["right"])
+        # pg.typewrite(["right"])
+        returnValue = 1
         print("look right")
 
     EEGns.fulleegData = []
+    return returnValue
 
 ########### MORSE code functions ############### need modification
 
@@ -836,8 +851,8 @@ def getGyroAccData(windowLenght = 10):
     gyroscpeZ = np.mean(np.array(gyro_data)[:,2]) * np.pi
     return accelerationX,accelerationY,accelerationZ,gyroscpeX,gyroscpeY,gyroscpeZ
 
-def gyroController(ns,accX,accY,accZ,currentTime):
-    mesageController = ns.eye_state
+def gyroController(ns,accX,accY,accZ,EEG_data):
+    mesageController = ns.type_of_blink_msg
     returnVal = 0
     if accY > 0.35 and accX < 0.05:
         mesageController.emit("tab 3")
@@ -862,11 +877,17 @@ def gyroController(ns,accX,accY,accZ,currentTime):
     else:
         mesageController.emit("tab 5")
         returnVal = 5
-        print("tab 5") # x: 0.15 , y: 0.15
+        # print("tab 5") # x: 0.15 , y: 0.15
     print("")
-    if time.time()-currentTime > 5:
+
+    isSelected = readFullinputedSeq(ns,EEGData=EEG_data,controllMethod="gyroNavigator")
+    if isSelected == 1:
         return returnVal
-    return 0
+    else:
+        return 0
+    # if time.time()-currentTime > 5:
+    #     return returnVal
+    # return returnVal
 ################### fall detection Handler ############################
 def handelFalls(accX,accY,accZ,gyroX,gyroY,gyroZ):
     #if fall is detected 

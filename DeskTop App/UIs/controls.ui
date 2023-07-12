@@ -19,10 +19,6 @@
   <property name="windowTitle">
    <string>Controls</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">
-border-image:url(:/imgs/sakura.jpg);</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,4,0,3,3">
    <item>
     <spacer name="verticalSpacer_2">
@@ -458,6 +454,26 @@ border-image:url(:/imgs/sakura.jpg);</string>
        </property>
        <property name="text">
         <string>Add</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_13">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>PushButton</string>
        </property>
       </widget>
      </item>
