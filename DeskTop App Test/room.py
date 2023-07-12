@@ -9,6 +9,7 @@ class Room(qtw.QWidget):
         #bath = "DeskTop App/"
         uic.loadUi("UIs/l2.ui", self)
         self.selected = 0
+        self.on_or_off = {1: 0, 2: 0, 3: 0, 4: 0}
         self.dic = {1: ["Light", self.lightButton], 2: ["Curtains", self.cartensButton], 3: ["TV", self.tvButton],
                     4: ["Fan", self.fanButton], 5: ["Home", self.homeButton]}
 
