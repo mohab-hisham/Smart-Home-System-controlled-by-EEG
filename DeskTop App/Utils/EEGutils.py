@@ -857,23 +857,23 @@ def gyroController(ns,accX,accY,accZ,EEG_data):
     if accY > 0.35 and accX < 0.05:
         mesageController.emit("tab 3")
         returnVal = 3
-        print("tab 3") # x: -0.001 , y: 0.4
+        # print("tab 3") # x: -0.001 , y: 0.4
     elif accY < -0.2 and accX < 0:
         mesageController.emit("tab 1")
         returnVal = 1
-        print("tab 1") # x: -0.03 , y: -0.25
+        # print("tab 1") # x: -0.03 , y: -0.25
     elif accY > 0.2 and accX > 0.1:
         mesageController.emit("tab 6")
         returnVal = 6
-        print("tab 6") # x: 0.22 , y: 0.38
+        # print("tab 6") # x: 0.22 , y: 0.38
     elif accY < -0.2 and accX > 0.1:
         mesageController.emit("tab 4")
         returnVal = 4
-        print("tab 4") # x: 0.13 , y: -0.25
+        # print("tab 4") # x: 0.13 , y: -0.25
     elif -0.2 < accY < 0.2 and accX < 0:
         mesageController.emit("tab 2")
         returnVal = 2
-        print("tab 2") # x: -0.001 , y: 0.10
+        # print("tab 2") # x: -0.001 , y: 0.10
     else:
         mesageController.emit("tab 5")
         returnVal = 5
