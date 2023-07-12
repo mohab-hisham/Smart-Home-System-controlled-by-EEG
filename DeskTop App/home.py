@@ -8,6 +8,7 @@ import sys
 import main as m
 from PyQt5.QtCore import *
 from Utils.MUSEutils import startMUSEconnection
+from Utils.EEGutils import TFModelInit
 
 class Smarthome(qtw.QMainWindow):
 
@@ -124,7 +125,7 @@ class Smarthome(qtw.QMainWindow):
 
     def get_control_mode(self):
         m.CntWorker.control_mode = self.control.get_control_option()
-        if m.CntWorker.control_mode:
+        if m.CntWorker.control_mode == 1:
             self.house.select(1)
             #self.house.message_label.setText("Living is selected.")
             print("new done!!")
@@ -148,7 +149,7 @@ class Smarthome(qtw.QMainWindow):
                 m.CntWorker.morse_falg = 1
 
             # select first item if in left right mode
-            if m.CntWorker.control_mode:
+            if m.CntWorker.control_mode == 1:
                 try: # because widgets in menue bar has no selection.
                     self.room_dic[self.current_widget].select(1)
                 except:
@@ -187,7 +188,7 @@ class Smarthome(qtw.QMainWindow):
                 pass
             self.room_dic[self.current_widget].close()
             self.house.show()
-            if m.CntWorker.control_mode:
+            if m.CntWorker.control_mode == 1:
                 try:
                     self.room_dic[self.current_widget].reset_selection()
                     self.room_dic[self.current_widget].selected = 0
@@ -245,6 +246,7 @@ class Smarthome(qtw.QMainWindow):
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
     startMUSEconnection()
+    TFModelInit()
     home = Smarthome()
     home.cnt_thr.start()
     #home.open()

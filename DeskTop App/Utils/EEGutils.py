@@ -123,6 +123,8 @@ muses = []
 
 homeOrCar = 1
 
+
+L_R_Flag = 0
 # modular sequence variables
 StartSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,0.5]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="startSequence")
 EndSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,0.5]),Blink(length=[0,0.2],durationAfterBlink=[0,0.5]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="endSequence")
@@ -462,22 +464,26 @@ def getBlinkData(inputChar):
 ########### construct sequence from blinks #####
 def readInputedSeq(ns, windowLength=10,homeOrRoom = True,controlMethod = 0):
     outSeqValue = 0
-    startTime = time.time()
+    # startTime = time.time()
     while True:
         if ns.intr_val[0]:
             # ns.intr_val[0]=0
             return -1
         # 256 in 1 sec , 52 in 1 sec
-        AccX, AccY, AccZ,_,_,_ = getGyroAccData(2)
-    
-        eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-                timeout=3, max_samples=int(windowLength))
+        if controlMethod == 1:
+            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+                timeout=3, max_samples=int(480))
+        else:
+            AccX, AccY, AccZ,_,_,_ = getGyroAccData(2)
+        
+            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+                    timeout=3, max_samples=int(windowLength))
         if controlMethod == 1:
             outSeqValue = getL_R_eyeMovement(ns=ns,eegData=eeg_data)
         elif controlMethod == 2:
             # AccX, AccY, AccZ,_,_,_ = getGyroAccData()
             outSeqValue = gyroController(ns = ns,accX = AccX, accY = AccY, accZ = AccZ,EEG_data=eeg_data)
-        else:
+        elif controlMethod == 0:
             outSeqValue = readFullinputedSeq(ns = ns,EEGData=eeg_data,windowLength=windowLength,homeOrRoom=homeOrRoom)
 
         if outSeqValue != 0:
@@ -731,8 +737,9 @@ def TFModelInit():
     EEGns.interpreter.allocate_tensors()
     
 def getL_R_eyeMovement(ns,eegData):
+    global L_R_Flag
     returnValue = 0
-    mesageController = ns.eye_state
+    mesageController = ns.type_of_blink_msg
     EEGns.fulleegData = np.vstack([EEGns.fulleegData, np.array(eegData)[:,1:-2]]) if len(EEGns.fulleegData) else np.array(eegData)[:,1:-2]
    
     print(EEGns.fulleegData.shape)
@@ -750,17 +757,28 @@ def getL_R_eyeMovement(ns,eegData):
 
     print(output_data)
 
-    if int(np.array(output_data[0]).argmax()) == 0:
+    if int(np.array(output_data[0]).argmax()) == 0 and L_R_Flag == 1:
+        L_R_Flag = 0
         mesageController.emit("left")
         # pg.typewrite(["left"])
-        returnValue = -1
+        returnValue = 1
         print("look Left")
     elif int(np.array(output_data[0]).argmax()) == 1:
+        L_R_Flag = 1
         print("look center")
-    elif int(np.array(output_data[0]).argmax()) == 2:
+        chunks = np.array_split(eegData,48)
+        for i in range(48):
+            isSelected = readFullinputedSeq(ns,EEGData=chunks[i],controllMethod="gyroNavigator")
+            if isSelected == 1:
+                returnValue = 2
+                break
+            else:
+                returnValue = 0
+    elif int(np.array(output_data[0]).argmax()) == 2 and L_R_Flag == 1:
+        L_R_Flag = 0
         mesageController.emit("right")
         # pg.typewrite(["right"])
-        returnValue = 1
+        returnValue = 3
         print("look right")
 
     EEGns.fulleegData = []
@@ -878,7 +896,7 @@ def gyroController(ns,accX,accY,accZ,EEG_data):
         mesageController.emit("tab 5")
         returnVal = 5
         # print("tab 5") # x: 0.15 , y: 0.15
-    print("")
+    # print("")
 
     isSelected = readFullinputedSeq(ns,EEGData=EEG_data,controllMethod="gyroNavigator")
     if isSelected == 1:
