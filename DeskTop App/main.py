@@ -40,10 +40,13 @@ ns = SimpleNamespace()
 
 class CntWorker(QObject):
     morse_falg =0
+    control_mode = 0
     selected_item_code_msg = pyqtSignal(int)
     #fin = pyqtSignal()
 
     mouse_interrupt_msg =  pyqtSignal(int)
+
+    left_right_msg = pyqtSignal(int)
 
     type_of_blink_msg = pyqtSignal(str)
 
@@ -63,15 +66,18 @@ class CntWorker(QObject):
         if CntWorker.morse_falg:
             EEGutils.readMorseCode(self)
         else:
-            code = EEGutils.readInputedSeq(self,windowLength=10,homeOrRoom=True,eyeNav=0)
+            code = EEGutils.readInputedSeq(self,windowLength=10,homeOrRoom=True,controlMethod=CntWorker.control_mode)
 
             # while code == 0:
             #     # loop for taking input
             #     code = self.readInputedSeq()
             self.type_of_blink_msg.emit("")
             if code != -1:
+                if CntWorker.control_mode == 1:
+                    self.left_right_msg.emit(code-2)
+                else:
                 # if no button is clicked:
-                self.selected_item_code_msg.emit(code)
+                    self.selected_item_code_msg.emit(code)
                 print("sig is emitted")
                 time.sleep(2)
 
