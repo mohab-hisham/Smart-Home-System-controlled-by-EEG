@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets as qtw
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
 import sys
+import main as m
 
 class BathRoom(qtw.QWidget):
     def __init__(self):
@@ -10,17 +11,26 @@ class BathRoom(qtw.QWidget):
         uic.loadUi("UIs/toi.ui", self)
 
         self.setStyleSheet("background-color: #122222; ")
-        #
+        self.selected = 0
+        self.on_off_background = {1: "background-color: #ffff30;", 0: "background-color: #666660;"}
+        self.on_or_off = {1: 0, 2: 0, 3: 0, 4: 0}
+        self.dic = {1: ["Light", self.lightButton], 2: ["Bidet", self.bidetButton],
+                    3: ["Cover", self.coverButton],
+                    4: ["Flush", self.flushButton], 5: ["Home", self.homeButton]}
 
-        common_style = "background-color: #fffff0; border-radius: 90px; border-color: white; background-repeat: no-repeat; "
-        self.message_label.setStyleSheet(common_style)
-        self.info_label.setStyleSheet(common_style)
+        self.img_styles = {1: "border-image: url(imgs/light-bulb.png);", 2: "border-image: url(imgs/bidet.jpeg);",
+                           3: "border-image: url(imgs/cover.jpeg);", 4: "border-image: url(imgs/flush.jpeg);",
+                           5: "border-image: url(imgs/home.png);"}
 
-        self.homeButton.setStyleSheet(common_style + "border-image: url(imgs/home.png);")
-        self.lightButton.setStyleSheet(common_style + "border-image: url(imgs/light-bulb.png);")
-        self.bidetButton.setStyleSheet(common_style + "border-image: url(imgs/bidet.jpeg);")
-        self.coverButton.setStyleSheet(common_style + "border-image: url(imgs/cover.jpeg);")
-        self.flushButton.setStyleSheet(common_style + "border-image: url(imgs/flush.jpeg);")
+        self.common_style = "border-radius: 90px; border: 10px solid red; background-repeat: no-repeat; "
+        self.message_label.setStyleSheet(self.common_style + "background-color: #fffff0;")
+        self.info_label.setStyleSheet(self.common_style + "background-color: #fffff0;")
+
+        self.lightButton.setStyleSheet(self.common_style + self.img_styles[1]+ self.on_off_background[self.on_or_off[1]])
+        self.bidetButton.setStyleSheet(self.common_style + self.img_styles[2]+ self.on_off_background[self.on_or_off[2]])
+        self.coverButton.setStyleSheet(self.common_style + self.img_styles[3]+ self.on_off_background[self.on_or_off[3]])
+        self.flushButton.setStyleSheet(self.common_style + self.img_styles[4]+ self.on_off_background[self.on_or_off[4]])
+        self.homeButton.setStyleSheet(self.common_style + self.img_styles[5])
 
 
 
@@ -38,6 +48,25 @@ class BathRoom(qtw.QWidget):
         mapp = {21: 'Light', 22: 'Bidet', 23: 'Toilet Cover', 24: 'Flush'}
         msg = mapp[cnt_val] + " is turned on."
         self.show_state(msg)
+
+    def select(self, item_no):
+        print("in rooom select")
+
+        new_style = "background-color: #fffff0; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
+        if self.selected != 0:
+            self.reset_selection()
+
+        if item_no != 5 or m.CntWorker.control_mode:
+            self.dic[item_no][1].setStyleSheet(new_style)
+            self.dic[item_no][1].setText(self.dic[item_no][0])
+            self.selected = item_no
+        else:
+            self.selected = 0
+
+    def reset_selection(self):
+        self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected]
+                                                 + self.on_off_background[self.on_or_off[self.selected]])
+        self.dic[self.selected][1].setText("")
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
