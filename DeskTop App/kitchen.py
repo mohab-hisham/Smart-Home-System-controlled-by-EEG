@@ -16,8 +16,8 @@ class Kitchen(qtw.QWidget):
         self.selected = 0
         self.on_or_off = {1: 0, 2: 0, 3: 0, 4: 0}
         self.on_off_background = {1: "background-color: #ffff30;", 0: "background-color: #666660;"}
-        self.dic = {1: ["Light", self.lightButton], 2: ["Stove", self.stoveButton], 3: ["Washing Machine", self.washerButton],
-                    4: ["Chimney", self.chimneyButton], 5: ["Home", self.homeButton]}
+        self.dic = {1: ["Light", self.lightButton, "الاضاءة"], 2: ["Stove", self.stoveButton, "البوتجاز"], 3: ["Washing Machine", self.washerButton, "الغسالة"],
+                    4: ["Chimney", self.chimneyButton, "المدخنة"], 5: ["Home", self.homeButton, "المنزل"]}
 
         self.img_styles = {1: "border-image: url(imgs/light-bulb.png);", 2: "border-image: url(imgs/oven.png);",
                            3: "border-image: url(imgs/washing-machine.png);", 4: "border-image: url(imgs/food.png);",
@@ -59,21 +59,27 @@ class Kitchen(qtw.QWidget):
 
     def select(self, item_no):
         print("in rooom select")
-
         new_style = "background-color: #fffff0; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
         if self.selected != 0:
             self.reset_selection()
 
         if item_no != 5 or m.CntWorker.control_mode:
             self.dic[item_no][1].setStyleSheet(new_style)
-            self.dic[item_no][1].setText(self.dic[item_no][0])
+            if m.CntWorker.isArabic:
+                self.dic[item_no][1].setText(self.dic[item_no][2])
+            else:
+                self.dic[item_no][1].setText(self.dic[item_no][0])
             self.selected = item_no
+
         else:
             self.selected = 0
 
     def reset_selection(self):
-        self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected]
-                                                 + self.on_off_background[self.on_or_off[self.selected]])
+        if self.selected != 5:
+            self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected]
+                                                     + self.on_off_background[self.on_or_off[self.selected]])
+        else:
+            self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected])
         self.dic[self.selected][1].setText("")
 
 if __name__ == '__main__':

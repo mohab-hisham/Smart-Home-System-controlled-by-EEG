@@ -82,7 +82,7 @@
      <property name="font">
       <font>
        <family>Times New Roman</family>
-       <pointsize>35</pointsize>
+       <pointsize>50</pointsize>
       </font>
      </property>
      <property name="text">
@@ -101,7 +101,7 @@
      <property name="font">
       <font>
        <family>Times New Roman</family>
-       <pointsize>35</pointsize>
+       <pointsize>50</pointsize>
       </font>
      </property>
      <property name="autoFillBackground">
@@ -152,7 +152,7 @@
      <property name="font">
       <font>
        <family>Times New Roman</family>
-       <pointsize>35</pointsize>
+       <pointsize>50</pointsize>
       </font>
      </property>
      <property name="text">
@@ -187,7 +187,7 @@
      <property name="font">
       <font>
        <family>Times New Roman</family>
-       <pointsize>35</pointsize>
+       <pointsize>50</pointsize>
       </font>
      </property>
      <property name="text">
@@ -259,7 +259,7 @@
        <property name="font">
         <font>
          <family>Times New Roman</family>
-         <pointsize>14</pointsize>
+         <pointsize>40</pointsize>
         </font>
        </property>
        <property name="frameShape">
