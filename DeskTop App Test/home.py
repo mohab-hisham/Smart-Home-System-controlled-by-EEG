@@ -174,15 +174,16 @@ class Smarthome(qtw.QMainWindow):
 
                 if on_or_off_state:
                     self.room_dic[self.current_widget].on_or_off[widget_no] = 0
-                    self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is turned off !!")
+                    self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned off !!")
                 else:
                     self.room_dic[self.current_widget].on_or_off[widget_no] = 1
-                    self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is turned on !!" )
+                    self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on !!" )
+
 
                 self.send_to_server([room_name, item_name, on_or_off_state])
                 self.room_dic[self.current_widget].select(widget_no)
                 print("in second if")
-                print("any button is clicked")
+
 
         # if 'return to home button' is selected:
         else:
