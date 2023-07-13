@@ -7,6 +7,8 @@ import room, bathroom, kitchen, corridor, calibration, controls, message, fall, 
 import sys
 import main as m
 from PyQt5.QtCore import *
+from Utils.EEGutils import TFModelInit
+from Utils.MUSEutils import startMUSEconnection
 
 
 class Smarthome(qtw.QMainWindow):
@@ -301,7 +303,8 @@ class Smarthome(qtw.QMainWindow):
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
-    #startMUSEconnection()
+    startMUSEconnection()
+    TFModelInit()
     home = Smarthome()
     home.cnt_thr.start()
     #home.open()
