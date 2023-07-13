@@ -13,32 +13,81 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QRadioButton" name="seq_radioButton">
-     <property name="text">
-      <string>Sequence</string>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="cont_groupBox">
+     <property name="title">
+      <string>Control Mode</string>
      </property>
-     <property name="checked">
-      <bool>true</bool>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QRadioButton" name="seq_radioButton">
+          <property name="text">
+           <string>Sequence</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="left_right_radioButton">
+          <property name="text">
+           <string>Left and Right </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="head_radioButton">
+          <property name="text">
+           <string>Head Movment</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item>
-    <widget class="QRadioButton" name="left_right_radioButton">
-     <property name="text">
-      <string>Left and Right </string>
+   <item row="0" column="2">
+    <widget class="QGroupBox" name="lang_groupBox">
+     <property name="title">
+      <string>Language</string>
      </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QRadioButton" name="arabic_radioButton">
+          <property name="text">
+           <string>العربية</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="english_radioButton">
+          <property name="text">
+           <string>English</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item>
-    <widget class="QRadioButton" name="head_radioButton">
-     <property name="text">
-      <string>Head Movment</string>
-     </property>
-    </widget>
-   </item>
-   <item>
+   <item row="1" column="1">
     <widget class="QPushButton" name="doneButton">
      <property name="font">
       <font>

@@ -44,6 +44,9 @@ class Ui_Form(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.room1_Button.sizePolicy().hasHeightForWidth())
         self.room1_Button.setSizePolicy(sizePolicy)
+        font = QFont()
+        font.setPointSize(50)
+        self.room1_Button.setFont(font)
 
         self.gridLayout.addWidget(self.room1_Button, 1, 3, 1, 1)
 
@@ -51,6 +54,7 @@ class Ui_Form(object):
         self.room2_Button.setObjectName(u"room2_Button")
         sizePolicy.setHeightForWidth(self.room2_Button.sizePolicy().hasHeightForWidth())
         self.room2_Button.setSizePolicy(sizePolicy)
+        self.room2_Button.setFont(font)
 
         self.gridLayout.addWidget(self.room2_Button, 1, 5, 1, 1)
 
@@ -58,8 +62,6 @@ class Ui_Form(object):
         self.livingButton.setObjectName(u"livingButton")
         sizePolicy.setHeightForWidth(self.livingButton.sizePolicy().hasHeightForWidth())
         self.livingButton.setSizePolicy(sizePolicy)
-        font = QFont()
-        font.setPointSize(8)
         self.livingButton.setFont(font)
 
         self.gridLayout.addWidget(self.livingButton, 1, 1, 1, 1)
@@ -68,6 +70,7 @@ class Ui_Form(object):
         self.kitchenButton.setObjectName(u"kitchenButton")
         sizePolicy.setHeightForWidth(self.kitchenButton.sizePolicy().hasHeightForWidth())
         self.kitchenButton.setSizePolicy(sizePolicy)
+        self.kitchenButton.setFont(font)
 
         self.gridLayout.addWidget(self.kitchenButton, 3, 1, 1, 1)
 
@@ -77,7 +80,7 @@ class Ui_Form(object):
         self.message_label.setSizePolicy(sizePolicy)
         font1 = QFont()
         font1.setFamilies([u"Times New Roman"])
-        font1.setPointSize(15)
+        font1.setPointSize(40)
         font1.setBold(False)
         font1.setItalic(False)
         self.message_label.setFont(font1)
@@ -108,6 +111,7 @@ class Ui_Form(object):
         self.bathButton.setObjectName(u"bathButton")
         sizePolicy.setHeightForWidth(self.bathButton.sizePolicy().hasHeightForWidth())
         self.bathButton.setSizePolicy(sizePolicy)
+        self.bathButton.setFont(font)
 
         self.gridLayout.addWidget(self.bathButton, 3, 5, 1, 1)
 
@@ -117,7 +121,7 @@ class Ui_Form(object):
         self.info_label.setSizePolicy(sizePolicy)
         font3 = QFont()
         font3.setFamilies([u"Times New Roman"])
-        font3.setPointSize(15)
+        font3.setPointSize(40)
         self.info_label.setFont(font3)
         self.info_label.setFrameShape(QFrame.WinPanel)
         self.info_label.setFrameShadow(QFrame.Raised)
@@ -129,6 +133,7 @@ class Ui_Form(object):
         self.lobbyButton.setObjectName(u"lobbyButton")
         sizePolicy.setHeightForWidth(self.lobbyButton.sizePolicy().hasHeightForWidth())
         self.lobbyButton.setSizePolicy(sizePolicy)
+        self.lobbyButton.setFont(font)
 
         self.gridLayout.addWidget(self.lobbyButton, 3, 3, 1, 1)
 

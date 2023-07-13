@@ -20,8 +20,8 @@ class Home(qtw.QWidget):
 
         self.selected = 0
         self.setStyleSheet("background-color: #122222; ")
-        self.dic = {1: ["Living", self.livingButton], 2: ["Room 1", self.room1_Button], 3: ["Room 2", self.room2_Button],
-                    4: ["Kitchen", self.kitchenButton], 5: ["Corridor", self.lobbyButton], 6: ["Toilet", self.bathButton]}
+        self.dic = {1: ["Living", self.livingButton, "غرفة المعيشة"], 2: ["Room 1", self.room1_Button, "الغرفة الأولى"], 3: ["Room 2", self.room2_Button,"الغرفة الثانية"],
+                    4: ["Kitchen", self.kitchenButton, "المطبخ"], 5: ["Corridor", self.lobbyButton, "الممر"], 6: ["Toilet", self.bathButton, "دوره المياه"]}
 
         self.common_style = "background-color: #fffff0; border-radius: 90px; border-color: white; background-repeat: no-repeat; "
         self.message_label.setStyleSheet(
@@ -46,7 +46,10 @@ class Home(qtw.QWidget):
             self.reset_selection()
 
         self.dic[item_no][1].setStyleSheet(new_style)
-        self.dic[item_no][1].setText(self.dic[item_no][0])
+        if m.CntWorker.isArabic:
+            self.dic[item_no][1].setText(self.dic[item_no][2])
+        else:
+            self.dic[item_no][1].setText(self.dic[item_no][0])
         self.selected = item_no
 
     def reset_selection(self):
