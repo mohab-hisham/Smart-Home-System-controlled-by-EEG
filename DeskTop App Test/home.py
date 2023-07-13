@@ -267,6 +267,7 @@ class Smarthome(qtw.QMainWindow):
         self.cnt_thr.quit()
 
     def send_to_server(self, info_list):
+        print(info_list[0],info_list[1],info_list[2])
         # list structure -> [room, item, on or off]
         #room -> str
         #item -> str
