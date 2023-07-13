@@ -479,7 +479,7 @@ def readInputedSeq(ns, windowLength=10,homeOrRoom = True,controlMethod = 0):
             eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
                     timeout=3, max_samples=int(windowLength))
         if controlMethod == 1:
-            outSeqValue = getL_R_eyeMovement(ns=ns,eegData=eeg_data)
+            outSeqValue = getL_R_eyeMovement(ns=ns,eegData=eeg_data,startTime=time.time())
         elif controlMethod == 2:
             # AccX, AccY, AccZ,_,_,_ = getGyroAccData()
             outSeqValue = gyroController(ns = ns,accX = AccX, accY = AccY, accZ = AccZ,EEG_data=eeg_data)
@@ -736,7 +736,7 @@ def TFModelInit():
     # Allocate tensors
     EEGns.interpreter.allocate_tensors()
     
-def getL_R_eyeMovement(ns,eegData):
+def getL_R_eyeMovement(ns,eegData,startTime):
     global L_R_Flag
     returnValue = 0
     mesageController = ns.type_of_blink_msg
@@ -766,9 +766,11 @@ def getL_R_eyeMovement(ns,eegData):
     elif int(np.array(output_data[0]).argmax()) == 1:
         L_R_Flag = 1
         print("look center")
-        chunks = np.array_split(eegData,48)
-        for i in range(48):
-            isSelected = readFullinputedSeq(ns,EEGData=chunks[i],controllMethod="gyroNavigator")
+        # chunks = np.array_split(eegData,48)
+        while (time.time()- startTime) < 5:
+            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+                timeout=0.5, max_samples=int(10))
+            isSelected = readFullinputedSeq(ns,EEGData=eeg_data,controllMethod="gyroNavigator")
             if isSelected == 1:
                 returnValue = 2
                 break
