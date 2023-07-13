@@ -7,8 +7,8 @@ import room, bathroom, kitchen, corridor, calibration, controls, message, fall, 
 import sys
 import main as m
 from PyQt5.QtCore import *
-from Utils.MUSEutils import startMUSEconnection
 from Utils.EEGutils import TFModelInit
+from Utils.MUSEutils import startMUSEconnection
 
 class Smarthome(qtw.QMainWindow):
 
@@ -152,6 +152,7 @@ class Smarthome(qtw.QMainWindow):
             if m.CntWorker.control_mode == 1:
                 try: # because widgets in menue bar has no selection.
                     self.room_dic[self.current_widget].select(1)
+                    self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
                 except:
                     pass
 
@@ -167,10 +168,23 @@ class Smarthome(qtw.QMainWindow):
                 else:
                     pass
             else:
-                self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is turned on !!" )
+                item_name = self.room_dic[self.current_widget].dic[widget_no][0]
+                # Be careful, potential bug if self.current_widget is zero:
+                room_name = self.house.dic[self.current_widget][0]
+                on_or_off_state = self.room_dic[self.current_widget].on_or_off[widget_no]
+
+                if on_or_off_state:
+                    self.room_dic[self.current_widget].on_or_off[widget_no] = 0
+                    self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned off !!")
+                else:
+                    self.room_dic[self.current_widget].on_or_off[widget_no] = 1
+                    self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on !!" )
+
+
+                self.send_to_server([room_name, item_name, on_or_off_state])
                 self.room_dic[self.current_widget].select(widget_no)
                 print("in second if")
-                print("any button is clicked")
+
 
         # if 'return to home button' is selected:
         else:
@@ -183,6 +197,7 @@ class Smarthome(qtw.QMainWindow):
             print("in third if")
             try:
                 self.room_dic[self.current_widget].select(widget_no)
+                #self.room_dic[self.current_widget].message_label.setText(f"{widget_no} is selected.")
             except:
                 print("in pass")
                 pass
@@ -221,7 +236,20 @@ class Smarthome(qtw.QMainWindow):
                     self.cnt_worker.mouse_interrupt_msg.emit(5)
                 else:
                     # if user wants to turn a devices without returning to home menue:
-                    self.room_dic[self.current_widget].message_label.setText(f"{selected_item} is turned on !!")
+                    item_name = self.room_dic[self.current_widget].dic[selected_item][0]
+                    # Be careful, potential bug if self.current_widget is zero:
+                    room_name = self.house.dic[self.current_widget][0]
+                    on_or_off_state = self.room_dic[self.current_widget].on_or_off[selected_item]
+
+                    if on_or_off_state:
+                        self.room_dic[self.current_widget].on_or_off[selected_item] = 0
+                        self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned off !!")
+
+                    else:
+                        self.room_dic[self.current_widget].on_or_off[selected_item] = 1
+                        self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on!!")
+
+                    self.send_to_server([room_name, item_name, on_or_off_state])
 
 
         else:
@@ -232,12 +260,20 @@ class Smarthome(qtw.QMainWindow):
             self.house.selected = 0
             self.room_dic[self.current_widget].show()
             self.room_dic[self.current_widget].select(1)
+            self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
+
 
 
 
         self.cnt_thr.quit()
 
-
+    def send_to_server(self, info_list):
+        # list structure -> [room, item, on or off]
+        #room -> str
+        #item -> str
+        # on or off -> int (1 -> on, 2 -> off)
+        # self.mohab.this_is_where_your_code_goes()
+        pass
 
 
 
