@@ -34,7 +34,6 @@ class Room(qtw.QWidget):
 
     def select(self, item_no):
         print("in rooom select")
-
         new_style = "background-color: #fffff0; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
         if self.selected != 0:
             self.reset_selection()
@@ -43,13 +42,17 @@ class Room(qtw.QWidget):
             self.dic[item_no][1].setStyleSheet(new_style)
             self.dic[item_no][1].setText(self.dic[item_no][0])
             self.selected = item_no
+
         else:
             self.selected = 0
 
     def reset_selection(self):
-        self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected]
-                                                 + self.on_off_background[self.on_or_off[self.selected]])
-        self.dic[self.selected][1].setText("")
+            if self.selected != 5:
+                self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected]
+                                                         + self.on_off_background[self.on_or_off[self.selected]])
+            else:
+                self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected])
+            self.dic[self.selected][1].setText("")
 
         #print("after room select")
 

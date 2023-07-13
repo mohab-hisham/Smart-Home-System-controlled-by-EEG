@@ -67,13 +67,13 @@ class CntWorker(QObject):
 
             time.sleep(1)
 
-            # if i == 10:
-            #     seq += "4"
-            #     self.type_of_blink_msg.emit("type 4")
+            if i == 10:
+                seq += "4"
+                self.type_of_blink_msg.emit("type 4")
 
-            # elif i == 20:
-            #     seq += "4"
-            #     self.type_of_blink_msg.emit("type 4")
+            elif i == 20:
+                seq += "4"
+                self.type_of_blink_msg.emit("type 4")
 
         try:
             return home_seq[seq]
@@ -161,7 +161,7 @@ class CntWorker(QObject):
             if self.intr_val[0]:
                 return 2
             if i == 7:
-                return 0
+                return 1
             if i == 14:
                 return 1
             elif i == 24:
