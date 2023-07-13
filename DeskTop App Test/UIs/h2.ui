@@ -61,6 +61,11 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>50</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -73,6 +78,11 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>50</pointsize>
+      </font>
      </property>
      <property name="text">
       <string/>
@@ -89,7 +99,7 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>8</pointsize>
+       <pointsize>50</pointsize>
       </font>
      </property>
      <property name="text">
@@ -104,6 +114,11 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>50</pointsize>
+      </font>
      </property>
      <property name="text">
       <string/>
@@ -121,7 +136,7 @@
      <property name="font">
       <font>
        <family>Times New Roman</family>
-       <pointsize>15</pointsize>
+       <pointsize>40</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
@@ -186,6 +201,11 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>50</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string/>
      </property>
@@ -202,7 +222,7 @@
      <property name="font">
       <font>
        <family>Times New Roman</family>
-       <pointsize>15</pointsize>
+       <pointsize>40</pointsize>
       </font>
      </property>
      <property name="frameShape">
@@ -226,6 +246,11 @@
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>50</pointsize>
+      </font>
      </property>
      <property name="text">
       <string/>

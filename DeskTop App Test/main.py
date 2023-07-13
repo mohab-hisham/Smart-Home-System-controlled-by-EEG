@@ -162,7 +162,7 @@ class CntWorker(QObject):
             if self.intr_val[0]:
                 return 2
             if i == 7:
-                return 0
+                return 1
             if i == 14:
                 return 1
             elif i == 24:
