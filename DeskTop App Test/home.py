@@ -18,7 +18,6 @@ class Smarthome(qtw.QMainWindow):
 
         self.setStyleSheet("background-color: #122222; ")
 
-
         self.house = house.Home()
         self.room1 = room.Room("Room 1")
         self.room2 = room.Room("Room 2")
@@ -123,7 +122,9 @@ class Smarthome(qtw.QMainWindow):
         self.showFullScreen()
 
     def get_control_mode(self):
-        m.CntWorker.control_mode = self.control.get_control_option()
+        cont, lang = self.control.get_control_option()
+        m.CntWorker.control_mode = cont
+        m.CntWorker.isArabic = lang
         if m.CntWorker.control_mode:
             self.house.select(1)
             #self.house.message_label.setText("Living is selected.")
@@ -151,7 +152,11 @@ class Smarthome(qtw.QMainWindow):
             if m.CntWorker.control_mode:
                 try: # because widgets in menue bar has no selection.
                     self.room_dic[self.current_widget].select(1)
-                    self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
+                    if m.CntWorker.isArabic:
+                        self.room_dic[self.current_widget].message_label.setText(
+                            f" تم تحديد {self.room_dic[self.current_widget].dic[1][2]} .")
+                    else:
+                        self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
                 except:
                     pass
 
@@ -171,13 +176,19 @@ class Smarthome(qtw.QMainWindow):
                 # Be careful, potential bug if self.current_widget is zero:
                 room_name = self.house.dic[self.current_widget][0]
                 on_or_off_state = self.room_dic[self.current_widget].on_or_off[widget_no]
-
                 if on_or_off_state:
                     self.room_dic[self.current_widget].on_or_off[widget_no] = 0
-                    self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned off !!")
+                    if m.CntWorker.isArabic:
+                        self.room_dic[self.current_widget].message_label.setText(f"    تم اطفاء {self.room_dic[self.current_widget].dic[widget_no][2]} !! ")
+                    else:
+                        self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned off !!")
                 else:
                     self.room_dic[self.current_widget].on_or_off[widget_no] = 1
-                    self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on !!" )
+                    if m.CntWorker.isArabic:
+                        self.room_dic[self.current_widget].message_label.setText(
+                            f"   تم تشغيل {self.room_dic[self.current_widget].dic[widget_no][2]} !!")
+                    else:
+                        self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on !!")
 
 
                 self.send_to_server([room_name, item_name, self.room_dic[self.current_widget].on_or_off[widget_no]])
@@ -208,7 +219,10 @@ class Smarthome(qtw.QMainWindow):
                     self.room_dic[self.current_widget].selected = 0
                 except:
                     pass
-                self.house.message_label.setText("Living is selected.")
+                if m.CntWorker.isArabic:
+                    self.house.message_label.setText("تم تحديد غرفة المعيشة.")
+                else:
+                    self.house.message_label.setText("Living is selected.")
             self.current_widget = 0
 
 
@@ -227,7 +241,12 @@ class Smarthome(qtw.QMainWindow):
                 selected_item = list(self.room_dic[self.current_widget].dic)[-1]
 
             self.room_dic[self.current_widget].select(selected_item)
-            self.room_dic[self.current_widget].message_label.setText(f"{selected_item} is selected.")
+            if m.CntWorker.isArabic:
+                self.room_dic[self.current_widget].message_label.setText(
+                    f" تم تحديد {selected_item} .")
+            else:
+
+                self.room_dic[self.current_widget].message_label.setText(f"{selected_item} is selected.")
 
             if left_right_state == 0:
                 if selected_item == 5:
@@ -242,11 +261,19 @@ class Smarthome(qtw.QMainWindow):
 
                     if on_or_off_state:
                         self.room_dic[self.current_widget].on_or_off[selected_item] = 0
-                        self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned off !!")
+                        if m.CntWorker.isArabic:
+                            self.room_dic[self.current_widget].message_label.setText(
+                                f"   تم اطفاء {self.room_dic[self.current_widget].dic[selected_item][2]} !! ")
+                        else:
+                            self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned off !!")
 
                     else:
                         self.room_dic[self.current_widget].on_or_off[selected_item] = 1
-                        self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on!!")
+                        if m.CntWorker.isArabic:
+                            self.room_dic[self.current_widget].message_label.setText(
+                                f"    تم تشغيل {self.room_dic[self.current_widget].dic[selected_item][2]} !! ")
+                        else:
+                            self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on!!")
 
                     self.send_to_server([room_name, item_name, self.room_dic[self.current_widget].on_or_off[selected_item]])
 
@@ -259,7 +286,11 @@ class Smarthome(qtw.QMainWindow):
             self.house.selected = 0
             self.room_dic[self.current_widget].show()
             self.room_dic[self.current_widget].select(1)
-            self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
+            if m.CntWorker.isArabic:
+                self.room_dic[self.current_widget].message_label.setText(
+                    f" تم تحديد {self.room_dic[self.current_widget].dic[1][2]} .")
+            else:
+                self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
 
 
 

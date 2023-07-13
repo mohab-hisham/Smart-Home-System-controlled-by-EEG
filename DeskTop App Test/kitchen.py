@@ -59,21 +59,27 @@ class Kitchen(qtw.QWidget):
 
     def select(self, item_no):
         print("in rooom select")
-
         new_style = "background-color: #fffff0; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
         if self.selected != 0:
             self.reset_selection()
 
         if item_no != 5 or m.CntWorker.control_mode:
             self.dic[item_no][1].setStyleSheet(new_style)
-            self.dic[item_no][1].setText(self.dic[item_no][0])
+            if m.CntWorker.isArabic:
+                self.dic[item_no][1].setText(self.dic[item_no][2])
+            else:
+                self.dic[item_no][1].setText(self.dic[item_no][0])
             self.selected = item_no
+
         else:
             self.selected = 0
 
     def reset_selection(self):
-        self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected]
-                                                 + self.on_off_background[self.on_or_off[self.selected]])
+        if self.selected != 5:
+            self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected]
+                                                     + self.on_off_background[self.on_or_off[self.selected]])
+        else:
+            self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected])
         self.dic[self.selected][1].setText("")
 
 if __name__ == '__main__':

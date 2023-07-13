@@ -40,6 +40,7 @@ ns = SimpleNamespace()
 class CntWorker(QObject):
     morse_falg = 0
     control_mode = 0
+    isArabic = 1
 
     selected_item_code_msg = pyqtSignal(int)
 
@@ -161,7 +162,7 @@ class CntWorker(QObject):
             if self.intr_val[0]:
                 return 2
             if i == 7:
-                return 1
+                return 0
             if i == 14:
                 return 1
             elif i == 24:
