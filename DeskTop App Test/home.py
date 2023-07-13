@@ -180,7 +180,7 @@ class Smarthome(qtw.QMainWindow):
                     self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on !!" )
 
 
-                self.send_to_server([room_name, item_name, on_or_off_state])
+                self.send_to_server([room_name, item_name, self.room_dic[self.current_widget].on_or_off[widget_no]])
                 self.room_dic[self.current_widget].select(widget_no)
                 print("in second if")
 
@@ -248,7 +248,7 @@ class Smarthome(qtw.QMainWindow):
                         self.room_dic[self.current_widget].on_or_off[selected_item] = 1
                         self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on!!")
 
-                    self.send_to_server([room_name, item_name, on_or_off_state])
+                    self.send_to_server([room_name, item_name, self.room_dic[self.current_widget].on_or_off[selected_item]])
 
 
         else:
