@@ -470,20 +470,30 @@ def readInputedSeq(ns, windowLength=10,homeOrRoom = True,controlMethod = 0):
             # ns.intr_val[0]=0
             return -1
         # 256 in 1 sec , 52 in 1 sec
+        # if controlMethod == 1:
+        #     eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+        #         timeout=3, max_samples=int(480))
+            
+        # else:
+        #     AccX, AccY, AccZ,_,_,_ = getGyroAccData(2)
+        
+        #     eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+        #             timeout=3, max_samples=int(windowLength))
         if controlMethod == 1:
             eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
                 timeout=3, max_samples=int(480))
-        else:
+            outSeqValue = getL_R_eyeMovement(ns=ns,eegData=eeg_data,startTime=time.time())
+
+        elif controlMethod == 2:
+            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+                    timeout=3, max_samples=int(200))
+            
             AccX, AccY, AccZ,_,_,_ = getGyroAccData(2)
-        
+            outSeqValue = gyroController(ns = ns,accX = AccX, accY = AccY, accZ = AccZ,EEG_data=eeg_data)
+
+        elif controlMethod == 0:
             eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
                     timeout=3, max_samples=int(windowLength))
-        if controlMethod == 1:
-            outSeqValue = getL_R_eyeMovement(ns=ns,eegData=eeg_data,startTime=time.time())
-        elif controlMethod == 2:
-            # AccX, AccY, AccZ,_,_,_ = getGyroAccData()
-            outSeqValue = gyroController(ns = ns,accX = AccX, accY = AccY, accZ = AccZ,EEG_data=eeg_data)
-        elif controlMethod == 0:
             outSeqValue = readFullinputedSeq(ns = ns,EEGData=eeg_data,windowLength=windowLength,homeOrRoom=homeOrRoom)
 
         if outSeqValue != 0:
@@ -767,11 +777,12 @@ def getL_R_eyeMovement(ns,eegData,startTime):
         L_R_Flag = 1
         print("look center")
         # chunks = np.array_split(eegData,48)
-        while (time.time()- startTime) < 5:
-            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-                timeout=0.5, max_samples=int(10))
-            isSelected = readFullinputedSeq(ns,EEGData=eeg_data,controllMethod="gyroNavigator")
+        while (time.time()- startTime) < 2:
+            Jaweeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+                timeout=2, max_samples=int(200))
+            isSelected = detectJawClench(EEGData=Jaweeg_data,windlenght=200)
             if isSelected == 1:
+                mesageController.emit("Jaw Clenched!!")
                 returnValue = 2
                 break
             else:
@@ -900,7 +911,7 @@ def gyroController(ns,accX,accY,accZ,EEG_data):
         # print("tab 5") # x: 0.15 , y: 0.15
     # print("")
 
-    isSelected = readFullinputedSeq(ns,EEGData=EEG_data,controllMethod="gyroNavigator")
+    isSelected = detectJawClench(EEGData=EEG_data,windlenght=200)
     if isSelected == 1:
         return returnVal
     else:
@@ -946,6 +957,29 @@ def heartRate():
 
     heartRateValue = int(np.max([np.array(PPG2_peaks).shape[0] , np.array(PPG3_peaks).shape[0]])) * 12
     return heartRateValue
+
+
+def detectJawClench(EEGData,windlenght = 250): # min window length is 200
+    LE_ch_data = np.array(EEGData)[:, 0]
+    LF_ch_data = np.array(EEGData)[:, 1]
+    RF_ch_data = np.array(EEGData)[:, 2]
+    RE_ch_data = np.array(EEGData)[:, 3]
+    # print(LF_ch_data)
+    LF_ch_data_buffer = np.zeros(2500)
+    RF_ch_data_buffer = np.zeros(2500)
+    # can add function to fill the buffer with repeated data
+    for i in range(0,2000,windlenght):
+        LF_ch_data_buffer[i:(i+windlenght)] = LF_ch_data[:windlenght]
+        RF_ch_data_buffer[i:(i+windlenght)] = RF_ch_data[:windlenght]
+    LE_ch_data_fft = np.fft.rfft(LE_ch_data)
+    LF_ch_data_fft = np.fft.rfft(LF_ch_data_buffer)
+    RF_ch_data_fft = np.fft.rfft(RF_ch_data_buffer)
+    RE_ch_data_fft = np.fft.rfft(RE_ch_data)
+    if max(LF_ch_data_fft[500:1000]) > 1000 and max(RF_ch_data_fft[500:1000]) > 1000:
+        print("jaw clench detected")
+        return 1
+    else:
+        return 0
 
 # if __name__ == '__main__':
 #     print(MORSE_CODE_DICT['-.'])

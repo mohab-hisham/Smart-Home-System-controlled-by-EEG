@@ -163,7 +163,7 @@ def CheckSignalQuality(inputInlet:StreamInlet):
     while True:
         ch_Quality = False
         
-        eegData, timestamp = StreamInlet.pull_chunk(
+        eegData, timestamp = inputInlet.pull_chunk(
             timeout=1, max_samples=int(255))
         LE_ch_data = np.array(eegData)[:, [0]]
         LF_ch_data = np.array(eegData)[:, [1]]
@@ -176,13 +176,33 @@ def CheckSignalQuality(inputInlet:StreamInlet):
         if LE_ch_STD < 80 and LF_ch_STD < 80 and RF_ch_STD < 80 and RE_ch_STD < 80:
             ch_Quality = True
             
-
+        print(LE_ch_STD,LF_ch_STD,RF_ch_STD,RE_ch_STD)
         #i think we will check the std of every channel from it we can check the quality
         if ch_Quality:
             print("good signal quality!!")
             return
-
-
+counter = 0
+def detectJawClench(eegData,windlenght = 480):
+    global counter
+    LE_ch_data = np.array(eegData)[:, 0]
+    LF_ch_data = np.array(eegData)[:, 1]
+    RF_ch_data = np.array(eegData)[:, 2]
+    RE_ch_data = np.array(eegData)[:, 3]
+    # print(LF_ch_data)
+    LF_ch_data_buffer = np.zeros(2500)
+    RF_ch_data_buffer = np.zeros(2500)
+    for i in range(0,2000,windlenght):
+        LF_ch_data_buffer[i:(i+windlenght)] = LF_ch_data[:windlenght]
+        RF_ch_data_buffer[i:(i+windlenght)] = RF_ch_data[:windlenght]
+    LE_ch_data_fft = np.fft.rfft(LE_ch_data)
+    LF_ch_data_fft = np.fft.rfft(LF_ch_data_buffer)
+    RF_ch_data_fft = np.fft.rfft(RF_ch_data_buffer)
+    RE_ch_data_fft = np.fft.rfft(RE_ch_data)
+    if max(LF_ch_data_fft[500:1000]) > 1000 and max(RF_ch_data_fft[500:1000]) > 1000:
+        counter += 1
+        print("jaw clench detected" + str(counter))
+        
+    
 
 
 if __name__ == "__main__":
@@ -251,14 +271,14 @@ if __name__ == "__main__":
         """ 3.1 ACQUIRE DATA """
         # Obtain EEG data from the LSL stream
         eeg_data, timestamp = inlet.pull_chunk(
-            timeout=1, max_samples=int(SHIFT_LENGTH * fs))
+            timeout=3, max_samples=int(200))
 
         # Only keep the channel we're interested in
         
         # ch_data = np.array(eeg_data)[:, INDEX_CHANNEL]
-        
+        # print("data pulled")
             
-        concentrationLevel(eeg_data)
+        # concentrationLevel(eeg_data)
         # rData,lData = filter_alpha_beta(eeg_data,fs=fs,wind_len=int(SHIFT_LENGTH * fs))
         # if calbCount < 1001:
         #     lowerTH,upperTH = calibrate(rData)
@@ -267,6 +287,7 @@ if __name__ == "__main__":
         #     BlinkHandler(rData,lData,lowerTH,upperTH)
 
         #print(calibratingFlag,type(calibratingFlag))
+        detectJawClench(eegData=eeg_data,windlenght=200)
         
                 
                 
