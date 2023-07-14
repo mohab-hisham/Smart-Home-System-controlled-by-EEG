@@ -105,9 +105,9 @@ class Smarthome(qtw.QMainWindow):
         self.house.kitchenButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(4))
         self.house.lobbyButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
         self.house.bathButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(6))
-        self.actionCalibration.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(7))
+        self.actionCalibration.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(9))
         self.actionControls.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(8))
-        self.actionMessage.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(9))
+        self.actionMessage.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(7))
         self.actionFall_Detection.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(10))
 
         self.cnt_worker.type_of_blink_msg.connect(self.kitchen.show_state)
@@ -144,7 +144,7 @@ class Smarthome(qtw.QMainWindow):
             self.room_dic[self.current_widget].show()
 
             # if morse is selected:
-            if widget_no == 9:
+            if widget_no == 7:
                 m.CntWorker.morse_falg = 1
 
             # select first item if in left right mode
@@ -172,7 +172,7 @@ class Smarthome(qtw.QMainWindow):
                 self.testLayout.addWidget(self.room_dic[widget_no])
                 self.current_widget = widget_no
                 self.room_dic[self.current_widget].show()
-                if widget_no == 9:
+                if widget_no == 7:
                     m.CntWorker.morse_falg = 1
                 print(self.current_widget)
 
