@@ -5,7 +5,7 @@ from types import SimpleNamespace
 # from EEGutils import EEGns
 MQTTns = SimpleNamespace()
 
-serverAddress = "raspberrypi.local"
+serverAddress = "localhost"
 clientName = "PiBot"
 MQTTns.mqttClient = mqtt.Client(clientName)
 
@@ -14,8 +14,8 @@ MQTTns.didPrintSubscribeMessage = False
 
 def connectionStatus(client, userdata, flags, rc):
     
-    global didPrintSubscribeMessage
-    if not didPrintSubscribeMessage:
+    # global didPrintSubscribeMessage
+    if not MQTTns.didPrintSubscribeMessage:
         MQTTns.didPrintSubscribeMessage = True
         print("subscribing")
         MQTTns.mqttClient.subscribe("/feeds/light1")
@@ -46,6 +46,7 @@ def On_message(client, userdata, message):
         relay1State = int(recivedmess)
     elif message.topic == "/feeds/light2":
         relay2State = int(recivedmess)
+        print("اشتغلت يا صيع")
     elif message.topic == "/feeds/light3":
         relay3State = int(recivedmess)
     elif message.topic == "/feeds/light4":
@@ -87,4 +88,16 @@ def startMQTTserver():
     while not MQTTns.didPrintSubscribeMessage:
         continue
     MQTTns.mqttClient.publish("/server/connection","connected")
-    
+
+# for some tests              
+if __name__ == '__main__':
+    # startMQTTserver()
+    ServerThread = threading.Thread(target=connectToServer)
+    ServerThread.daemon = True
+    ServerThread.start()
+    MQTTns.mqttClient.publish("/server/connection","connecting....")
+    while not MQTTns.didPrintSubscribeMessage:
+        continue
+    MQTTns.mqttClient.publish("/server/connection","connected")
+    while True:
+        pass
