@@ -181,13 +181,11 @@ class CntWorker(QObject):
             self.morse()
         elif CntWorker.control_mode == 0 :
             code = self.readInputedSeq()
-
             while code == 0:
                 # loop for taking input
                 code = self.readInputedSeq()
 
             self.type_of_blink_msg.emit("")
-
             if code != -1:
                 # if no button is clicked:
                 self.selected_item_code_msg.emit(code)

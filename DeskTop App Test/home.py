@@ -162,7 +162,23 @@ class Smarthome(qtw.QMainWindow):
 
         # if any button other than 'return to home' button is selected:
         elif widget_no != 5:
-            if m.CntWorker.morse_falg:
+            print(widget_no)
+            if widget_no > 5:
+                print("trying to go to morse")
+                print(self.current_widget)
+                if self.room_dic[self.current_widget].selected != 0:
+                    self.room_dic[self.current_widget].reset_selection()
+                self.room_dic[self.current_widget].close()
+                self.testLayout.addWidget(self.room_dic[widget_no])
+                self.current_widget = widget_no
+                self.room_dic[self.current_widget].show()
+                if widget_no == 9:
+                    m.CntWorker.morse_falg = 1
+                print(self.current_widget)
+
+
+
+            elif m.CntWorker.morse_falg:
                 if widget_no == 1 :
                     self.msg.paragraph = ""
                     self.msg.write_pragraph("")
