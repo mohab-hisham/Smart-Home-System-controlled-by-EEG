@@ -48,6 +48,11 @@ class Ui_Form(object):
 
         self.verticalLayout.addWidget(self.head_radioButton)
 
+        self.head_radioButton1 = QRadioButton(self.cont_groupBox)
+        self.head_radioButton1.setObjectName(u"head_radioButton1")
+
+        self.verticalLayout.addWidget(self.head_radioButton1)
+
 
         self.verticalLayout_3.addLayout(self.verticalLayout)
 
@@ -99,6 +104,7 @@ class Ui_Form(object):
         self.seq_radioButton.setText(QCoreApplication.translate("Form", u"Sequence", None))
         self.left_right_radioButton.setText(QCoreApplication.translate("Form", u"Left and Right ", None))
         self.head_radioButton.setText(QCoreApplication.translate("Form", u"Head Movment", None))
+        self.head_radioButton1.setText(QCoreApplication.translate("Form", u"Left and Right with Head", None))
         self.lang_groupBox.setTitle(QCoreApplication.translate("Form", u"Language", None))
         self.arabic_radioButton.setText(QCoreApplication.translate("Form", u"\u0627\u0644\u0639\u0631\u0628\u064a\u0629", None))
         self.english_radioButton.setText(QCoreApplication.translate("Form", u"English", None))
