@@ -81,7 +81,7 @@ class CntWorker(QObject):
                 # self.left_right_msg.emit(code-2)
                 # self.left_right_msg.emit(-2)
                 # self.selected_item_code_msg.emit(code)
-                if CntWorker.control_mode == 1:
+                if CntWorker.control_mode == 1 or CntWorker.control_mode == 3:
                     self.left_right_msg.emit(code-2)
                 else:
                 # if no button is clicked:
