@@ -13,7 +13,8 @@ import threading
 import asyncio
 # import variables
 from types import SimpleNamespace
-from Utils import EEGutils
+from Utils.EEGutils import readMorseCode, readInputedSeq,EEGns
+
 
 #from Utils import collectEEGsignal,readFullinputedSeq,MUSEns,EEGns, EEGutils
 global home_seq, calib_seq, all_cnt_sig, rooms
@@ -63,25 +64,30 @@ class CntWorker(QObject):
 
 
     def choose(self):
+        
         print("in choose!!!!!!!")
 
         if CntWorker.morse_falg:
-            EEGutils.readMorseCode(self)
+            readMorseCode(self)
         else:
-            code = EEGutils.readInputedSeq(self,windowLength=10,homeOrRoom=True,controlMethod=CntWorker.control_mode)
+            code = readInputedSeq(self,windowLength=10,homeOrRoom=True,controlMethod=CntWorker.control_mode)
 
             # while code == 0:
             #     # loop for taking input
             #     code = self.readInputedSeq()
             self.type_of_blink_msg.emit("")
             if code != -1:
+
+                # self.left_right_msg.emit(code-2)
+                # self.left_right_msg.emit(-2)
+                # self.selected_item_code_msg.emit(code)
                 if CntWorker.control_mode == 1:
                     self.left_right_msg.emit(code-2)
                 else:
                 # if no button is clicked:
                     self.selected_item_code_msg.emit(code)
                 print("sig is emitted")
-                time.sleep(2)
+                # time.sleep(2)
 
             else:
                 # if button is clicked:

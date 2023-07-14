@@ -7,6 +7,7 @@ import room, bathroom, kitchen, corridor, calibration, controls, message, fall, 
 import sys
 import main as m
 from PyQt5.QtCore import *
+# from Utils.MQTTutils import startMQTTserver,MQTTns
 # from Utils.EEGutils import TFModelInit
 # from Utils.MUSEutils import startMUSEconnection
 
@@ -290,6 +291,9 @@ class Smarthome(qtw.QMainWindow):
 
     def send_to_server(self, info_list):
         print(info_list[0],info_list[1],info_list[2])
+        print("/"+info_list[0]+"/"+info_list[1])
+        # MQTTns.mqttClient.publish("/"+info_list[0]+"/"+info_list[1],info_list[2])
+        # MQTTns.mqttClient.publish("/feeds/light2",1)
         # list structure -> [room, item, on or off]
         #room -> str
         #item -> str
@@ -305,6 +309,7 @@ if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
     # startMUSEconnection()
     # TFModelInit()
+    # startMQTTserver()
     home = Smarthome()
     home.cnt_thr.start()
     #home.open()

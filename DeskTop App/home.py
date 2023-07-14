@@ -9,6 +9,7 @@ import main as m
 from PyQt5.QtCore import *
 from Utils.EEGutils import TFModelInit
 from Utils.MUSEutils import startMUSEconnection
+from Utils.MQTTutils import startMQTTserver, MQTTns
 
 
 class Smarthome(qtw.QMainWindow):
@@ -167,7 +168,7 @@ class Smarthome(qtw.QMainWindow):
                     self.msg.paragraph = ""
                     self.msg.write_pragraph("")
                 elif widget_no == 3:
-                    self.msg.show_code("Error: Unknown sequence is entered, Try again!!!! ")
+                    self.msg.show_code("Unknown seq")
                 else:
                     pass
             else:
@@ -290,6 +291,7 @@ class Smarthome(qtw.QMainWindow):
 
     def send_to_server(self, info_list):
         print(info_list[0],info_list[1],info_list[2])
+        MQTTns.mqttClient.publish("/"+info_list[0]+"/"+info_list[1],info_list[2])
         # list structure -> [room, item, on or off]
         #room -> str
         #item -> str
@@ -305,6 +307,7 @@ if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
     startMUSEconnection()
     TFModelInit()
+    startMQTTserver()
     home = Smarthome()
     home.cnt_thr.start()
     #home.open()

@@ -10,6 +10,10 @@
 #define Relay2            18
 #define Relay3            5
 #define Relay4            17
+#define Relay5            33
+#define Relay6            25
+#define Relay7            26
+#define Relay8            27
 
 char custom_AIO_SERVER[20];
 
@@ -36,12 +40,14 @@ WiFiClient client;
 //WiFiClientSecure client;
 
 Adafruit_MQTT_Client *mqtt = NULL;
-Adafruit_MQTT_Subscribe *light1_sub = NULL;
-Adafruit_MQTT_Subscribe *light2_sub = NULL;
-Adafruit_MQTT_Subscribe *light3_sub = NULL;
-Adafruit_MQTT_Subscribe *light4_sub = NULL;
-Adafruit_MQTT_Subscribe *wifi_name = NULL;
-Adafruit_MQTT_Subscribe *wifi_password = NULL;
+Adafruit_MQTT_Subscribe *living_light_sub = NULL;
+Adafruit_MQTT_Subscribe *room1_TV_sub = NULL;
+Adafruit_MQTT_Subscribe *room2_light_sub = NULL;
+Adafruit_MQTT_Subscribe *kitchen_light_sub = NULL;
+Adafruit_MQTT_Subscribe *corridor_door1_sub = NULL;
+Adafruit_MQTT_Subscribe *toilet_light_sub = NULL;
+//Adafruit_MQTT_Subscribe *wifi_name = NULL;
+//Adafruit_MQTT_Subscribe *wifi_password = NULL;
 
 //// Setup the MQTT client class by passing in the WiFi client and MQTT server and login details.
 //Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
@@ -66,46 +72,60 @@ void deleteOldInstances(void)
     Serial.println("Deleting old MQTT object");
   }
 
-    if (light1_sub)
+    if (living_light_sub)
   {
-    delete light1_sub;
-    light1_sub = NULL;
+    delete living_light_sub;
+    living_light_sub = NULL;
     Serial.println("Deleting old light1 object");
   }
 
-      if (light2_sub)
+      if (room1_TV_sub)
   {
-    delete light2_sub;
-    light2_sub = NULL;
+    delete room1_TV_sub;
+    room1_TV_sub = NULL;
     Serial.println("Deleting old light2 object");
   }
 
-    if (light3_sub)
+      if (room2_light_sub)
   {
-    delete light3_sub;
-    light3_sub = NULL;
+    delete room2_light_sub;
+    room2_light_sub = NULL;
+    Serial.println("Deleting old room2_light_sub object");
+  }
+
+    if (kitchen_light_sub)
+  {
+    delete kitchen_light_sub;
+    kitchen_light_sub = NULL;
     Serial.println("Deleting old light3 object");
   }
 
-      if (light4_sub)
+      if (corridor_door1_sub)
   {
-    delete light4_sub;
-    light4_sub = NULL;
+    delete corridor_door1_sub;
+    corridor_door1_sub = NULL;
+    Serial.println("Deleting old corridor_door1_sub object");
+  }
+
+      if (toilet_light_sub)
+  {
+    delete toilet_light_sub;
+    toilet_light_sub = NULL;
     Serial.println("Deleting old light4 object");
   }
   
-  if (wifi_name)
-  {
-    delete wifi_name;
-    wifi_name = NULL;
-    Serial.println("Deleting old wifi_name object");
-  }
-  if (wifi_password)
-  {
-    delete wifi_password;
-    wifi_password = NULL;
-    Serial.println("Deleting old wifi_password object");
-  }  
+//  if (wifi_name)
+//  {
+//    delete wifi_name;
+//    wifi_name = NULL;
+//    Serial.println("Deleting old wifi_name object");
+//  }
+//  if (wifi_password)
+//  {
+//    delete wifi_password;
+//    wifi_password = NULL;
+//    Serial.println("Deleting old wifi_password object");
+//  }  
 }
 
 /*************************** Sketch Code ************************************/
@@ -127,7 +147,7 @@ void GetServerIP(){
   while (serverIp.toString() == "0.0.0.0") {
     Serial.println("Resolving host...");
     delay(250);
-    serverIp = MDNS.queryHost("raspberrypi"); 
+    serverIp = MDNS.queryHost("DESKTOP-KB0NG3A"); 
   }
  
   Serial.println("Host address resolved:");
@@ -144,24 +164,30 @@ void GetServerIP(){
 
   // Notice MQTT paths for AIO follow the form: <username>/feeds/<feedname>
   
-  light1_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/feeds/light1");
+  living_light_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/Living/Light");
   
-  light2_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/feeds/light2");
+  room1_TV_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/Room 1/TV");
 
-  light3_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/feeds/light3");
-  
-  light4_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/feeds/light4");
-  
-  wifi_name = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/wifi/name");
-  
-  wifi_password = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/wifi/password");
+  room2_light_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/Room 2/Light");
 
-  mqtt->subscribe(wifi_name);
-  mqtt->subscribe(wifi_password);
-  mqtt->subscribe(light1_sub);
-  mqtt->subscribe(light2_sub);
-  mqtt->subscribe(light3_sub);
-  mqtt->subscribe(light4_sub);
+  kitchen_light_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/Kitchen/Light");
+
+  corridor_door1_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/Corridor/Door 1");
+  
+  toilet_light_sub = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/Toilet/Light");
+  
+//  wifi_name = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/wifi/name");
+//  
+//  wifi_password = new Adafruit_MQTT_Subscribe(mqtt, AIO_USERNAME "/wifi/password");
+
+//  mqtt->subscribe(wifi_name);
+//  mqtt->subscribe(wifi_password);
+  mqtt->subscribe(living_light_sub);
+  mqtt->subscribe(room1_TV_sub);
+  mqtt->subscribe(room2_light_sub);
+  mqtt->subscribe(kitchen_light_sub);
+  mqtt->subscribe(corridor_door1_sub);
+  mqtt->subscribe(toilet_light_sub);
 }
 //Servo myservo;
 void setup() {
@@ -172,10 +198,18 @@ void setup() {
   pinMode(Relay2, OUTPUT);
   pinMode(Relay3, OUTPUT);
   pinMode(Relay4, OUTPUT);
+  pinMode(Relay5, OUTPUT);
+  pinMode(Relay6, OUTPUT);
+  pinMode(Relay7, OUTPUT);
+  pinMode(Relay8, OUTPUT);
   digitalWrite(Relay1, HIGH);
   digitalWrite(Relay2, HIGH);
   digitalWrite(Relay3, HIGH);
   digitalWrite(Relay4, HIGH);
+  digitalWrite(Relay5, LOW);
+  digitalWrite(Relay6, LOW);
+  digitalWrite(Relay7, LOW);
+  digitalWrite(Relay8, LOW);
 
   Serial.println(F("Adafruit MQTT demo"));
 
@@ -198,12 +232,14 @@ void setup() {
   GetServerIP();
 
   // Setup MQTT subscription for onoff feed.
-  mqtt->subscribe(wifi_name);
-  mqtt->subscribe(wifi_password);
-  mqtt->subscribe(light1_sub);
-  mqtt->subscribe(light2_sub);
-  mqtt->subscribe(light3_sub);
-  mqtt->subscribe(light4_sub);
+//  mqtt->subscribe(wifi_name);
+//  mqtt->subscribe(wifi_password);
+  mqtt->subscribe(living_light_sub);
+  mqtt->subscribe(room1_TV_sub);
+  mqtt->subscribe(room2_light_sub);
+  mqtt->subscribe(kitchen_light_sub);
+  mqtt->subscribe(corridor_door1_sub);
+  mqtt->subscribe(toilet_light_sub);
 }
 
 uint32_t x = 0;
@@ -218,25 +254,25 @@ void loop() {
 
   Adafruit_MQTT_Subscribe *subscription;
   while ((subscription = mqtt->readSubscription(5000))) {
-    if (subscription == wifi_name) {
-      Serial.print(F("Got: "));
-      Serial.println((char *)wifi_name->lastread);
-      WIFI_NAME = (char *)wifi_name->lastread;
-      Serial.println(WIFI_NAME);
-      
-    }
-
-    if (subscription == wifi_password) {
-      Serial.print(F("Got: "));
-      Serial.println((char *)wifi_password->lastread);
-      WIFI_PASSWORD = (char *)wifi_password->lastread;
-      Serial.println(WIFI_PASSWORD);
-
-    }
-    if (subscription == light1_sub) {
+//    if (subscription == wifi_name) {
+//      Serial.print(F("Got: "));
+//      Serial.println((char *)wifi_name->lastread);
+//      WIFI_NAME = (char *)wifi_name->lastread;
+//      Serial.println(WIFI_NAME);
+//      
+//    }
+//
+//    if (subscription == wifi_password) {
+//      Serial.print(F("Got: "));
+//      Serial.println((char *)wifi_password->lastread);
+//      WIFI_PASSWORD = (char *)wifi_password->lastread;
+//      Serial.println(WIFI_PASSWORD);
+//
+//    }
+    if (subscription == living_light_sub) {
       Serial.print(F("Got: Light1 "));
-      Serial.println((char *)light1_sub->lastread);
-      int Light1_State = atoi((char *)light1_sub->lastread);
+      Serial.println((char *)living_light_sub->lastread);
+      int Light1_State = atoi((char *)living_light_sub->lastread);
       if(Light1_State == 0){
         digitalWrite(Relay1, HIGH);
       }
@@ -245,40 +281,71 @@ void loop() {
       }
     }
 
-    if (subscription == light2_sub) {
+    if (subscription == room1_TV_sub) {
       Serial.print(F("Got: Light2 "));
-      Serial.println((char *)light2_sub->lastread);
-      int Light2_State = atoi((char *)light2_sub->lastread);
+      Serial.println((char *)room1_TV_sub->lastread);
+      int Light2_State = atoi((char *)room1_TV_sub->lastread);
       if(Light2_State == 0){
-        digitalWrite(Relay2, HIGH);
+        digitalWrite(Relay5, LOW);
       }
       else{
-        digitalWrite(Relay2, LOW);
+        digitalWrite(Relay5, HIGH);
       }
     }
 
-    if (subscription == light3_sub) {
-      Serial.print(F("Got: Light3 "));
-      Serial.println((char *)light3_sub->lastread);
-      int Light3_State = atoi((char *)light3_sub->lastread);
-      if(Light3_State == 0){
-        digitalWrite(Relay3, HIGH);
+    if (subscription == room2_light_sub) {
+      Serial.print(F("Got: room2_light_sub "));
+      Serial.println((char *)room2_light_sub->lastread);
+      int Light1_State = atoi((char *)room2_light_sub->lastread);
+      if(Light1_State == 0){
+//        digitalWrite(Relay1, HIGH);
+//          Serial.println("room2_light_sub 0");
+          digitalWrite(Relay4, HIGH);
       }
       else{
-        digitalWrite(Relay3, LOW);
+        digitalWrite(Relay4, LOW);
+//          Serial.println("room2_light_sub 1");
+//        digitalWrite(Relay1, LOW);
+      }
+    }
+
+    if (subscription == kitchen_light_sub) {
+      Serial.print(F("Got: Light3 "));
+      Serial.println((char *)kitchen_light_sub->lastread);
+      int Light3_State = atoi((char *)kitchen_light_sub->lastread);
+      if(Light3_State == 0){
+        digitalWrite(Relay6, LOW);
+      }
+      else{
+        digitalWrite(Relay6, HIGH);
       }
       
     }
 
-    if (subscription == light4_sub) {
-      Serial.print(F("Got: Light4 "));
-      Serial.println((char *)light4_sub->lastread);
-      int Light4_State = atoi((char *)light4_sub->lastread);
-      if(Light4_State == 0){
-        digitalWrite(Relay4, HIGH);
+    if (subscription == corridor_door1_sub) {
+      Serial.print(F("Got: corridor_door1_sub "));
+      Serial.println((char *)corridor_door1_sub->lastread);
+      int Light1_State = atoi((char *)corridor_door1_sub->lastread);
+      if(Light1_State == 0){
+//        Serial.println("corridor_door1_sub 0");
+        digitalWrite(Relay7, LOW);
+
       }
       else{
-        digitalWrite(Relay4, LOW);
+//        Serial.println("corridor_door1_sub 1");
+        digitalWrite(Relay7, HIGH);
+      }
+    }
+
+    if (subscription == toilet_light_sub) {
+      Serial.print(F("Got: Light4 "));
+      Serial.println((char *)toilet_light_sub->lastread);
+      int Light4_State = atoi((char *)toilet_light_sub->lastread);
+      if(Light4_State == 0){
+        digitalWrite(Relay8, LOW);
+      }
+      else{
+        digitalWrite(Relay8, HIGH);
       }
     }
 
