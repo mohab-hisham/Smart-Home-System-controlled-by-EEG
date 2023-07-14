@@ -20,7 +20,7 @@ class Controls(qtw.QWidget):
             cont = 0
         elif self.left_right_radioButton.isChecked():
             cont = 1
-        elif self.left_right_head_radioButton.isChecked():
+        elif self.head_radioButton.isChecked():
             cont = 2
         else:
             cont = 3

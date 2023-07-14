@@ -127,6 +127,7 @@ class Smarthome(qtw.QMainWindow):
 
     def get_control_mode(self):
         cont, lang = self.control.get_control_option()
+        print("control_mode",cont)
         m.CntWorker.control_mode = cont
         m.CntWorker.isArabic = lang
         self.living.info_label.setText(self.living.howtocontrol[cont])

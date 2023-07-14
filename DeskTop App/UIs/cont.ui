@@ -49,7 +49,7 @@
           </property>
          </widget>
         </item>
-         <item>
+        <item>
          <widget class="QRadioButton" name="left_right_head_radioButton">
           <property name="text">
            <string>Left and Right with Head</string>
