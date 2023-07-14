@@ -643,7 +643,7 @@ def applyCommand(mesageController,command,controlMethod):
             return 10
         else:
             if mesageController != None:
-                mesageController.emit("Error: Unknown sequence is entered, Try again!!!! ")
+                mesageController.emit("Unknown seq")
             return 0
     elif controlMethod == "blinkNavigator":
         if command == "rightSequence":
@@ -659,7 +659,7 @@ def applyCommand(mesageController,command,controlMethod):
             pg.typewrite(["space"])
         else:
             if mesageController != None:
-                mesageController.emit("Error: Unknown sequence is entered, Try again!!!! ")
+                mesageController.emit("Unknown seq")
             return 0
         return 0
     elif controlMethod == "gyroNavigator":
@@ -921,6 +921,7 @@ def gyroController(ns):
     accX, accY, AccZ = getGyroAccData(2)
     mesageController = ns.type_of_blink_msg
     returnVal = 0
+    print("in gyro controller")
     if accY > 0.35 and accX < 0.05:
         mesageController.emit("tab 3")
         returnVal = 3
@@ -963,6 +964,7 @@ def gyroController(ns):
         else:
             EEGns.gyroclenchFlag = 0
             return 0
+    return 0
     # if time.time()-currentTime > 5:
     #     return returnVal
 
