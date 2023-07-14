@@ -5,7 +5,7 @@ from types import SimpleNamespace
 # from EEGutils import EEGns
 MQTTns = SimpleNamespace()
 
-serverAddress = "raspberrypi.local"
+serverAddress = "localhost"
 clientName = "PiBot"
 MQTTns.mqttClient = mqtt.Client(clientName)
 
@@ -14,8 +14,8 @@ MQTTns.didPrintSubscribeMessage = False
 
 def connectionStatus(client, userdata, flags, rc):
     
-    global didPrintSubscribeMessage
-    if not didPrintSubscribeMessage:
+    # global didPrintSubscribeMessage
+    if not MQTTns.didPrintSubscribeMessage:
         MQTTns.didPrintSubscribeMessage = True
         print("subscribing")
         MQTTns.mqttClient.subscribe("/feeds/light1")

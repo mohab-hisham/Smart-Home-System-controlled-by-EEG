@@ -90,14 +90,14 @@ def startMQTTserver():
     MQTTns.mqttClient.publish("/server/connection","connected")
 
 # for some tests              
-if __name__ == '__main__':
-    # startMQTTserver()
-    ServerThread = threading.Thread(target=connectToServer)
-    ServerThread.daemon = True
-    ServerThread.start()
-    MQTTns.mqttClient.publish("/server/connection","connecting....")
-    while not MQTTns.didPrintSubscribeMessage:
-        continue
-    MQTTns.mqttClient.publish("/server/connection","connected")
-    while True:
-        pass
+# if __name__ == '__main__':
+#     # startMQTTserver()
+#     ServerThread = threading.Thread(target=connectToServer)
+#     ServerThread.daemon = True
+#     ServerThread.start()
+#     MQTTns.mqttClient.publish("/server/connection","connecting....")
+#     while not MQTTns.didPrintSubscribeMessage:
+#         continue
+#     MQTTns.mqttClient.publish("/server/connection","connected")
+#     while True:
+#         pass

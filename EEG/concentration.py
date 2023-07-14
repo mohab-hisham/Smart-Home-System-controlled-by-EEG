@@ -260,10 +260,11 @@ if __name__ == "__main__":
     # The try/except structure allows to quit the while loop by aborting the
     # script with <Ctrl-C>
     print('Press Ctrl-C in the console to break the while loop.')
-    CheckSignalQuality(inlet)
+    # CheckSignalQuality(inlet)
     
     # input("input any key to start calibration")
-
+    eegDataCounter = 0
+    eegBuffer = []
     # The following loop acquires data, computes band powers, and calculates neurofeedback metrics based on those band powers
     while True:
 
@@ -271,8 +272,20 @@ if __name__ == "__main__":
         """ 3.1 ACQUIRE DATA """
         # Obtain EEG data from the LSL stream
         eeg_data, timestamp = inlet.pull_chunk(
-            timeout=3, max_samples=int(200))
-
+            timeout=3, max_samples=int(480))
+        # eeg_data = np.transpose(eeg_data)
+        # print(np.array(eeg_data).shape)
+        print(eeg_data)
+        EEGchunks = np.array_split([eeg_data],48,axis=1)
+        print(EEGchunks[5])
+        # if np.array(eegBuffer).shape[0] < 200:
+        #     eegBuffer = np.vstack([eegBuffer, np.array(eeg_data)]) if len(eegBuffer) else np.array(eeg_data)
+        #     # eegDataCounter += 1
+        # else:
+        #     print(eegBuffer.shape)
+        #     detectJawClench(eegData=eegBuffer,windlenght=200)
+        #     eegBuffer = eegBuffer[20:]
+        #     print("after removal",np.array(eegBuffer).shape[0])
         # Only keep the channel we're interested in
         
         # ch_data = np.array(eeg_data)[:, INDEX_CHANNEL]
@@ -287,7 +300,7 @@ if __name__ == "__main__":
         #     BlinkHandler(rData,lData,lowerTH,upperTH)
 
         #print(calibratingFlag,type(calibratingFlag))
-        detectJawClench(eegData=eeg_data,windlenght=200)
+        
         
                 
                 
