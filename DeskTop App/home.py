@@ -10,6 +10,7 @@ from PyQt5.QtCore import *
 from Utils.MQTTutils import startMQTTserver,MQTTns
 from Utils.EEGutils import TFModelInit
 from Utils.MUSEutils import startMUSEconnection
+import loading as lg
 
 
 class Smarthome(qtw.QMainWindow):
@@ -128,6 +129,12 @@ class Smarthome(qtw.QMainWindow):
         cont, lang = self.control.get_control_option()
         m.CntWorker.control_mode = cont
         m.CntWorker.isArabic = lang
+        self.living.info_label.setText(self.living.howtocontrol[cont])
+        self.room1.info_label.setText(self.room1.howtocontrol[cont])
+        self.room2.info_label.setText(self.room2.howtocontrol[cont])
+        self.kitchen.info_label.setText(self.kitchen.howtocontrol[cont])
+        self.corridor.info_label.setText(self.corridor.howtocontrol[cont])
+        self.bath.info_label.setText(self.bath.howtocontrol[cont])
         if m.CntWorker.control_mode:
             self.house.select(1)
             #self.house.message_label.setText("Living is selected.")
@@ -323,11 +330,17 @@ class Smarthome(qtw.QMainWindow):
         # self.mohab.this_is_where_your_code_goes()
         pass
 
-
+#sequence lenght ________
+#index ________
+#blink lenght ________
+#duration after blink ________
+#what to controll ________
 
 
 
 if __name__ == '__main__':
+    
+    
     app = qtw.QApplication(sys.argv)
     startMUSEconnection()
     TFModelInit()

@@ -22,6 +22,7 @@ class Kitchen(qtw.QWidget):
         self.img_styles = {1: "border-image: url(imgs/light-bulb.png);", 2: "border-image: url(imgs/oven.png);",
                            3: "border-image: url(imgs/washing-machine.png);", 4: "border-image: url(imgs/food.png);",
                            5: "border-image: url(imgs/home.png);"}
+        self.howtocontrol = {0:"  kitchen\n  Light: ..\n  stove: .-\n  washer: -. \n  chimney: --\n  Home: ...",1:"  kitchen\n  select: ..",2:"  kitchen\n  select: jaw clench",3:"  kitchen\n  select: jaw clench"}
 
         self.common_style = "border-radius: 90px; border: 10px solid red; background-repeat: no-repeat; "
         self.message_label.setStyleSheet(self.common_style + "background-color: #fffff0;")

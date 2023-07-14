@@ -17,6 +17,7 @@ class Room(qtw.QWidget):
         self.img_styles = {1:"border-image: url(imgs/light-bulb.png);", 2: "border-image: url(imgs/curtains.png);",
                            3: "border-image: url(imgs/smart-tv.png);", 4:"border-image: url(imgs/fan.png);",
                            5:"border-image: url(imgs/home.png);"}
+        self.howtocontrol = {0:f"  {name}\n  Light: ..\n  curtains: .-\n  TV: -. \n  Fan: --\n  Home: ...",1:f"  {name}\n  select: ..",2:f"  {name}\n  select: jaw clench",3:f"  {name}\n  select: jaw clench"}
         self.message_label.setText(name)
         self.setStyleSheet("background-color: #122222; ")
 
@@ -30,6 +31,7 @@ class Room(qtw.QWidget):
         self.tvButton.setStyleSheet(self.common_style + self.img_styles[3]+ self.on_off_background[self.on_or_off[3]])
         self.cartensButton.setStyleSheet(self.common_style + self.img_styles[2]+ self.on_off_background[self.on_or_off[2]])
         self.lightButton.setStyleSheet(self.common_style + self.img_styles[1]+ self.on_off_background[self.on_or_off[1]])
+        
 
 
     def select(self, item_no):
