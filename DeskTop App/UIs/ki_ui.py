@@ -137,11 +137,8 @@ class Ui_Form(object):
 
         self.homeButton = QPushButton(Form)
         self.homeButton.setObjectName(u"homeButton")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(34)
-        sizePolicy1.setHeightForWidth(self.homeButton.sizePolicy().hasHeightForWidth())
-        self.homeButton.setSizePolicy(sizePolicy1)
+        sizePolicy.setHeightForWidth(self.homeButton.sizePolicy().hasHeightForWidth())
+        self.homeButton.setSizePolicy(sizePolicy)
         self.homeButton.setFont(font)
         self.homeButton.setAutoDefault(False)
 
