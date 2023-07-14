@@ -20,8 +20,10 @@ class Home(qtw.QWidget):
 
         self.selected = 0
         self.setStyleSheet("background-color: #122222; ")
-        self.dic = {1: ["Living", self.livingButton, "غرفة المعيشة"], 2: ["Room 1", self.room1_Button, "الغرفة الأولى"], 3: ["Room 2", self.room2_Button,"الغرفة الثانية"],
-                    4: ["Kitchen", self.kitchenButton, "المطبخ"], 5: ["Corridor", self.lobbyButton, "الممر"], 6: ["Toilet", self.bathButton, "دوره المياه"]}
+        self.dic = {1: ["Living", self.livingButton, "غرفة المعيشة"], 2: ["Room 1", self.room1_Button, "الغرفة الأولى"],
+                    3: ["Room 2", self.room2_Button,"الغرفة الثانية"], 4: ["Kitchen", self.kitchenButton, "المطبخ"],
+                    5: ["Corridor", self.lobbyButton, "الممر"], 6: ["Toilet", self.bathButton, "دوره المياه"],
+                    7: ["Message", None, "الرسالة"]}
 
         self.common_style = "background-color: #fffff0; border-radius: 90px; border-color: white; background-repeat: no-repeat; "
         self.message_label.setStyleSheet(
@@ -53,8 +55,9 @@ class Home(qtw.QWidget):
         self.selected = item_no
 
     def reset_selection(self):
-        self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected])
-        self.dic[self.selected][1].setText("")
+        if self.selected < 7:
+            self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected])
+            self.dic[self.selected][1].setText("")
 
 
     def closeHome(self):

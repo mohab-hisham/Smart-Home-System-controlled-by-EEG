@@ -44,7 +44,7 @@ class Ui_message_wind(object):
         self.message_label.setFont(font1)
         self.message_label.setFrameShape(QFrame.WinPanel)
         self.message_label.setFrameShadow(QFrame.Raised)
-        self.message_label.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignTop)
+        self.message_label.setAlignment(Qt.AlignJustify|Qt.AlignTop)
 
         self.gridLayout.addWidget(self.message_label, 1, 1, 1, 1)
 
@@ -82,7 +82,7 @@ class Ui_message_wind(object):
 
         self.horizontalLayout.setStretch(0, 1)
         self.horizontalLayout.setStretch(1, 3)
-        self.horizontalLayout.setStretch(2, 1)
+        self.horizontalLayout.setStretch(2, 2)
         self.horizontalLayout.setStretch(3, 3)
         self.horizontalLayout.setStretch(4, 1)
 

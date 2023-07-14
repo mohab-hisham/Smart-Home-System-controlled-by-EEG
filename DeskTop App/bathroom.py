@@ -18,8 +18,8 @@ class BathRoom(qtw.QWidget):
                     3: ["Cover", self.coverButton, "الغطاء"],
                     4: ["Flush", self.flushButton, "السيفون"], 5: ["Home", self.homeButton, "المنزل"]}
 
-        self.img_styles = {1: "border-image: url(imgs/light-bulb.png);", 2: "border-image: url(imgs/bidet.jpeg);",
-                           3: "border-image: url(imgs/cover.jpeg);", 4: "border-image: url(imgs/flush.jpeg);",
+        self.img_styles = {1: "border-image: url(imgs/light-bulb.png);", 2: "border-image: url(imgs/toilet (1).png);",
+                           3: "border-image: url(imgs/toilet cover.png);", 4: "border-image: url(imgs/flush.png);",
                            5: "border-image: url(imgs/home.png);"}
 
         self.common_style = "border-radius: 90px; border: 10px solid red; background-repeat: no-repeat; "
