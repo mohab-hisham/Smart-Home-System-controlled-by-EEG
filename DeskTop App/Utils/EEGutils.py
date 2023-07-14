@@ -125,6 +125,14 @@ homeOrCar = 1
 
 
 L_R_Flag = 0
+EEGns.L_R_Gyro_Flag = 0
+EEGns.eeg_l_R_gyroController_Buffer = []
+EEGns.eeg_gyroController_Buffer = []
+EEGns.eeg_l_R_eyeController_Buffer = []
+
+EEGns.LRgyroclenchFlag = 0
+EEGns.gyroclenchFlag = 0
+EEGns.eyeMoveclenchFlag = 0
 # modular sequence variables
 StartSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,0.5]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="startSequence")
 EndSeq = Sequence([Blink(length=[0,0.2],durationAfterBlink=[0,0.5]),Blink(length=[0,0.2],durationAfterBlink=[0,0.5]),Blink(length=[0,0.2],durationAfterBlink=[0,0])],whatToControll="endSequence")
@@ -480,17 +488,20 @@ def readInputedSeq(ns, windowLength=10,homeOrRoom = True,controlMethod = 0):
         #     eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
         #             timeout=3, max_samples=int(windowLength))
         if controlMethod == 1:
-            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-                timeout=3, max_samples=int(480))
-            outSeqValue = getL_R_eyeMovement(ns=ns,eegData=eeg_data,startTime=time.time())
+            # eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+            #     timeout=3, max_samples=int(480))
+            outSeqValue = getL_R_eyeMovement(ns=ns)
 
         elif controlMethod == 2:
-            eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-                    timeout=3, max_samples=int(200))
+            # eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+            #         timeout=1, max_samples=int(10))
             
-            AccX, AccY, AccZ,_,_,_ = getGyroAccData(2)
-            outSeqValue = gyroController(ns = ns,accX = AccX, accY = AccY, accZ = AccZ,EEG_data=eeg_data)
-
+            # AccX, AccY, AccZ = getGyroAccData(2)
+            outSeqValue = gyroController(ns = ns)
+        elif controlMethod == 3:
+            # AccX, AccY, AccZ= getGyroAccData(2)
+            outSeqValue = l_R_gyroController(ns=ns)
+            
         elif controlMethod == 0:
             eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
                     timeout=3, max_samples=int(windowLength))
@@ -632,7 +643,7 @@ def applyCommand(mesageController,command,controlMethod):
             return 10
         else:
             if mesageController != None:
-                mesageController.emit("Error: Unknown sequence is entered, Try again!!!! ")
+                mesageController.emit("Unknown seq")
             return 0
     elif controlMethod == "blinkNavigator":
         if command == "rightSequence":
@@ -648,12 +659,12 @@ def applyCommand(mesageController,command,controlMethod):
             pg.typewrite(["space"])
         else:
             if mesageController != None:
-                mesageController.emit("Error: Unknown sequence is entered, Try again!!!! ")
+                mesageController.emit("Unknown seq")
             return 0
         return 0
     elif controlMethod == "gyroNavigator":
         if command == "selectSequence":
-            return 1
+            return 2
         else:
             return 0
         
@@ -746,8 +757,36 @@ def TFModelInit():
     # Allocate tensors
     EEGns.interpreter.allocate_tensors()
     
-def getL_R_eyeMovement(ns,eegData,startTime):
+def getL_R_eyeMovement(ns):
     global L_R_Flag
+    EEGns.fulleegData = []
+
+    eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
+                    timeout=3, max_samples=int(480))
+    
+    for i in range(40):
+        # eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
+        #             timeout=1, max_samples=int(10))
+        
+        returnValue = readFullinputedSeq(ns=ns,EEGData=eegData,controllMethod="gyroNavigator")
+        # if np.array(EEGns.eeg_l_R_eyeController_Buffer).shape[0] < 200:
+        #     EEGns.eeg_l_R_eyeController_Buffer = np.vstack([EEGns.eeg_l_R_eyeController_Buffer, np.array(eegData)]) if len(EEGns.eeg_l_R_eyeController_Buffer) else np.array(eegData)
+        # else:
+        #     isSelected = detectJawClench(EEGData=EEGns.eeg_l_R_eyeController_Buffer,windlenght=200)
+        #     if isSelected == 1 and EEGns.eyeMoveclenchFlag == 0:
+        #         EEGns.eyeMoveclenchFlag = 1
+        #         mesageController.emit("Jaw Clenched!!")
+        #         returnValue = 2
+                
+
+        #         break
+        #     elif EEGns.eyeMoveclenchFlag == 1:
+        #         EEGns.eyeMoveclenchFlag = 0
+        #         returnValue = 0
+            # if int(np.array(output_data[0]).argmax()) == 1:
+            #         L_R_Flag = 1
+            # EEGns.eeg_l_R_eyeController_Buffer = EEGns.eeg_l_R_eyeController_Buffer[150:]
+            
     returnValue = 0
     mesageController = ns.type_of_blink_msg
     EEGns.fulleegData = np.vstack([EEGns.fulleegData, np.array(eegData)[:,1:-2]]) if len(EEGns.fulleegData) else np.array(eegData)[:,1:-2]
@@ -769,32 +808,28 @@ def getL_R_eyeMovement(ns,eegData,startTime):
 
     if int(np.array(output_data[0]).argmax()) == 0 and L_R_Flag == 1:
         L_R_Flag = 0
+        EEGns.eyeMoveclenchFlag = 0
         mesageController.emit("left")
         # pg.typewrite(["left"])
         returnValue = 1
         print("look Left")
+        return returnValue
     elif int(np.array(output_data[0]).argmax()) == 1:
         L_R_Flag = 1
-        print("look center")
-        # chunks = np.array_split(eegData,48)
-        while (time.time()- startTime) < 2:
-            Jaweeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-                timeout=2, max_samples=int(200))
-            isSelected = detectJawClench(EEGData=Jaweeg_data,windlenght=200)
-            if isSelected == 1:
-                mesageController.emit("Jaw Clenched!!")
-                returnValue = 2
-                break
-            else:
-                returnValue = 0
+        print("center")
+        
+
     elif int(np.array(output_data[0]).argmax()) == 2 and L_R_Flag == 1:
         L_R_Flag = 0
+        EEGns.eyeMoveclenchFlag = 0
         mesageController.emit("right")
         # pg.typewrite(["right"])
         returnValue = 3
         print("look right")
-
-    EEGns.fulleegData = []
+        return returnValue
+    
+    
+    
     return returnValue
 
 ########### MORSE code functions ############### need modification
@@ -867,24 +902,26 @@ def decodeMorse(morseCode):
         return None
 
 ############ Gyro Acc functions ###################################
-def getGyroAccData(windowLenght = 10):
+def getGyroAccData(windowLenght = 2):
     acc_data, accTimestamp = MUSEns.ACCinlet.pull_chunk(
-            timeout=1, max_samples=int(windowLenght))
+            timeout=0.1, max_samples=int(windowLenght))
         
-    gyro_data, gyroTimestamp = MUSEns.GYROinlet.pull_chunk(
-        timeout=1, max_samples=int(windowLenght))
+    # gyro_data, gyroTimestamp = MUSEns.GYROinlet.pull_chunk(
+    #     timeout=, max_samples=int(windowLenght))
     
     accelerationX = np.mean(np.array(acc_data)[:,0]) #* np.pi
     accelerationY = np.mean(np.array(acc_data)[:,1]) #* np.pi
     accelerationZ = np.mean(np.array(acc_data)[:,2]) #* np.pi
-    gyroscpeX = np.mean(np.array(gyro_data)[:,0]) * np.pi
-    gyroscpeY = np.mean(np.array(gyro_data)[:,1]) * np.pi
-    gyroscpeZ = np.mean(np.array(gyro_data)[:,2]) * np.pi
-    return accelerationX,accelerationY,accelerationZ,gyroscpeX,gyroscpeY,gyroscpeZ
+    # gyroscpeX = np.mean(np.array(gyro_data)[:,0]) * np.pi
+    # gyroscpeY = np.mean(np.array(gyro_data)[:,1]) * np.pi
+    # gyroscpeZ = np.mean(np.array(gyro_data)[:,2]) * np.pi
+    return accelerationX,accelerationY,accelerationZ#,gyroscpeX,gyroscpeY,gyroscpeZ
 
-def gyroController(ns,accX,accY,accZ,EEG_data):
+def gyroController(ns):
+    accX, accY, AccZ = getGyroAccData(2)
     mesageController = ns.type_of_blink_msg
     returnVal = 0
+    print("in gyro controller")
     if accY > 0.35 and accX < 0.05:
         mesageController.emit("tab 3")
         returnVal = 3
@@ -910,15 +947,81 @@ def gyroController(ns,accX,accY,accZ,EEG_data):
         returnVal = 5
         # print("tab 5") # x: 0.15 , y: 0.15
     # print("")
-
-    isSelected = detectJawClench(EEGData=EEG_data,windlenght=200)
-    if isSelected == 1:
-        return returnVal
+    EEG_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+                    timeout=1, max_samples=int(10))
+            
+            
+    if np.array(EEGns.eeg_gyroController_Buffer).shape[0] < 200:
+        EEGns.eeg_gyroController_Buffer = np.vstack([EEGns.eeg_gyroController_Buffer, np.array(EEG_data)]) if len(EEGns.eeg_gyroController_Buffer) else np.array(EEG_data)
     else:
-        return 0
+        isSelected = detectJawClench(EEGData=EEGns.eeg_gyroController_Buffer,windlenght=200)
+        EEGns.eeg_gyroController_Buffer = EEGns.eeg_gyroController_Buffer[150:]
+        if isSelected == 1 and EEGns.gyroclenchFlag == 0:
+            EEGns.gyroclenchFlag = 1
+            mesageController.emit("Jaw Clenched!!")
+            return returnVal
+            
+        else:
+            EEGns.gyroclenchFlag = 0
+            return 0
+    return 0
     # if time.time()-currentTime > 5:
     #     return returnVal
-    # return returnVal
+
+def l_R_gyroController(ns):
+    AccX, accY, AccZ = getGyroAccData(2)
+    mesageController = ns.type_of_blink_msg
+    returnValue = 0
+    # print("accy",accY)
+    if accY > 0.35 and EEGns.L_R_Gyro_Flag == 0:
+        print("Right")
+        EEGns.LRgyroclenchFlag = 0
+        EEGns.L_R_Gyro_Flag = 1
+        mesageController.emit("Right")
+        returnValue = 3
+        # print("tab 3") # x: -0.001 , y: 0.4
+    elif accY < -0.2 and EEGns.L_R_Gyro_Flag == 0:
+        print("left")
+        EEGns.LRgyroclenchFlag = 0
+        EEGns.L_R_Gyro_Flag = 1
+        mesageController.emit("Left")
+        returnValue = 1
+    elif -0.2 < accY < 0.35:
+        EEGns.L_R_Gyro_Flag = 0
+        returnValue = 0
+        EEGData, timestamp = MUSEns.EEGinlet.pull_chunk(
+                    timeout=0.1, max_samples=int(10))
+            
+            
+        if np.array(EEGns.eeg_l_R_gyroController_Buffer).shape[0] < 200:
+            EEGns.eeg_l_R_gyroController_Buffer = np.vstack([EEGns.eeg_l_R_gyroController_Buffer, np.array(EEGData)]) if len(EEGns.eeg_l_R_gyroController_Buffer) else np.array(EEGData)
+        else:
+            isSelected = detectJawClench(EEGData=EEGns.eeg_l_R_gyroController_Buffer,windlenght=200)
+            if isSelected == 1 and EEGns.LRgyroclenchFlag == 0:
+                EEGns.LRgyroclenchFlag = 1
+                print("jaw clench")
+
+                mesageController.emit("Jaw Clenched!!")
+                returnValue = 2
+                
+            elif EEGns.LRgyroclenchFlag == 1:
+                EEGns.LRgyroclenchFlag = 0
+                returnValue = 0
+            EEGns.eeg_l_R_gyroController_Buffer = EEGns.eeg_l_R_gyroController_Buffer[150:]
+        # while (time.time()- startTime) < 2:
+        #     Jaweeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
+        #         timeout=2, max_samples=int(200))
+        #     isSelected = detectJawClench(EEGData=Jaweeg_data,windlenght=200)
+        #     if isSelected == 1:
+        #         mesageController.emit("Jaw Clenched!!")
+        #         returnValue = 2
+        #         break
+        #     else:
+        #         returnValue = 0
+    # print("flag",EEGns.L_R_Gyro_Flag)
+    return returnValue
+    
+    
 ################### fall detection Handler ############################
 def handelFalls(accX,accY,accZ,gyroX,gyroY,gyroZ):
     #if fall is detected 
@@ -975,7 +1078,7 @@ def detectJawClench(EEGData,windlenght = 250): # min window length is 200
     LF_ch_data_fft = np.fft.rfft(LF_ch_data_buffer)
     RF_ch_data_fft = np.fft.rfft(RF_ch_data_buffer)
     RE_ch_data_fft = np.fft.rfft(RE_ch_data)
-    if max(LF_ch_data_fft[500:1000]) > 1000 and max(RF_ch_data_fft[500:1000]) > 1000:
+    if max(LF_ch_data_fft[500:1000]) > 2000 and max(RF_ch_data_fft[500:1000]) > 2000:
         print("jaw clench detected")
         return 1
     else:
