@@ -35,8 +35,8 @@ class Smarthome(qtw.QMainWindow):
 
         #self.morse_flag = 0
         self.room_dic = {0: self.house, 1: self.living, 2: self.room1, 3: self.room2,
-               4: self.kitchen, 5: self.corridor, 6: self.bath, 7: self.calib,
-               8: self.control, 9: self.msg, 10: self.fall}
+               4: self.kitchen, 5: self.corridor, 6: self.bath, 7: self.msg,
+               8: self.control, 9: self.calib, 10: self.fall}
 
         self.testLayout.addWidget(self.house)
         self.current_widget = 0
@@ -250,8 +250,11 @@ class Smarthome(qtw.QMainWindow):
                 selected_item = list(self.room_dic[self.current_widget].dic)[0]
             elif selected_item < list(self.room_dic[self.current_widget].dic)[0]:
                 selected_item = list(self.room_dic[self.current_widget].dic)[-1]
-
-            self.room_dic[self.current_widget].select(selected_item)
+            try:
+                self.room_dic[self.current_widget].select(selected_item)
+            except:
+                self.room_dic[self.current_widget].selected = selected_item
+                pass
             if m.CntWorker.isArabic:
                 self.room_dic[self.current_widget].message_label.setText(
                     f" تم تحديد {self.room_dic[self.current_widget].dic[selected_item][2]} .")
@@ -295,12 +298,15 @@ class Smarthome(qtw.QMainWindow):
             self.current_widget = self.house.selected
             self.house.selected = 0
             self.room_dic[self.current_widget].show()
-            self.room_dic[self.current_widget].select(1)
-            if m.CntWorker.isArabic:
-                self.room_dic[self.current_widget].message_label.setText(
-                    f" تم تحديد {self.room_dic[self.current_widget].dic[1][2]} .")
-            else:
-                self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
+            try:
+                self.room_dic[self.current_widget].select(1)
+                if m.CntWorker.isArabic:
+                    self.room_dic[self.current_widget].message_label.setText(
+                        f" تم تحديد {self.room_dic[self.current_widget].dic[1][2]} .")
+                else:
+                    self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
+            except:
+                pass
 
         self.cnt_thr.quit()
 
