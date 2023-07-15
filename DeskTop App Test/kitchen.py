@@ -59,7 +59,10 @@ class Kitchen(qtw.QWidget):
 
     def select(self, item_no):
         print("in rooom select")
-        new_style = "background-color: #fffff0; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
+        if self.on_or_off[item_no]:
+            new_style = "background-color: #ffff30; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
+        else:
+            new_style = "background-color: #666660; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
         if self.selected != 0:
             self.reset_selection()
 

@@ -328,6 +328,8 @@ class Smarthome(qtw.QMainWindow):
 
 
 if __name__ == '__main__':
+
+
     app = qtw.QApplication(sys.argv)
     # startMUSEconnection()
     # TFModelInit()
