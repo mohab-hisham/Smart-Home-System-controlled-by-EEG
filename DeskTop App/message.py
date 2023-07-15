@@ -17,7 +17,7 @@ class Message(qtw.QWidget):
         self.saveButton.setStyleSheet(btn_style)
         self.code_label.setStyleSheet(label_style)
         self.message_label.setStyleSheet(label_style)
-        self.info_label.setStyleSheet(label_style)
+        self.info_label.setStyleSheet(label_style + "border-image: url(imgs/morsecode.jpg);")
 
 
 

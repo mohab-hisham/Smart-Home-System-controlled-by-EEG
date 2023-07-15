@@ -41,7 +41,8 @@ class Ui_Form(object):
         font.setFamilies([u"Times New Roman"])
         font.setPointSize(50)
         self.progressBar.setFont(font)
-        self.progressBar.setValue(24)
+        self.progressBar.setMaximum(4)
+        self.progressBar.setValue(0)
         self.progressBar.setTextVisible(False)
         self.progressBar.setInvertedAppearance(False)
 

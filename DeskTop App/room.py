@@ -17,6 +17,7 @@ class Room(qtw.QWidget):
         self.img_styles = {1:"border-image: url(imgs/light-bulb.png);", 2: "border-image: url(imgs/curtains.png);",
                            3: "border-image: url(imgs/smart-tv.png);", 4:"border-image: url(imgs/fan.png);",
                            5:"border-image: url(imgs/home.png);"}
+        
         self.howtocontrol = {0:f"  {name}\n  Light: ..\n  curtains: .-\n  TV: -. \n  Fan: --\n  Home: ...",1:f"  {name}\n  select: ..",2:f"  {name}\n  select: jaw clench",3:f"  {name}\n  select: jaw clench"}
         self.message_label.setText(name)
         self.setStyleSheet("background-color: #122222; ")
@@ -31,12 +32,14 @@ class Room(qtw.QWidget):
         self.tvButton.setStyleSheet(self.common_style + self.img_styles[3]+ self.on_off_background[self.on_or_off[3]])
         self.cartensButton.setStyleSheet(self.common_style + self.img_styles[2]+ self.on_off_background[self.on_or_off[2]])
         self.lightButton.setStyleSheet(self.common_style + self.img_styles[1]+ self.on_off_background[self.on_or_off[1]])
-        
 
 
     def select(self, item_no):
         print("in rooom select")
-        new_style = "background-color: #fffff0; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
+        if self.on_or_off[item_no]:
+            new_style = "background-color: #ffff30; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
+        else:
+            new_style = "background-color: #666660; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
         if self.selected != 0:
             self.reset_selection()
 
@@ -53,7 +56,6 @@ class Room(qtw.QWidget):
 
     def reset_selection(self):
         if self.selected != 5:
-            print("in reset_selection")
             self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected]
                                                      + self.on_off_background[self.on_or_off[self.selected]])
         else:
