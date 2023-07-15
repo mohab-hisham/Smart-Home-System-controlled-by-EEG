@@ -10,6 +10,7 @@ from PyQt5.QtCore import *
 from Utils.MQTTutils import startMQTTserver,MQTTns
 from Utils.EEGutils import TFModelInit
 from Utils.MUSEutils import startMUSEconnection
+# from loading import Loading
 
 
 class Smarthome(qtw.QMainWindow):
@@ -123,7 +124,7 @@ class Smarthome(qtw.QMainWindow):
         self.cnt_worker.morse_statment_msg.connect(self.msg.write_pragraph)
         self.cnt_worker.type_of_blink_msg.connect(self.msg.show_code)
 
-        self.showFullScreen()
+        # self.showFullScreen()
 
     def get_control_mode(self):
         cont, lang = self.control.get_control_option()
@@ -174,8 +175,11 @@ class Smarthome(qtw.QMainWindow):
             if widget_no > 5:
                 print("trying to go to morse")
                 print(self.current_widget)
-                if self.room_dic[self.current_widget].selected != 0:
-                    self.room_dic[self.current_widget].reset_selection()
+                try:
+                    if self.room_dic[self.current_widget].selected != 0:
+                        self.room_dic[self.current_widget].reset_selection()
+                except:
+                    pass
                 self.room_dic[self.current_widget].close()
                 self.testLayout.addWidget(self.room_dic[widget_no])
                 self.current_widget = widget_no
@@ -352,10 +356,14 @@ class Smarthome(qtw.QMainWindow):
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
-    startMUSEconnection()
-    TFModelInit()
-    startMQTTserver()
+    
     home = Smarthome()
+    
+    # startMUSEconnection()
+    # TFModelInit()
+    # startMQTTserver()
+ 
+
     home.cnt_thr.start()
     #home.open()
 
