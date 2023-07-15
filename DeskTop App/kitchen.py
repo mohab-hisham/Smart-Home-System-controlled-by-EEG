@@ -23,7 +23,6 @@ class Kitchen(qtw.QWidget):
                            3: "border-image: url(imgs/washing-machine.png);", 4: "border-image: url(imgs/food.png);",
                            5: "border-image: url(imgs/home.png);"}
         self.howtocontrol = {0:"  kitchen\n  Light: ..\n  stove: .-\n  washer: -. \n  chimney: --\n  Home: ...",1:"  kitchen\n  select: ..",2:"  kitchen\n  select: jaw clench",3:"  kitchen\n  select: jaw clench"}
-
         self.common_style = "border-radius: 90px; border: 10px solid red; background-repeat: no-repeat; "
         self.message_label.setStyleSheet(self.common_style + "background-color: #fffff0;")
         self.info_label.setStyleSheet(self.common_style + "background-color: #fffff0;")
@@ -60,7 +59,10 @@ class Kitchen(qtw.QWidget):
 
     def select(self, item_no):
         print("in rooom select")
-        new_style = "background-color: #fffff0; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
+        if self.on_or_off[item_no]:
+            new_style = "background-color: #ffff30; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
+        else:
+            new_style = "background-color: #666660; border-radius: 90px; border: 10px solid green; background-repeat: no-repeat; "
         if self.selected != 0:
             self.reset_selection()
 
