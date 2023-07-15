@@ -17,10 +17,12 @@ class Loading(qtw.QWidget):
         super().__init__()
         #bath = "DeskTop App/"
         uic.loadUi("UIs/loading.ui", self)
+
         self.steps = 4
         self.info_label.setStyleSheet("color : white;")
         #self.progressBar.setvalue(1)
         #self.progressBar.setvalue(2)
+
         self.setStyleSheet("background-color: #122222; ")
         self.progressBar.setStyleSheet("border-radius: 1px; border-color: white;")
         self.welcome_label.setStyleSheet("background-color: #fffff0; border-radius: 50px;border: 10px solid orange; ")
