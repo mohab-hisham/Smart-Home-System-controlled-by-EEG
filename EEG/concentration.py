@@ -263,21 +263,49 @@ if __name__ == "__main__":
     # CheckSignalQuality(inlet)
     
     # input("input any key to start calibration")
-    eegDataCounter = 0
-    eegBuffer = []
+    # eegDataCounter = 0
+    # eegBuffer = []
     # The following loop acquires data, computes band powers, and calculates neurofeedback metrics based on those band powers
     while True:
 
-
+        fullChunks = []
+        for i in range(48):
+            fullChunks.append([])
+        # print(fullChunks)
+        # fullChunks = np.l(fullChunks)
+        # TP9chunks = []
+        # AF7chunks = []
+        # AF8chunks = []
+        # TP10chunks = []
         """ 3.1 ACQUIRE DATA """
         # Obtain EEG data from the LSL stream
+
         eeg_data, timestamp = inlet.pull_chunk(
             timeout=3, max_samples=int(480))
+        print(np.array(eeg_data).shape)
+        TP9chunks = np.array_split(np.array(eeg_data)[:,0],48)
+        AF7chunks = np.array_split(np.array(eeg_data)[:,1],48)
+        AF8chunks = np.array_split(np.array(eeg_data)[:,2],48)
+        TP10chunks = np.array_split(np.array(eeg_data)[:,3],48)
+        print(np.array(TP9chunks).shape)
+        # TP9chunks = np.transpose(TP9chunks)
+        # AF7chunks = np.transpose(AF7chunks)
+        # AF8chunks = np.transpose(AF8chunks)
+        # TP10chunks = np.transpose(TP10chunks)
+        for i in range(48):
+            for j in range(10):
+                fullChunks[i].append([TP9chunks[i][j],AF7chunks[i][j],AF8chunks[i][j],TP10chunks[i][j]])
+                # fullChunks[i].append(AF7chunks[i])
+                # fullChunks[i].append(AF8chunks[i])
+                # fullChunks[i].append(TP10chunks[i])
+        print(np.array(fullChunks).shape)
+        print("TP9 chunks",np.array(TP9chunks)[0])
+        print("full chunks",np.array(fullChunks)[0][:,0])
         # eeg_data = np.transpose(eeg_data)
         # print(np.array(eeg_data).shape)
-        print(eeg_data)
-        EEGchunks = np.array_split([eeg_data],48,axis=1)
-        print(EEGchunks[5])
+        # print(eeg_data)
+        # EEGchunks = np.array_split([eeg_data],48,axis=1)
+        # print(EEGchunks[5])
         # if np.array(eegBuffer).shape[0] < 200:
         #     eegBuffer = np.vstack([eegBuffer, np.array(eeg_data)]) if len(eegBuffer) else np.array(eeg_data)
         #     # eegDataCounter += 1

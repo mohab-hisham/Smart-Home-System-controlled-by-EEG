@@ -98,6 +98,7 @@ class Smarthome(qtw.QMainWindow):
         self.cnt_thr.started.connect(self.cnt_worker.choose)
         self.cnt_worker.selected_item_code_msg.connect(self.change)
         self.cnt_worker.left_right_msg.connect(self.left_right)
+        self.cnt_worker.gyro_msg.connect(self.gyroSelect)
         self.cnt_thr.finished.connect(self.cnt_thr.start)
 
         self.house.livingButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(1))
@@ -248,6 +249,19 @@ class Smarthome(qtw.QMainWindow):
 
         self.cnt_thr.quit()
 
+    def gyroSelect(self,tabSelected):
+        try:
+            self.room_dic[self.current_widget].select(tabSelected)
+        except:
+            self.room_dic[self.current_widget].selected = tabSelected
+        if m.CntWorker.isArabic:
+            self.room_dic[self.current_widget].message_label.setText(
+                f" تم تحديد {self.room_dic[self.current_widget].dic[tabSelected][2]} .")
+        else:
+
+            self.room_dic[self.current_widget].message_label.setText(f"{self.room_dic[self.current_widget].dic[tabSelected][0]} is selected.")
+
+        
     def left_right(self, left_right_state):
 
         if self.current_widget != 0 or left_right_state != 0:
@@ -258,8 +272,10 @@ class Smarthome(qtw.QMainWindow):
             elif selected_item < list(self.room_dic[self.current_widget].dic)[0]:
                 selected_item = list(self.room_dic[self.current_widget].dic)[-1]
             try:
+                print("in try")
                 self.room_dic[self.current_widget].select(selected_item)
             except:
+                print("in except")
                 self.room_dic[self.current_widget].selected = selected_item
                 pass
             if m.CntWorker.isArabic:
@@ -272,6 +288,7 @@ class Smarthome(qtw.QMainWindow):
             if left_right_state == 0:
                 if selected_item == 5:
                     # if user wants to go home:
+                    print("in selected item")
                     self.cnt_worker.mouse_interrupt_msg.emit(5)
                 else:
                     # if user wants to turn a devices without returning to home menue:

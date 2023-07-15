@@ -51,6 +51,8 @@ class CntWorker(QObject):
 
     left_right_msg = pyqtSignal(int)
 
+    gyro_msg = pyqtSignal(int)
+
     type_of_blink_msg = pyqtSignal(str)
 
     morse_statment_msg = pyqtSignal(str)
