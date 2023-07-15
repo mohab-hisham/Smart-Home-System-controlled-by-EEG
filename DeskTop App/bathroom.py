@@ -21,7 +21,7 @@ class BathRoom(qtw.QWidget):
         self.img_styles = {1: "border-image: url(imgs/light-bulb.png);", 2: "border-image: url(imgs/toilet (1).png);",
                            3: "border-image: url(imgs/toilet cover.png);", 4: "border-image: url(imgs/flush.png);",
                            5: "border-image: url(imgs/home.png);"}
-
+        self.howtocontrol = {0:"  Bath Room\n  Light: ..\n  bidet: .-\n  cover: -. \n  Flush: --\n Home: ...",1:"  Bath Room\n  select: ..",2:"  Bath Room\n  select: jaw clench",3:"  Bath Room\n  select: jaw clench"}
         self.common_style = "border-radius: 90px; border: 10px solid red; background-repeat: no-repeat; "
         self.message_label.setStyleSheet(self.common_style + "background-color: #fffff0;")
         self.info_label.setStyleSheet(self.common_style + "background-color: #fffff0;")

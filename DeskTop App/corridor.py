@@ -21,7 +21,7 @@ class Corridor(qtw.QWidget):
         self.img_styles = {1: "border-image: url(imgs/light-bulb.png);", 2: "border-image: url(imgs/door1.png);",
                            3: "border-image: url(imgs/door.png);", 4: "border-image: url(imgs/wc.png);",
                            5: "border-image: url(imgs/home.png);"}
-
+        self.howtocontrol = {0:"  corridor\n  Light: ..\n  Door1: .-\n  Door2: -. \n  Bath Room: --\n  Home: ...",1:"  corridor\n  select: ..",2:"  corridor\n  select: jaw clench",3:"  corridor\n  select: jaw clench"}
         self.common_style = "border-radius: 90px; border: 10px solid red; background-repeat: no-repeat; "
         self.message_label.setStyleSheet(self.common_style + "background-color: #fffff0;")
         self.info_label.setStyleSheet(self.common_style + "background-color: #fffff0;")
