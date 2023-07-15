@@ -32,22 +32,6 @@ class Ui_message_wind(object):
         self.gridLayout.setSpacing(0)
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setContentsMargins(0, 0, 0, 0)
-        self.message_label = QLabel(message_wind)
-        self.message_label.setObjectName(u"message_label")
-        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.message_label.sizePolicy().hasHeightForWidth())
-        self.message_label.setSizePolicy(sizePolicy)
-        font1 = QFont()
-        font1.setPointSize(30)
-        self.message_label.setFont(font1)
-        self.message_label.setFrameShape(QFrame.WinPanel)
-        self.message_label.setFrameShadow(QFrame.Raised)
-        self.message_label.setAlignment(Qt.AlignJustify|Qt.AlignTop)
-
-        self.gridLayout.addWidget(self.message_label, 1, 1, 1, 1)
-
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
@@ -56,11 +40,14 @@ class Ui_message_wind(object):
 
         self.clearButton = QPushButton(message_wind)
         self.clearButton.setObjectName(u"clearButton")
+        sizePolicy = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.clearButton.sizePolicy().hasHeightForWidth())
         self.clearButton.setSizePolicy(sizePolicy)
-        font2 = QFont()
-        font2.setPointSize(45)
-        self.clearButton.setFont(font2)
+        font1 = QFont()
+        font1.setPointSize(45)
+        self.clearButton.setFont(font1)
 
         self.horizontalLayout.addWidget(self.clearButton)
 
@@ -72,7 +59,7 @@ class Ui_message_wind(object):
         self.saveButton.setObjectName(u"saveButton")
         sizePolicy.setHeightForWidth(self.saveButton.sizePolicy().hasHeightForWidth())
         self.saveButton.setSizePolicy(sizePolicy)
-        self.saveButton.setFont(font2)
+        self.saveButton.setFont(font1)
 
         self.horizontalLayout.addWidget(self.saveButton)
 
@@ -88,13 +75,36 @@ class Ui_message_wind(object):
 
         self.gridLayout.addLayout(self.horizontalLayout, 5, 1, 1, 1)
 
+        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.gridLayout.addItem(self.verticalSpacer_2, 6, 1, 1, 1)
+
+        self.horizontalLayout_2 = QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.code_label = QLabel(message_wind)
+        self.code_label.setObjectName(u"code_label")
+        sizePolicy.setHeightForWidth(self.code_label.sizePolicy().hasHeightForWidth())
+        self.code_label.setSizePolicy(sizePolicy)
+        font2 = QFont()
+        font2.setPointSize(25)
+        self.code_label.setFont(font2)
+        self.code_label.setFrameShape(QFrame.WinPanel)
+        self.code_label.setFrameShadow(QFrame.Raised)
+        self.code_label.setAlignment(Qt.AlignCenter)
+
+        self.horizontalLayout_2.addWidget(self.code_label)
+
+        self.horizontalLayout_2.setStretch(0, 6)
+
+        self.gridLayout.addLayout(self.horizontalLayout_2, 3, 1, 1, 1)
+
         self.verticalSpacer = QSpacerItem(20, 31, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.gridLayout.addItem(self.verticalSpacer, 4, 1, 1, 1)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.gridLayout.addItem(self.verticalSpacer_2, 6, 1, 1, 1)
+        self.gridLayout.addItem(self.horizontalSpacer_5, 3, 2, 1, 1)
 
         self.verticalSpacer_3 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -108,45 +118,41 @@ class Ui_message_wind(object):
 
         self.gridLayout.addItem(self.verticalSpacer_4, 0, 1, 1, 1)
 
-        self.horizontalSpacer_5 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.gridLayout.addItem(self.horizontalSpacer_5, 3, 2, 1, 1)
-
-        self.horizontalLayout_2 = QHBoxLayout()
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.code_label = QLabel(message_wind)
-        self.code_label.setObjectName(u"code_label")
-        sizePolicy.setHeightForWidth(self.code_label.sizePolicy().hasHeightForWidth())
-        self.code_label.setSizePolicy(sizePolicy)
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.message_label = QLabel(message_wind)
+        self.message_label.setObjectName(u"message_label")
+        sizePolicy.setHeightForWidth(self.message_label.sizePolicy().hasHeightForWidth())
+        self.message_label.setSizePolicy(sizePolicy)
         font3 = QFont()
-        font3.setPointSize(25)
-        self.code_label.setFont(font3)
-        self.code_label.setFrameShape(QFrame.WinPanel)
-        self.code_label.setFrameShadow(QFrame.Raised)
-        self.code_label.setAlignment(Qt.AlignCenter)
+        font3.setPointSize(30)
+        self.message_label.setFont(font3)
+        self.message_label.setFrameShape(QFrame.WinPanel)
+        self.message_label.setFrameShadow(QFrame.Raised)
+        self.message_label.setAlignment(Qt.AlignJustify|Qt.AlignVCenter)
 
-        self.horizontalLayout_2.addWidget(self.code_label)
+        self.horizontalLayout_3.addWidget(self.message_label)
 
-        self.horizontalSpacer_6 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.horizontalSpacer_7 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.horizontalLayout_2.addItem(self.horizontalSpacer_6)
+        self.horizontalLayout_3.addItem(self.horizontalSpacer_7)
 
         self.info_label = QLabel(message_wind)
         self.info_label.setObjectName(u"info_label")
         sizePolicy.setHeightForWidth(self.info_label.sizePolicy().hasHeightForWidth())
         self.info_label.setSizePolicy(sizePolicy)
-        self.info_label.setFont(font3)
+        self.info_label.setFont(font2)
         self.info_label.setFrameShape(QFrame.WinPanel)
         self.info_label.setFrameShadow(QFrame.Raised)
         self.info_label.setAlignment(Qt.AlignCenter)
 
-        self.horizontalLayout_2.addWidget(self.info_label)
+        self.horizontalLayout_3.addWidget(self.info_label)
 
-        self.horizontalLayout_2.setStretch(0, 6)
-        self.horizontalLayout_2.setStretch(1, 1)
-        self.horizontalLayout_2.setStretch(2, 6)
+        self.horizontalLayout_3.setStretch(0, 6)
+        self.horizontalLayout_3.setStretch(1, 1)
+        self.horizontalLayout_3.setStretch(2, 6)
 
-        self.gridLayout.addLayout(self.horizontalLayout_2, 3, 1, 1, 1)
+        self.gridLayout.addLayout(self.horizontalLayout_3, 1, 1, 1, 1)
 
         self.gridLayout.setRowStretch(0, 2)
         self.gridLayout.setRowStretch(1, 10)
@@ -166,10 +172,10 @@ class Ui_message_wind(object):
 
     def retranslateUi(self, message_wind):
         message_wind.setWindowTitle(QCoreApplication.translate("message_wind", u"Message", None))
-        self.message_label.setText("")
         self.clearButton.setText(QCoreApplication.translate("message_wind", u"Clear", None))
         self.saveButton.setText(QCoreApplication.translate("message_wind", u"Save", None))
         self.code_label.setText("")
+        self.message_label.setText("")
         self.info_label.setText("")
     # retranslateUi
 
