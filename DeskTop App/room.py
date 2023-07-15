@@ -53,6 +53,7 @@ class Room(qtw.QWidget):
 
     def reset_selection(self):
         if self.selected != 5:
+            print("in reset_selection")
             self.dic[self.selected][1].setStyleSheet(self.common_style + self.img_styles[self.selected]
                                                      + self.on_off_background[self.on_or_off[self.selected]])
         else:

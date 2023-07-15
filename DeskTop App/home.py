@@ -10,7 +10,6 @@ from PyQt5.QtCore import *
 from Utils.MQTTutils import startMQTTserver,MQTTns
 from Utils.EEGutils import TFModelInit
 from Utils.MUSEutils import startMUSEconnection
-import loading as lg
 
 
 class Smarthome(qtw.QMainWindow):
@@ -99,6 +98,7 @@ class Smarthome(qtw.QMainWindow):
         self.cnt_thr.started.connect(self.cnt_worker.choose)
         self.cnt_worker.selected_item_code_msg.connect(self.change)
         self.cnt_worker.left_right_msg.connect(self.left_right)
+        self.cnt_worker.gyro_msg.connect(self.gyroSelect)
         self.cnt_thr.finished.connect(self.cnt_thr.start)
 
         self.house.livingButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(1))
@@ -107,9 +107,9 @@ class Smarthome(qtw.QMainWindow):
         self.house.kitchenButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(4))
         self.house.lobbyButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(5))
         self.house.bathButton.clicked.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(6))
-        self.actionCalibration.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(7))
+        self.actionCalibration.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(9))
         self.actionControls.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(8))
-        self.actionMessage.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(9))
+        self.actionMessage.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(7))
         self.actionFall_Detection.triggered.connect(lambda: self.cnt_worker.mouse_interrupt_msg.emit(10))
 
         self.cnt_worker.type_of_blink_msg.connect(self.kitchen.show_state)
@@ -127,7 +127,6 @@ class Smarthome(qtw.QMainWindow):
 
     def get_control_mode(self):
         cont, lang = self.control.get_control_option()
-        print("control_mode",cont)
         m.CntWorker.control_mode = cont
         m.CntWorker.isArabic = lang
         self.living.info_label.setText(self.living.howtocontrol[cont])
@@ -153,7 +152,7 @@ class Smarthome(qtw.QMainWindow):
             self.room_dic[self.current_widget].show()
 
             # if morse is selected:
-            if widget_no == 9:
+            if widget_no == 7:
                 m.CntWorker.morse_falg = 1
 
             # select first item if in left right mode
@@ -181,7 +180,7 @@ class Smarthome(qtw.QMainWindow):
                 self.testLayout.addWidget(self.room_dic[widget_no])
                 self.current_widget = widget_no
                 self.room_dic[self.current_widget].show()
-                if widget_no == 9:
+                if widget_no == 7:
                     m.CntWorker.morse_falg = 1
                 print(self.current_widget)
 
@@ -250,6 +249,19 @@ class Smarthome(qtw.QMainWindow):
 
         self.cnt_thr.quit()
 
+    def gyroSelect(self,tabSelected):
+        try:
+            self.room_dic[self.current_widget].select(tabSelected)
+        except:
+            self.room_dic[self.current_widget].selected = tabSelected
+        if m.CntWorker.isArabic:
+            self.room_dic[self.current_widget].message_label.setText(
+                f" تم تحديد {self.room_dic[self.current_widget].dic[tabSelected][2]} .")
+        else:
+
+            self.room_dic[self.current_widget].message_label.setText(f"{self.room_dic[self.current_widget].dic[tabSelected][0]} is selected.")
+
+        
     def left_right(self, left_right_state):
 
         if self.current_widget != 0 or left_right_state != 0:
@@ -260,8 +272,10 @@ class Smarthome(qtw.QMainWindow):
             elif selected_item < list(self.room_dic[self.current_widget].dic)[0]:
                 selected_item = list(self.room_dic[self.current_widget].dic)[-1]
             try:
+                print("in try")
                 self.room_dic[self.current_widget].select(selected_item)
             except:
+                print("in except")
                 self.room_dic[self.current_widget].selected = selected_item
                 pass
             if m.CntWorker.isArabic:
@@ -274,6 +288,7 @@ class Smarthome(qtw.QMainWindow):
             if left_right_state == 0:
                 if selected_item == 5:
                     # if user wants to go home:
+                    print("in selected item")
                     self.cnt_worker.mouse_interrupt_msg.emit(5)
                 else:
                     # if user wants to turn a devices without returning to home menue:
@@ -331,17 +346,11 @@ class Smarthome(qtw.QMainWindow):
         # self.mohab.this_is_where_your_code_goes()
         pass
 
-#sequence lenght ________
-#index ________
-#blink lenght ________
-#duration after blink ________
-#what to controll ________
+
 
 
 
 if __name__ == '__main__':
-    
-    
     app = qtw.QApplication(sys.argv)
     startMUSEconnection()
     TFModelInit()
