@@ -40,6 +40,10 @@ class Controls(qtw.QWidget):
         self.duration_comboBox.setStyleSheet(self.combo_style)
         self.item_comboBox.setStyleSheet(self.combo_style)
         self.doneButton.setStyleSheet("background-color: #9ACD32; border-radius: 30px;  border: 10px solid black;")
+        self.index_comboBox.addItems(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"])
+        self.blink_len_comboBox.addItems(["Short Blink", "Long Blink"])
+        self.duration_comboBox.addItems(["Short Duration", "Long Duration"])
+        self.item_comboBox.addItems(["living", "Room 1", "Room 2", "Kitchen", "Corridor", "Bathroom", "Message"])
 
     def closeControl(self):
         self.close()
