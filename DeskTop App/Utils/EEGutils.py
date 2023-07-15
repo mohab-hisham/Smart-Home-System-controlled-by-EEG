@@ -763,7 +763,7 @@ def getL_R_eyeMovement(ns):
     EEGns.fulleegData = []
     fullChunks = []
     numOfchunks = 48
-    L_R_Flag = 0
+    # L_R_Flag = 0
     for i in range(numOfchunks):
         fullChunks.append([])
     eegData, timestamp = MUSEns.EEGinlet.pull_chunk(
@@ -875,7 +875,7 @@ def readMorseCode(ns):
                 # EEGns.LRgyroclenchFlag = 1
                 print("jaw clench")
 
-                ns.selected_item_code_msg.emit("space")
+                # ns.selected_item_code_msg.emit("space")
                 ns.morse_statment_msg.emit(" ")
                 ns.selected_item_code_msg.emit(2)
                 BlinkMorseCode = ""
