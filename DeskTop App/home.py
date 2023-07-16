@@ -8,7 +8,7 @@ import sys
 import main as m
 from PyQt5.QtCore import *
 from Utils.MQTTutils import startMQTTserver,MQTTns
-from Utils.EEGutils import TFModelInit
+from Utils.EEGutils import TFModelInit,EEGns
 from Utils.MUSEutils import startMUSEconnection
 # from loading import Loading
 
@@ -115,6 +115,7 @@ class Smarthome(qtw.QMainWindow):
 
         self.cnt_worker.type_of_blink_msg.connect(self.kitchen.show_state)
         self.cnt_worker.type_of_blink_msg.connect(self.house.show_state)
+        self.cnt_worker.system_action_msg.connect(self.house.show_control_state)
         self.cnt_worker.type_of_blink_msg.connect(self.corridor.show_state)
         self.cnt_worker.type_of_blink_msg.connect(self.bath.show_state)
         self.cnt_worker.type_of_blink_msg.connect(self.room1.show_state)
@@ -150,6 +151,7 @@ class Smarthome(qtw.QMainWindow):
             self.house.close()
             self.testLayout.addWidget(self.room_dic[widget_no])
             self.current_widget = widget_no
+            EEGns.current_widget = self.current_widget
             self.room_dic[self.current_widget].show()
 
             # if morse is selected:
@@ -183,6 +185,7 @@ class Smarthome(qtw.QMainWindow):
                 self.room_dic[self.current_widget].close()
                 self.testLayout.addWidget(self.room_dic[widget_no])
                 self.current_widget = widget_no
+                EEGns.current_widget = self.current_widget
                 self.room_dic[self.current_widget].show()
                 if widget_no == 7:
                     m.CntWorker.morse_falg = 1
@@ -249,6 +252,7 @@ class Smarthome(qtw.QMainWindow):
                     self.house.message_label.setText("Living is selected.")
                 self.house.select(1)
             self.current_widget = 0
+            EEGns.current_widget = self.current_widget
 
 
         self.cnt_thr.quit()
@@ -324,6 +328,7 @@ class Smarthome(qtw.QMainWindow):
             self.house.close()
             self.testLayout.addWidget(self.room_dic[self.house.selected])
             self.current_widget = self.house.selected
+            EEGns.current_widget = self.current_widget
             self.house.selected = 0
             self.room_dic[self.current_widget].show()
             try:

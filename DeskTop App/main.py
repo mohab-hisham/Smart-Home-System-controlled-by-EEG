@@ -55,6 +55,8 @@ class CntWorker(QObject):
 
     type_of_blink_msg = pyqtSignal(str)
 
+    system_action_msg = pyqtSignal(str)
+
     morse_statment_msg = pyqtSignal(str)
 
     def __init__(self):
@@ -72,7 +74,7 @@ class CntWorker(QObject):
         if CntWorker.morse_falg:
             readMorseCode(self)
         else:
-            code = readInputedSeq(self,windowLength=10,homeOrRoom=True,controlMethod=CntWorker.control_mode)
+            code = readInputedSeq(self,windowLength=10,controlMethod=CntWorker.control_mode)
 
             # while code == 0:
             #     # loop for taking input

@@ -13,6 +13,7 @@ from pandas import *
 import pyautogui as pg
 from Utils.MUSEutils import MUSEns,startMUSEconnection
 import tensorflow as tf
+import main as m
 # from MQTTutils import MQTTns
 
 
@@ -130,6 +131,9 @@ EEGns.eeg_l_R_gyroController_Buffer = []
 EEGns.eeg_gyroController_Buffer = []
 EEGns.eeg_l_R_eyeController_Buffer = []
 EEGns.eeg_morse_controller_Buffer = []
+
+EEGns.current_widget = 0
+
 
 EEGns.LRgyroclenchFlag = 0
 EEGns.gyroclenchFlag = 0
@@ -471,36 +475,29 @@ def getBlinkData(inputChar):
     return addedBlink
 
 ########### construct sequence from blinks #####
-def readInputedSeq(ns, windowLength=10,homeOrRoom = True,controlMethod = 0):
+def readInputedSeq(ns, windowLength=10,controlMethod = 0):
     outSeqValue = 0
+    print("language:", m.CntWorker.isArabic)
+    print("current room", EEGns.current_widget)
+    homeOrRoom = True
+    if EEGns.current_widget != 0:
+        homeOrRoom = False
+    else:
+        homeOrRoom = True
     # startTime = time.time()
     while True:
         if ns.intr_val[0]:
             # ns.intr_val[0]=0
             return -1
-        # 256 in 1 sec , 52 in 1 sec
-        # if controlMethod == 1:
-        #     eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-        #         timeout=3, max_samples=int(480))
-            
-        # else:
-        #     AccX, AccY, AccZ,_,_,_ = getGyroAccData(2)
         
-        #     eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-        #             timeout=3, max_samples=int(windowLength))
         if controlMethod == 1:
-            # eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-            #     timeout=3, max_samples=int(480))
+           
             outSeqValue = getL_R_eyeMovement(ns=ns)
 
         elif controlMethod == 2:
-            # eeg_data, timestamp = MUSEns.EEGinlet.pull_chunk(
-            #         timeout=1, max_samples=int(10))
-            
-            # AccX, AccY, AccZ = getGyroAccData(2)
-            outSeqValue = gyroController(ns = ns)
+            outSeqValue = gyroController(ns = ns,homeOrRoom=homeOrRoom)
+
         elif controlMethod == 3:
-            # AccX, AccY, AccZ= getGyroAccData(2)
             outSeqValue = l_R_gyroController(ns=ns)
             
         elif controlMethod == 0:
@@ -528,12 +525,12 @@ def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = Fa
     global roomSelectSeqArr
     returnValue = 0
     compSeqArr = tabSelectSeqArr
-    mesageController = ns.type_of_blink_msg
+    mesageController = ns.system_action_msg
 
     if controllMethod == "tabSelect":
         if homeOrRoom:
             compSeqArr = tabSelectSeqArr
-            mesageController = ns.type_of_blink_msg
+            mesageController = ns.system_action_msg
         else:
             compSeqArr = roomSelectSeqArr
             # mesageController = ns.
@@ -950,34 +947,56 @@ def getGyroAccData(windowLenght = 2):
     # gyroscpeZ = np.mean(np.array(gyro_data)[:,2]) * np.pi
     return accelerationX,accelerationY,accelerationZ#,gyroscpeX,gyroscpeY,gyroscpeZ
 
-def gyroController(ns):
+def gyroController(ns,homeOrRoom):
     accX, accY, AccZ = getGyroAccData(2)
     mesageController = ns.type_of_blink_msg
     returnVal = 0
     print("in gyro controller")
-    if accY > 0.35 and accX < 0.05:
-        mesageController.emit("tab 3")
-        returnVal = 3
-        # print("tab 3") # x: -0.001 , y: 0.4
-    elif accY < -0.2 and accX < 0:
-        mesageController.emit("tab 1")
-        returnVal = 1
-        # print("tab 1") # x: -0.03 , y: -0.25
-    elif accY > 0.2 and accX > 0.1:
-        mesageController.emit("tab 6")
-        returnVal = 6
-        # print("tab 6") # x: 0.22 , y: 0.38
-    elif accY < -0.2 and accX > 0.1:
-        mesageController.emit("tab 4")
-        returnVal = 4
-        # print("tab 4") # x: 0.13 , y: -0.25
-    elif -0.2 < accY < 0.2 and accX < 0:
-        mesageController.emit("tab 2")
-        returnVal = 2
-        # print("tab 2") # x: -0.001 , y: 0.10
+    if homeOrRoom:
+        if accY > 0.35 and accX < 0.05:
+            mesageController.emit("tab 3")
+            returnVal = 3
+            # print("tab 3") # x: -0.001 , y: 0.4
+        elif accY < -0.2 and accX < 0:
+            mesageController.emit("tab 1")
+            returnVal = 1
+            # print("tab 1") # x: -0.03 , y: -0.25
+        elif accY > 0.2 and accX > 0.1:
+            mesageController.emit("tab 6")
+            returnVal = 6
+            # print("tab 6") # x: 0.22 , y: 0.38
+        elif accY < -0.2 and accX > 0.1:
+            mesageController.emit("tab 4")
+            returnVal = 4
+            # print("tab 4") # x: 0.13 , y: -0.25
+        elif -0.2 < accY < 0.2 and accX < 0:
+            mesageController.emit("tab 2")
+            returnVal = 2
+            # print("tab 2") # x: -0.001 , y: 0.10
+        else:
+            mesageController.emit("tab 5")
+            returnVal = 5
     else:
-        mesageController.emit("tab 5")
-        returnVal = 5
+        
+        if accY < -0.2 and accX < 0:
+            mesageController.emit("tab 1")
+            returnVal = 1
+            # print("tab 1") # x: -0.03 , y: -0.25
+        elif accY > 0.2 and accX > 0.1:
+            mesageController.emit("home")
+            returnVal = 5
+            # print("tab 6") # x: 0.22 , y: 0.38
+        elif accY < -0.2 and accX > 0.1:
+            mesageController.emit("tab 3")
+            returnVal = 3
+            # print("tab 4") # x: 0.13 , y: -0.25
+        elif -0.2 < accY < 0.2 and accX < 0:
+            mesageController.emit("tab 2")
+            returnVal = 2
+            # print("tab 2") # x: -0.001 , y: 0.10
+        else:
+            mesageController.emit("tab 4")
+            returnVal = 4
     ns.gyro_msg.emit(returnVal)
         # print("tab 5") # x: 0.15 , y: 0.15
     # print("")

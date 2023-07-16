@@ -65,6 +65,9 @@ class Home(qtw.QWidget):
 
     def show_state(self, msg):
         self.message_label.setText(msg)
+    
+    def show_control_state(self, msg):
+        self.info_label.setText(msg)
 
 if __name__ == '__main__':
     app = qtw.QApplication(sys.argv)
