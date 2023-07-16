@@ -48,17 +48,29 @@ class Blink:
     def printBlink(self):
         print("blink length: ", self.length, "duration after Blink: ",self.durationAfterBlink)
     
-    def blinkType(self):
-        if self.length[0] < 0.2:
-            return "short BL"
+    def blinkType(self,language):
+        if language == 1:
+            if self.length[0] < 0.2:
+                return "رمشة قصيرة"
+            else:
+                return "رمشة طويلة"
         else:
-            return "long BL"
-    
-    def durationAfterBlinkType(self):
-        if self.durationAfterBlink[0] < 1:
-            return "short DAB"
+            if self.length[0] < 0.2:
+                return "short BL"
+            else:
+                return "long BL"
+        
+    def durationAfterBlinkType(self,language):
+        if language == 1:
+            if self.durationAfterBlink[0] < 1:
+                return "مدة بعد الرمشة قصيرة"
+            else:
+                return "مدة بعد الرمشة طويلة"
         else:
-            return "long DAB"
+            if self.durationAfterBlink[0] < 1:
+                return "short DAB"
+            else:
+                return "long DAB"
 
 class Sequence:
     def __init__(self,seqArr,whatToControll = None) -> None:
@@ -557,7 +569,7 @@ def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = Fa
                 
                 inputSeqArr[-1].durationAfterBlink = [openCloseTime]
                 if mesageController != None:
-                    mesageController.emit(inputSeqArr[-1].durationAfterBlinkType())
+                    mesageController.emit(inputSeqArr[-1].durationAfterBlinkType(m.CntWorker.isArabic))
                 Sequence(inputSeqArr).printSeq()
                 # print("eyeOpen: ", openCloseTime)
         elif (300 > max(rightData) > EEGns.upperTH) and (300 > max(leftData) > EEGns.upperTH) and openCloseState == 1: #open
@@ -567,7 +579,9 @@ def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = Fa
             closeOpenTime = openTime-closeTime
             inputSeqArr.append(Blink(length=[closeOpenTime]))
             if mesageController != None:
-                mesageController.emit(inputSeqArr[-1].blinkType())
+                mesageController.emit(inputSeqArr[-1].blinkType(m.CntWorker.isArabic))
+            tempcommand = checkSeq(Sequence(inputSeqArr),compSeqArr)
+            temp_selected_room(ns=ns,command=tempcommand)
             Sequence(inputSeqArr).printSeq()
         # return returnValue
     
@@ -616,7 +630,24 @@ def readFullinputedSeq(ns,EEGData,windowLength = 10,startSeq = False,endSeq = Fa
     except:
         return 0
          
-            
+def temp_selected_room(ns,command):
+    returnVal = 1
+    if command == "tabOne":
+        returnVal = 1
+    elif command == "tabTwo":
+        returnVal = 2
+    elif command == "tabThree":
+        returnVal = 3
+    elif command == "tabFour":
+        returnVal = 4
+    elif command == "tabFive":
+        returnVal = 5
+    elif command == "tabSix":
+        returnVal = 6
+    elif command == "tabSeven":
+        returnVal = 7
+    ns.gyro_msg.emit(returnVal)
+        
 def applyCommand(mesageController,command,controlMethod):
     if controlMethod == "tabSelect":
         if command == "tabOne":
@@ -946,8 +977,9 @@ def getGyroAccData(windowLenght = 2):
     # gyroscpeY = np.mean(np.array(gyro_data)[:,1]) * np.pi
     # gyroscpeZ = np.mean(np.array(gyro_data)[:,2]) * np.pi
     return accelerationX,accelerationY,accelerationZ#,gyroscpeX,gyroscpeY,gyroscpeZ
-
+gyroCounter = 0
 def gyroController(ns,homeOrRoom):
+    global gyroCounter
     accX, accY, AccZ = getGyroAccData(2)
     mesageController = ns.type_of_blink_msg
     returnVal = 0
@@ -1000,6 +1032,11 @@ def gyroController(ns,homeOrRoom):
     ns.gyro_msg.emit(returnVal)
         # print("tab 5") # x: 0.15 , y: 0.15
     # print("")
+    # #################3
+    # gyroCounter +=1
+    # if gyroCounter > 50:
+    #     return returnVal
+    # #################
     EEG_data, timestamp = MUSEns.EEGinlet.pull_chunk(
                     timeout=1, max_samples=int(10))
             

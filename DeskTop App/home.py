@@ -138,6 +138,8 @@ class Smarthome(qtw.QMainWindow):
         self.corridor.info_label.setText(self.corridor.howtocontrol[cont])
         self.bath.info_label.setText(self.bath.howtocontrol[cont])
         if m.CntWorker.control_mode:
+            # self.house.reset_selection()
+            # self.house.selected = 0
             self.house.select(1)
             #self.house.message_label.setText("Living is selected.")
         elif self.house.selected != 0:
@@ -159,16 +161,16 @@ class Smarthome(qtw.QMainWindow):
                 m.CntWorker.morse_falg = 1
 
             # select first item if in left right mode
-            if m.CntWorker.control_mode:
-                try: # because widgets in menue bar has no selection.
-                    self.room_dic[self.current_widget].select(1)
-                    if m.CntWorker.isArabic:
-                        self.room_dic[self.current_widget].message_label.setText(
-                            f" تم تحديد {self.room_dic[self.current_widget].dic[1][2]} .")
-                    else:
-                        self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
-                except:
-                    pass
+            # if m.CntWorker.control_mode:
+            try: # because widgets in menue bar has no selection.
+                self.room_dic[self.current_widget].select(self.room_dic[self.current_widget].selected)
+                if m.CntWorker.isArabic:
+                    self.room_dic[self.current_widget].message_label.setText(
+                        f" تم تحديد {self.room_dic[self.current_widget].dic[1][2]} .")
+                else:
+                    self.room_dic[self.current_widget].message_label.setText(f"{ self.room_dic[self.current_widget].dic[1][0]} is selected.")
+            except:
+                pass
 
 
         # if any button other than 'return to home' button is selected:
@@ -240,17 +242,21 @@ class Smarthome(qtw.QMainWindow):
                 pass
             self.room_dic[self.current_widget].close()
             self.house.show()
-            if m.CntWorker.control_mode:
-                try:
-                    self.room_dic[self.current_widget].reset_selection()
-                    self.room_dic[self.current_widget].selected = 0
-                except:
-                    pass
-                if m.CntWorker.isArabic:
-                    self.house.message_label.setText("تم تحديد غرفة المعيشة.")
-                else:
-                    self.house.message_label.setText("Living is selected.")
-                self.house.select(1)
+            # if m.CntWorker.control_mode:
+            try:
+                self.room_dic[self.current_widget].reset_selection()
+                self.room_dic[self.current_widget].selected = 0
+            except:
+                pass
+            if m.CntWorker.isArabic:
+                self.house.message_label.setText("تم تحديد غرفة المعيشة.")
+            else:
+                self.house.message_label.setText("Living is selected.")
+            # try:
+            #     self.house.reset_selection()
+            # except:
+            #     pass
+            self.house.select(1)
             self.current_widget = 0
             EEGns.current_widget = self.current_widget
 
@@ -262,13 +268,15 @@ class Smarthome(qtw.QMainWindow):
             self.room_dic[self.current_widget].select(tabSelected)
         except:
             self.room_dic[self.current_widget].selected = tabSelected
-        if m.CntWorker.isArabic:
-            self.room_dic[self.current_widget].message_label.setText(
-                f" تم تحديد {self.room_dic[self.current_widget].dic[tabSelected][2]} .")
-        else:
+        try:
+            if m.CntWorker.isArabic:
+                self.room_dic[self.current_widget].message_label.setText(
+                    f" تم تحديد {self.room_dic[self.current_widget].dic[tabSelected][2]} .")
+            else:
 
-            self.room_dic[self.current_widget].message_label.setText(f"{self.room_dic[self.current_widget].dic[tabSelected][0]} is selected.")
-
+                self.room_dic[self.current_widget].message_label.setText(f"{self.room_dic[self.current_widget].dic[tabSelected][0]} is selected.")
+        except:
+            pass
         
     def left_right(self, left_right_state):
 
@@ -295,6 +303,8 @@ class Smarthome(qtw.QMainWindow):
 
             if left_right_state == 0:
                 if selected_item == 5:
+                    # self.house.reset_selection()
+                    # self.house.select(1)
                     # if user wants to go home:
                     print("in selected item")
                     self.cnt_worker.mouse_interrupt_msg.emit(5)
@@ -322,12 +332,15 @@ class Smarthome(qtw.QMainWindow):
                             self.room_dic[self.current_widget].message_label.setText(f"{item_name} is turned on!!")
 
                     self.send_to_server([room_name, item_name, self.room_dic[self.current_widget].on_or_off[selected_item]])
+                    self.room_dic[self.current_widget].select(selected_item)
 
 
         else:
+            print("entering room")
             self.house.close()
             self.testLayout.addWidget(self.room_dic[self.house.selected])
             self.current_widget = self.house.selected
+            self.house.reset_selection()
             EEGns.current_widget = self.current_widget
             self.house.selected = 0
             self.room_dic[self.current_widget].show()
